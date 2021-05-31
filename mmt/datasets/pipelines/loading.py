@@ -16,5 +16,5 @@ class LoadAnnotations(object):
             return results
         except Exception as e:
             print(e, f' while loading {results["image_anns"]}')
-            pdb.set_trace()
+            # pdb.set_trace()
             return None

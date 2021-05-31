@@ -1,3 +1,4 @@
+import torch
 from mmcv.runner import _load_checkpoint, load_checkpoint, load_state_dict
 
 from mmt.models.builder import (FUSION, build_head, build_image_branch,
@@ -16,11 +17,15 @@ def resnet_trans_key(ckpt):
 @FUSION.register_module()
 class MultiBranchesFusionModel(BaseFusionModel):
     """Base class for detectors."""
-    def __init__(self, video_branch, image_branch, head, pretrained):
+    def __init__(self, video_branch, image_branch, video_edb, image_edb, video_head, image_head, fusion_head, pretrained):
         super(MultiBranchesFusionModel, self).__init__()
         self.video_branch = build_video_branch(video_branch)
         self.image_branch = build_image_branch(image_branch)
-        self.head = build_head(head)
+        self.image_edb = build_head(image_edb)
+        self.video_edb = build_head(video_edb)
+        self.video_head = build_head(video_head)
+        self.image_head = build_head(image_head)
+        self.fusion_head = build_head(fusion_head)
         if pretrained and 'video' in pretrained:
             self.load_pretrained(self.video_branch, pretrained['viedo'])
         if pretrained and 'image' in pretrained:
@@ -52,10 +57,29 @@ class MultiBranchesFusionModel(BaseFusionModel):
 
     def forward_train(self, video, image, gt_labels):
         video_feats = self.video_branch(video)
-        losses = self.head.forward_train(video_feats, gt_labels)
-        self.image_branch(image)
-        return losses
+        image_feats = self.image_branch(image)
+
+        video_ebd = self.video_edb(video_feats)
+        image_ebd = self.image_edb(image_feats)
+
+        video_loss = self.video_head.forward_train(video_ebd, gt_labels)
+        image_loss = self.image_head.forward_train(image_ebd, gt_labels)
+
+        ebd = torch.cat([video_ebd, image_ebd], 1)
+        fusion_loss = self.fusion_head.forward_train(ebd, gt_labels)
+
+        loss_dict = {'video_loss': video_loss,
+                     'image_loss': image_loss,
+                     'fusion_loss': fusion_loss}
+
+        return loss_dict
 
     def simple_test(self, video, image):
         video_feats = self.video_branch(video)
-        return self.head.simple_test(video_feats)
+        image_feats = self.image_branch(image)
+
+        video_ebd = self.video_edb(video_feats)
+        image_ebd = self.image_edb(image_feats)
+        ebd = torch.cat([video_ebd, image_ebd], 1)
+
+        return self.fusion_head.simple_test(ebd)

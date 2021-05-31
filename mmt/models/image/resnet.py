@@ -4,6 +4,7 @@ from mmcv.cnn import (build_conv_layer, build_norm_layer, build_plugin_layer,
                       constant_init, kaiming_init)
 from mmcv.runner import load_checkpoint
 from torch.nn.modules.batchnorm import _BatchNorm
+import torch.nn.functional as F
 
 from ...utils import get_root_logger
 from ..builder import IMAGE
@@ -711,7 +712,7 @@ class ResNet(nn.Module):
             if i in self.out_indices:
                 outs.append(x)
         assert len(outs) == 1
-        return outs[0]
+        return F.adaptive_avg_pool2d(outs[0], (1, 1))[:, :, 0, 0]
 
     def train(self, mode=True):
         """Convert the model into training mode while keep normalization layer

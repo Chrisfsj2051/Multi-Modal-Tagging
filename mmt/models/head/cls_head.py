@@ -4,19 +4,26 @@ from mmt.models.builder import HEAD, build_loss
 
 
 @HEAD.register_module()
-class ClsHead(nn.Module):
-    def __init__(self, loss):
-        super(ClsHead, self).__init__()
-        self.linear = nn.Linear(16384, 82)
+class FCHead(nn.Module):
+    def __init__(self, in_dim, out_dim):
+        super(FCHead, self).__init__()
+        self.linear = nn.Linear(in_dim, out_dim)
+
+    def forward(self, x):
+        return self.linear(x)
+
+
+@HEAD.register_module()
+class ClsHead(FCHead):
+    def __init__(self, in_dim, out_dim, loss):
+        super(ClsHead, self).__init__(in_dim, out_dim)
         self.loss = build_loss(loss)
 
     def forward_train(self, x, gt_labels):
         pred = self.linear(x)
-        losses = {}
-        losses['cls_loss'] = [
+        return [
             self.loss(pred[i], gt_labels[i]) for i in range(len(x))
         ]
-        return losses
 
     def simple_test(self, x):
         return self.linear(x)

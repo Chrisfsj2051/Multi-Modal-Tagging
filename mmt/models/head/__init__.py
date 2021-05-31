@@ -1,3 +1,3 @@
-from .cls_head import ClsHead
+from .cls_head import ClsHead, FCHead
 
-__all__ = ['ClsHead']
+__all__ = ['ClsHead', 'FCHead']

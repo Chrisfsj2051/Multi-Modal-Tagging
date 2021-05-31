@@ -1,9 +1,7 @@
-
 model = dict(
     type='MultiBranchesFusionModel',
     pretrained=dict(
-        image=
-        'https://download.openmmlab.com/mmclassification/v0/resnet/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
+        image='../pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
     video_branch=dict(type='NeXtVLAD',
                       feature_size=1024,

@@ -2,8 +2,8 @@ import os
 
 if __name__ =='__main__':
     data_base = 'dataset/tagging/tagging_dataset_test_5k/'
-    modal_type = ('audio_npy/Vggish/tagging/', 'image_jpg/tagging/', 'text_txt/tagging/', 'video_npy/Youtube8M/tagging/')
-    modal_suffix = ('.npy', '.jpg', '.txt', '.npy')
+    modal_type = ('video_npy/Youtube8M/tagging/', 'audio_npy/Vggish/tagging/', 'image_jpg/tagging/', 'text_txt/tagging/')
+    modal_suffix = ('.npy', '.npy', '.jpg', '.txt')
     data_path = [data_base + x for x in modal_type]
     lines = []
     for data in os.listdir(data_path[0]):

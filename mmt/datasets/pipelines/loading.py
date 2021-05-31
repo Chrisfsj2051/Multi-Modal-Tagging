@@ -1,6 +1,6 @@
 import mmcv
 import numpy as np
-
+import pdb
 from ..builder import PIPELINES
 
 
@@ -15,5 +15,6 @@ class LoadAnnotations(object):
             results['image'] = mmcv.imread(results['image_anns'])
             return results
         except Exception as e:
-            print(e)
-            return  None
+            print(e, f' while loading {results["image_anns"]}')
+            pdb.set_trace()
+            return None

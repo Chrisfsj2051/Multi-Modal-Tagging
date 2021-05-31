@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="ubuntu" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="Always" serverName="nirvana@cn-zz-bgp-6.sakurafrp.com:29239 password" autoUploadExternalChanges="true">
     <serverData>
-      <paths name="ubuntu">
+      <paths name="nirvana@cn-zz-bgp-6.sakurafrp.com:29239">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="nirvana@cn-zz-bgp-6.sakurafrp.com:29239 password">
         <serverdata>
           <mappings>
             <mapping deploy="/home/nirvana/workspace/PycharmProjects/Multi-Modal-Tagging" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="nirvana@cn-zz-bgp-6.sakurafrp.com:29239 password (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/nirvana/workspace/PycharmProjects/Multi-Modal-Tagging" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

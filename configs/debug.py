@@ -37,7 +37,7 @@ data = dict(
                    dict(type='Collect', keys=['video', 'image', 'gt_labels'])
                ]),
     val=dict(type='TaggingDataset',
-             ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+             ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
              label_id_file='dataset/tagging/label_id.txt',
              pipeline=[
                  dict(type='LoadAnnotations'),

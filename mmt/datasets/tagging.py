@@ -18,7 +18,7 @@ class TaggingDataset:
         self.test_mode = test_mode
         (self.video_anns, self.audio_anns, self.image_anns, self.test_anns,
          self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
-        self.flag = np.zeros((len(self.video_anns)))
+        self.flag = np.zeros((len(self.video_anns))).astype(np.int)
         self.pipeline = Compose(pipeline)
 
 

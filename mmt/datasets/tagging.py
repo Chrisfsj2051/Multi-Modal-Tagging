@@ -1,9 +1,12 @@
+import json
 import random
 
 import numpy as np
 
+import torch
 from mmt.datasets.builder import DATASETS
 from mmt.datasets.pipelines import Compose
+from mmt.utils import get_root_logger
 from mmt.utils.metrics.calculate_gap import calculate_gap
 
 
@@ -12,10 +15,12 @@ class TaggingDataset:
     def __init__(self, ann_file, label_id_file, pipeline, test_mode=False):
         self.index_to_tag, self.tag_to_index = self.load_label_dict(
             label_id_file)
+        self.test_mode = test_mode
         (self.video_anns, self.audio_anns, self.image_anns, self.test_anns,
          self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
         self.flag = np.zeros((len(self.video_anns)))
         self.pipeline = Compose(pipeline)
+
 
     def load_label_dict(self, dict_file):
         index_to_tag = {}
@@ -49,6 +54,8 @@ class TaggingDataset:
                 modal_anns[i].append(anns[_ + i].strip())
 
         for i in range(len(modal_anns[4])):
+            if modal_anns[4][i] == '':
+                continue
             line = modal_anns[4][i].split(',')
             modal_anns[4][i] = [self.tag_to_index[x] for x in line]
             modal_anns[5].append(np.zeros((len(self.tag_to_index))))
@@ -61,12 +68,36 @@ class TaggingDataset:
             results = dict(audio_anns=self.audio_anns[i],
                            video_anns=self.video_anns[i],
                            image_anns=self.image_anns[i],
-                           text_anns=self.test_anns[i],
-                           gt_labels=self.gt_label[i])
+                           text_anns=self.test_anns[i])
+            if not self.test_mode:
+                results['gt_labels']=self.gt_label[i]
             results = self.pipeline(results)
             if results is not None:
                 return results
+            logger = get_root_logger()
+            logger.info('Load failed')
             i = random.randint(0, len(self) - 1)
+
+    def format_results(self, outputs, save_dir='submit/submit.json', **kwargs):
+        outputs = torch.cat([x[None] for x in outputs])
+        outputs = outputs.sigmoid()
+        topk_score, topk_label = outputs.topk(20, 1, True, True)
+        ret_json = {}
+        for i in range(len(self.video_anns)):
+            item_id = self.video_anns[i].split('/')[-1].replace('.npy', '.mp4')
+            label = [self.index_to_tag[x.item()] for x in topk_label[i]]
+            score = [f'{x:.2f}' for x in topk_score[i].tolist()]
+            ret_json[item_id] = {
+                'results': [
+                    {
+                        'labels': label,
+                        'scores': score
+                    }
+                ]}
+        with open(save_dir, 'w', encoding='utf-8') as f:
+            json.dump(ret_json, f, ensure_ascii=False, indent = 4)
+            print(f'Saved at {save_dir}')
+
 
     def evaluate(self, preds, logger):
         preds = np.array([x.sigmoid().tolist() for x in preds])

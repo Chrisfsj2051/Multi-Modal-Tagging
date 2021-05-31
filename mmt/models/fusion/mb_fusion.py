@@ -21,9 +21,9 @@ class MultiBranchesFusionModel(BaseFusionModel):
         self.video_branch = build_video_branch(video_branch)
         self.image_branch = build_image_branch(image_branch)
         self.head = build_head(head)
-        if 'video' in pretrained:
+        if pretrained and 'video' in pretrained:
             self.load_pretrained(self.video_branch, pretrained['viedo'])
-        if 'image' in pretrained:
+        if pretrained and 'image' in pretrained:
             trans_key = None
             if 'ResNet' in image_branch['type']:
                 trans_key = resnet_trans_key

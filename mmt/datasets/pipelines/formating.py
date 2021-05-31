@@ -166,8 +166,8 @@ class DefaultFormatBundle(object):
         results['image'] = DC(to_tensor(results['image'].transpose(2, 0, 1)),
                               stack=True,
                               pad_dims=1)
-        for key in ['gt_labels']:
-            results[key] = DC(to_tensor(results[key]))
+        if 'gt_labels' in results.keys():
+            results['gt_labels'] = DC(to_tensor(results['gt_labels']))
         return results
 
     def __repr__(self):

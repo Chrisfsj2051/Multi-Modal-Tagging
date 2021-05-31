@@ -48,4 +48,15 @@ data = dict(
                  dict(type='DefaultFormatBundle'),
                  dict(type='Collect', keys=['video', 'image'])
              ]),
+    test=dict(type='TaggingDataset',
+              ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
+              label_id_file='dataset/tagging/label_id.txt',
+              pipeline=[
+                  dict(type='LoadAnnotations'),
+                  dict(type='Pad', size=(300, 1024)),
+                  dict(type='Resize', size=(224, 224)),
+                  dict(type='Normalize', **img_norm_cfg),
+                  dict(type='DefaultFormatBundle'),
+                  dict(type='Collect', keys=['video', 'image'])
+              ])
 )

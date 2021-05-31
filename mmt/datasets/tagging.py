@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 from mmt.datasets.builder import DATASETS
@@ -55,12 +57,16 @@ class TaggingDataset:
         return modal_anns
 
     def __getitem__(self, i):
-        results = dict(audio_anns=self.audio_anns[i],
-                       video_anns=self.video_anns[i],
-                       image_anns=self.image_anns[i],
-                       text_anns=self.test_anns[i],
-                       gt_labels=self.gt_label[i])
-        return self.pipeline(results)
+        while True:
+            results = dict(audio_anns=self.audio_anns[i],
+                           video_anns=self.video_anns[i],
+                           image_anns=self.image_anns[i],
+                           text_anns=self.test_anns[i],
+                           gt_labels=self.gt_label[i])
+            results = self.pipeline(results)
+            if results is not None:
+                return results
+            i = random.randint(0, len(self) - 1)
 
     def evaluate(self, preds, logger):
         preds = np.array([x.sigmoid().tolist() for x in preds])

@@ -5,6 +5,6 @@ _base_ = ['_base_/default_runtime.py',
 
 checkpoint_config = dict(interval=2000)
 evaluation = dict(interval=2000)
-data = dict(samples_per_gpu=8, workers_per_gpu=4)
+data = dict(samples_per_gpu=2, workers_per_gpu=4)
 optimizer_config = dict(
     _delete_=True, grad_clip=dict(max_norm=10, norm_type=2))

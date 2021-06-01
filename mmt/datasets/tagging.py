@@ -100,10 +100,13 @@ class TaggingDataset:
 
 
     def evaluate(self, preds, logger):
-        preds = np.array([x.sigmoid().tolist() for x in preds])
+        results = {}
         gt_onehot = np.array(self.gt_onehot)
-        gap = calculate_gap(preds, gt_onehot)
-        return dict(GAP=gap)
+        for modal in preds[0].keys():
+            modal_preds = [x[modal][0] for x in preds]
+            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            results[f'{modal}_GAP'] = calculate_gap(modal_preds, gt_onehot)
+        return results
 
     def __len__(self):
         return len(self.video_anns)

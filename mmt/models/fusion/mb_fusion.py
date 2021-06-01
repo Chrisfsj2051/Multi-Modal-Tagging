@@ -91,10 +91,13 @@ class MultiBranchesFusionModel(BaseFusionModel):
                         'image': image,
                         'text': text,
                         'audio': audio}
+        test_results = [{}]
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(ebd)
+            test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
         ebd = torch.cat(ebd_list, 1)
-        return self.fusion_head.simple_test(ebd)
+        test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)
+        return test_results

@@ -4,18 +4,11 @@ from mmcv.runner import _load_checkpoint, load_checkpoint, load_state_dict
 from mmt.models.builder import (FUSION, build_head, build_image_branch,
                                 build_frame_branch, build_text_branch)
 from mmt.models.fusion import BaseFusionModel
+from mmt.models.fusion.mb_fusion import resnet_trans_key
 from mmt.utils import get_root_logger
 
-
-def resnet_trans_key(ckpt):
-    ret = dict()
-    for key, val in ckpt.items():
-        ret[key.replace('backbone.', '')] = val
-    return ret
-
-
 @FUSION.register_module()
-class MultiBranchesFusionModel(BaseFusionModel):
+class MultiBranchesFusionModel(MultiBranchesFusionModel):
     """Base class for detectors."""
 
     def __init__(self,
@@ -24,7 +17,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  ebd_config,
                  head_config,
                  pretrained):
-        super(MultiBranchesFusionModel, self).__init__()
+        BaseFusionModel.__init__()
         build_branch_method = {'video': build_frame_branch,
                                'image': build_image_branch,
                                'text': build_text_branch,
@@ -80,8 +73,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
             losses[f'{modal}_loss'] = self.__getattr__(
                 f'{modal}_head').forward_train(ebd, gt_labels)
-            ebd_list.append(feats)
-
+            ebd_list.append(ebd)
         ebd = torch.cat(ebd_list, 1)
         losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
         return losses
@@ -97,7 +89,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
-            ebd_list.append(feats)
+            ebd_list.append(ebd)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
         ebd = torch.cat(ebd_list, 1)
         test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)

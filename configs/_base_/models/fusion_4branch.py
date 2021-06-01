@@ -54,7 +54,7 @@ model = dict(
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         audio=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024 * len(modal_used), out_dim=82,
+        fusion=dict(type='ClsHead', in_dim=20480, out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

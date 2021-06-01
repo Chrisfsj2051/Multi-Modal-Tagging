@@ -5,6 +5,8 @@ model = dict(
     pretrained=dict(
         image='../pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
+    use_layer_norm=False,
+    mode=3,
     modal_used = modal_used,
     branch_config=dict(
         video=dict(

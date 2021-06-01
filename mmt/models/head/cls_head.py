@@ -3,6 +3,15 @@ import torch.nn as nn
 from mmt.models.builder import HEAD, build_loss
 
 
+"""
+TODO:
+1. SE-GATING
+2. LAYER NORM
+3. TWO STAGE TRAINING
+4. ...
+"""
+
+
 @HEAD.register_module()
 class FCHead(nn.Module):
     def __init__(self, in_dim, out_dim, dropout_p=None):

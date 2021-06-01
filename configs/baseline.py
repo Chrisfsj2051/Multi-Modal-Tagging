@@ -3,7 +3,7 @@ _base_ = ['_base_/default_runtime.py',
           '_base_/models/fusion_4branch.py',
           '_base_/datasets/base_dataset.py']
 
-checkpoint_config = dict(interval=5000)
+checkpoint_config = dict(interval=2000)
 evaluation = dict(interval=2000)
 data = dict(samples_per_gpu=8, workers_per_gpu=4)
 optimizer_config = dict(

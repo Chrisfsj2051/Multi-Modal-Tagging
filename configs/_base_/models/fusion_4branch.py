@@ -3,7 +3,8 @@ model = dict(
     pretrained=dict(
         image='../pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
-    modal_used=['image', 'video', 'text'],
+    # modal_used=['image', 'video', 'text'],
+modal_used=['text'],
     branch_config=dict(
         video=dict(
             type='NeXtVLAD',
@@ -42,7 +43,7 @@ model = dict(
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         text=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024 * 3, out_dim=82,
+        fusion=dict(type='ClsHead', in_dim=1024 * 1, out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

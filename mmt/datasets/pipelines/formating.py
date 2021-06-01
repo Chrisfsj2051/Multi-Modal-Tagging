@@ -159,13 +159,13 @@ class DefaultFormatBundle(object):
         """
         results['video'] = DC(to_tensor(results['video']),
                               stack=True,
-                              pad_dims=1)
+                              pad_dims=None)
         results['image'] = DC(to_tensor(results['image'].transpose(2, 0, 1)),
                               stack=True,
-                              pad_dims=1)
+                              pad_dims=None)
         text = torch.cat([to_tensor(results['ocr_text']),
                           to_tensor(results['asr_text'])])
-        results['text'] = DC(text, stack=True, pad_dims=1)
+        results['text'] = DC(text, stack=True, pad_dims=None)
         if 'gt_labels' in results.keys():
             results['gt_labels'] = DC(to_tensor(results['gt_labels']))
         return results

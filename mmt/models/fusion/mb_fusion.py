@@ -67,10 +67,11 @@ class MultiBranchesFusionModel(BaseFusionModel):
         # load state_dict
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
-    def forward_train(self, video, image, gt_labels):
+    def forward_train(self, video, image, text, gt_labels):
         ebd_list, losses = [], {}
         modal_inputs = {'video': video,
-                        'image': image}
+                        'image': image,
+                        'text': text}
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
@@ -82,10 +83,11 @@ class MultiBranchesFusionModel(BaseFusionModel):
         losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
         return losses
 
-    def simple_test(self, video, image):
+    def simple_test(self, video, image, text):
         ebd_list, losses = [], {}
         modal_inputs = {'video': video,
-                        'image': image}
+                        'image': image,
+                        'text': text}
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)

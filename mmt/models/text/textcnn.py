@@ -9,6 +9,7 @@ from mmt.utils.tokenization import FullTokenizer
 class TextCNN(nn.Module):
     def __init__(self, vocab_size, ebd_dim, channel_in, channel_out, filter_size):
         super(TextCNN, self).__init__()
+        self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, ebd_dim)
         self.convs = nn.ModuleList(
             [nn.Conv2d(1, channel_in, (k, ebd_dim)) for k in filter_size])
@@ -20,7 +21,7 @@ class TextCNN(nn.Module):
         return x
 
     def forward(self, x):
-        assert x.max().item() < self.embedding.shape[0]
+        assert x.max().item() < self.vocab_size
         out = self.embedding(x)
         out = out.unsqueeze(1)
         out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
@@ -28,14 +29,14 @@ class TextCNN(nn.Module):
         return out
 
 @TEXT.register_module()
-class TwoStreamTextCNN(nn.Module):
+class TwoStreamTextCNN(TextCNN):
+
     def forward(self, x):
-        print('inininini')
-        ocr, asr = x.split()
-        out = self.embedding(x)
-        out = out.unsqueeze(1)
-        out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
-        out = self.fc(out)
+        assert x.ndim == 2
+        ocr, asr = x.split(x.shape[1]//2, dim=1)
+        ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
+        asr_feat = super(TwoStreamTextCNN, self).forward(asr)
+        out = (ocr_feat + asr_feat) / 2
         return out
 
 

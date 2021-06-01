@@ -32,14 +32,17 @@ model = dict(
     ),
     ebd_config=dict(
         video=dict(type='FCHead', in_dim=16384, out_dim=1024),
-        image=dict(type='FCHead', in_dim=2048, out_dim=1024)
+        image=dict(type='FCHead', in_dim=2048, out_dim=1024),
+        text=dict(type='FCHead', in_dim=1024, out_dim=1024)
     ),
     head_config=dict(
         video=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         image=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024 * 2, out_dim=82,
+        text=dict(type='ClsHead', in_dim=1024, out_dim=82,
+                   loss=dict(type='MultiLabelBCEWithLogitsLoss')),
+        fusion=dict(type='ClsHead', in_dim=1024 * 3, out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

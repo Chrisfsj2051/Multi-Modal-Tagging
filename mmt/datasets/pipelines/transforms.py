@@ -73,7 +73,7 @@ class Tokenize(object):
         ids = self.tokenizer.convert_tokens_to_ids(tokens)
         pad = self.tokenizer.convert_tokens_to_ids(['[PAD]'])
         ids = ids + (self.max_length - len(ids)) * pad
-        return ids
+        return ids[:self.max_length]
 
     def __call__(self, results):
         text_dict = results.pop('text')

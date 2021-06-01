@@ -28,7 +28,8 @@ modal_used=['text'],
             ebd_dim=300,
             channel_in=128,
             channel_out=1024,
-            filter_size=(2, 3, 4)
+            filter_size=(2, 3, 4),
+            dropout_p=0.5
         )
     ),
     ebd_config=dict(

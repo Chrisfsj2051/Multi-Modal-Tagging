@@ -7,13 +7,16 @@ from mmt.utils.tokenization import FullTokenizer
 
 @TEXT.register_module()
 class TextCNN(nn.Module):
-    def __init__(self, vocab_size, ebd_dim, channel_in, channel_out, filter_size):
+    def __init__(self, vocab_size, ebd_dim, channel_in, channel_out, filter_size, dropout_p=None):
         super(TextCNN, self).__init__()
         self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, ebd_dim)
         self.convs = nn.ModuleList(
             [nn.Conv2d(1, channel_in, (k, ebd_dim)) for k in filter_size])
         self.fc = nn.Linear(channel_in * len(filter_size), channel_out)
+        self.use_dropout = dropout_p is not None
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_p)
 
     def conv_and_pool(self, x, conv):
         x = F.relu(conv(x)).squeeze(3)
@@ -26,6 +29,8 @@ class TextCNN(nn.Module):
         out = out.unsqueeze(1)
         out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
         out = self.fc(out)
+        if self.use_dropout and self.training:
+            out = self.dropout(out)
         return out
 
 @TEXT.register_module()

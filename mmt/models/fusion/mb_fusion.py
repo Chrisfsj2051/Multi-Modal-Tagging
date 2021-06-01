@@ -104,7 +104,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 ebd = self.__getattr__(f'{modal}_ebd')(feats)
                 losses[f'{modal}_loss'] = self.__getattr__(
                     f'{modal}_head').forward_train(ebd, gt_labels)
-
+        if self.mode == 1:
+            return losses
         ebd = torch.cat(ebd_list, 1)
         if self.use_layer_norm:
             ebd = self.fusion_layer_norm(ebd)

@@ -4,6 +4,7 @@ from torch import nn
 FUSION = Registry('fusion')
 VIDEO = Registry('video')
 IMAGE = Registry('image')
+TEXT = Registry('text')
 HEAD = Registry('head')
 LOSS = Registry('loss')
 
@@ -32,6 +33,8 @@ def build(cfg, registry, default_args=None):
 def build_video_branch(cfg):
     return build(cfg, VIDEO)
 
+def build_text_branch(cfg):
+    return build(cfg, TEXT)
 
 def build_head(cfg):
     return build(cfg, HEAD)

@@ -2,7 +2,7 @@ import torch
 from mmcv.runner import _load_checkpoint, load_checkpoint, load_state_dict
 
 from mmt.models.builder import (FUSION, build_head, build_image_branch,
-                                build_video_branch)
+                                build_video_branch, build_text_branch)
 from mmt.models.fusion import BaseFusionModel
 from mmt.utils import get_root_logger
 
@@ -17,20 +17,32 @@ def resnet_trans_key(ckpt):
 @FUSION.register_module()
 class MultiBranchesFusionModel(BaseFusionModel):
     """Base class for detectors."""
-    def __init__(self, video_branch, image_branch, video_edb, image_edb, video_head, image_head, fusion_head, pretrained):
+
+    def __init__(self,
+                 modal_used,
+                 branch_config,
+                 ebd_config,
+                 head_config,
+                 pretrained):
         super(MultiBranchesFusionModel, self).__init__()
-        self.video_branch = build_video_branch(video_branch)
-        self.image_branch = build_image_branch(image_branch)
-        self.image_edb = build_head(image_edb)
-        self.video_edb = build_head(video_edb)
-        self.video_head = build_head(video_head)
-        self.image_head = build_head(image_head)
-        self.fusion_head = build_head(fusion_head)
+        build_branch_method = {'video': build_video_branch,
+                               'image': build_image_branch,
+                               'text': build_text_branch}
+        self.modal_list = modal_used
+        for modal in self.modal_list:
+            self.add_module(f'{modal}_branch',
+                            build_branch_method[modal](branch_config[modal]))
+            self.add_module(f'{modal}_ebd',
+                            build_head(ebd_config[modal]))
+            self.add_module(f'{modal}_head',
+                            build_head(head_config[modal]))
+        assert 'fusion' in head_config.keys()
+        self.add_module('fusion_head', build_head(head_config['fusion']))
         if pretrained and 'video' in pretrained:
             self.load_pretrained(self.video_branch, pretrained['viedo'])
         if pretrained and 'image' in pretrained:
             trans_key = None
-            if 'ResNet' in image_branch['type']:
+            if 'ResNet' in branch_config['image']['type']:
                 trans_key = resnet_trans_key
             self.load_pretrained(self.image_branch, pretrained['image'],
                                  trans_key)
@@ -56,30 +68,28 @@ class MultiBranchesFusionModel(BaseFusionModel):
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
     def forward_train(self, video, image, gt_labels):
-        video_feats = self.video_branch(video)
-        image_feats = self.image_branch(image)
-
-        video_ebd = self.video_edb(video_feats)
-        image_ebd = self.image_edb(image_feats)
-
-        video_loss = self.video_head.forward_train(video_ebd, gt_labels)
-        image_loss = self.image_head.forward_train(image_ebd, gt_labels)
-
-        ebd = torch.cat([video_ebd, image_ebd], 1)
-        fusion_loss = self.fusion_head.forward_train(ebd, gt_labels)
-
-        loss_dict = {'video_loss': video_loss,
-                     'image_loss': image_loss,
-                     'fusion_loss': fusion_loss}
-
-        return loss_dict
+        ebd_list, losses = [], {}
+        modal_inputs = {'video': video,
+                        'image': image}
+        for modal in self.modal_list:
+            inputs = modal_inputs[modal]
+            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            losses[f'{modal}_loss'] = self.__getattr__(
+                f'{modal}_head').forward_train(ebd, gt_labels)
+            ebd_list.append(ebd)
+        ebd = torch.cat(ebd_list, 1)
+        losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
+        return losses
 
     def simple_test(self, video, image):
-        video_feats = self.video_branch(video)
-        image_feats = self.image_branch(image)
-
-        video_ebd = self.video_edb(video_feats)
-        image_ebd = self.image_edb(image_feats)
-        ebd = torch.cat([video_ebd, image_ebd], 1)
-
+        ebd_list, losses = [], {}
+        modal_inputs = {'video': video,
+                        'image': image}
+        for modal in self.modal_list:
+            inputs = modal_inputs[modal]
+            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            ebd_list.append(ebd)
+        ebd = torch.cat(ebd_list, 1)
         return self.fusion_head.simple_test(ebd)

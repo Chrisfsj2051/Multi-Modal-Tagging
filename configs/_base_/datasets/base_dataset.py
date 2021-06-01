@@ -1,4 +1,3 @@
-
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 
@@ -10,6 +9,9 @@ data = dict(
                label_id_file='dataset/tagging/label_id.txt',
                pipeline=[
                    dict(type='LoadAnnotations'),
+                   dict(type='Tokenize',
+                        vocab_root='dataset/vocab_small.txt',
+                        max_length=1024),
                    dict(type='Pad', size=(300, 1024)),
                    dict(type='Resize', size=(224, 224)),
                    dict(type='Normalize', **img_norm_cfg),

@@ -2,6 +2,7 @@ import mmcv
 import numpy as np
 
 from ..builder import PIPELINES
+from ...utils.tokenization import FullTokenizer
 
 
 @PIPELINES.register_module()
@@ -55,12 +56,29 @@ class Resize(object):
 
     def __call__(self, results):
         """Resize images with ``results['scale']``."""
-
         img, w_scale, h_scale = mmcv.imresize(results['image'],
                                               size=self.size,
                                               return_scale=True)
-
         results['image'] = img
+        return results
+
+@PIPELINES.register_module()
+class Tokenize(object):
+    def __init__(self, vocab_root, max_length):
+        self.tokenizer = FullTokenizer(vocab_root)
+        self.max_length = max_length
+
+    def tokenize(self, text):
+        tokens = self.tokenizer.tokenize(text)
+        ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        pad = self.tokenizer.convert_tokens_to_ids(['[PAD]'])
+        ids = ids + (self.max_length - len(ids)) * pad
+        return ids
+
+    def __call__(self, results):
+        text_dict = results.pop('text')
+        results['ocr_text'] = self.tokenize(text_dict['video_ocr'])
+        results['asr_text'] = self.tokenize(text_dict['video_asr'])
         return results
 
 

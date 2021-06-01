@@ -157,15 +157,15 @@ class DefaultFormatBundle(object):
             dict: The result dict contains the data that is formatted with \
                 default bundle.
         """
-        # img = results['image']
-        # img = np.ascontiguousarray(img.transpose(2, 0, 1))
-        # results['image'] = DC(to_tensor(img), stack=True)
         results['video'] = DC(to_tensor(results['video']),
                               stack=True,
                               pad_dims=1)
         results['image'] = DC(to_tensor(results['image'].transpose(2, 0, 1)),
                               stack=True,
                               pad_dims=1)
+        text = torch.cat([to_tensor(results['ocr_text']),
+                          to_tensor(results['asr_text'])])
+        results['text'] = DC(text, stack=True, pad_dims=1)
         if 'gt_labels' in results.keys():
             results['gt_labels'] = DC(to_tensor(results['gt_labels']))
         return results

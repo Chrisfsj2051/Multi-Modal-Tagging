@@ -2,7 +2,7 @@ import torch
 from mmcv.runner import _load_checkpoint, load_checkpoint, load_state_dict
 
 from mmt.models.builder import (FUSION, build_head, build_image_branch,
-                                build_video_branch, build_text_branch)
+                                build_frame_branch, build_text_branch)
 from mmt.models.fusion import BaseFusionModel
 from mmt.utils import get_root_logger
 
@@ -25,9 +25,10 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  head_config,
                  pretrained):
         super(MultiBranchesFusionModel, self).__init__()
-        build_branch_method = {'video': build_video_branch,
+        build_branch_method = {'video': build_frame_branch,
                                'image': build_image_branch,
-                               'text': build_text_branch}
+                               'text': build_text_branch,
+                               'audio': build_frame_branch}
         self.modal_list = modal_used
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
@@ -67,11 +68,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
         # load state_dict
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
-    def forward_train(self, video, image, text, gt_labels):
+    def forward_train(self, video, image, text, audio, gt_labels):
         ebd_list, losses = [], {}
         modal_inputs = {'video': video,
                         'image': image,
-                        'text': text}
+                        'text': text,
+                        'audio': audio}
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
@@ -83,11 +85,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
         losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
         return losses
 
-    def simple_test(self, video, image, text):
+    def simple_test(self, video, image, text, audio):
         ebd_list, losses = [], {}
         modal_inputs = {'video': video,
                         'image': image,
-                        'text': text}
+                        'text': text,
+                        'audio': audio}
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)

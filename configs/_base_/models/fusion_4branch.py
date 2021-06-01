@@ -1,16 +1,23 @@
+modal_used=['image', 'video', 'text', 'audio']
+
 model = dict(
     type='MultiBranchesFusionModel',
     pretrained=dict(
         image='../pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
-    # modal_used=['image', 'video', 'text'],
-modal_used=['text'],
+    modal_used = modal_used,
     branch_config=dict(
         video=dict(
             type='NeXtVLAD',
             feature_size=1024,
             max_frames=300,
             cluster_size=128
+        ),
+        audio=dict(
+            type='NeXtVLAD',
+            feature_size=128,
+            max_frames=300,
+            cluster_size=64
         ),
         image=dict(
             type='ResNet',
@@ -35,7 +42,8 @@ modal_used=['text'],
     ebd_config=dict(
         video=dict(type='FCHead', in_dim=16384, out_dim=1024),
         image=dict(type='FCHead', in_dim=2048, out_dim=1024),
-        text=dict(type='FCHead', in_dim=1024, out_dim=1024)
+        text=dict(type='FCHead', in_dim=1024, out_dim=1024),
+        audio=dict(type='FCHead', in_dim=1024, out_dim=1024)
     ),
     head_config=dict(
         video=dict(type='ClsHead', in_dim=1024, out_dim=82,
@@ -44,7 +52,9 @@ modal_used=['text'],
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         text=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024 * 1, out_dim=82,
+        audio=dict(type='ClsHead', in_dim=1024, out_dim=82,
+                   loss=dict(type='MultiLabelBCEWithLogitsLoss')),
+        fusion=dict(type='ClsHead', in_dim=1024 * len(modal_used), out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

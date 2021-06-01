@@ -7,22 +7,10 @@ from ...utils.tokenization import FullTokenizer
 
 @PIPELINES.register_module()
 class Pad(object):
-    def __init__(self, size=None, pad_val=0):
-        self.size = size
+    def __init__(self, video_pad_size, audio_pad_size, pad_val=0):
+        self.video_pad_size = video_pad_size
+        self.audio_pad_size = audio_pad_size
         self.pad_val = pad_val
-
-    def _pad_masks(self, results):
-        """Pad masks according to ``results['pad_shape']``."""
-        pad_shape = results['pad_shape'][:2]
-        for key in results.get('mask_fields', []):
-            results[key] = results[key].pad(pad_shape, pad_val=self.pad_val)
-
-    def _pad_seg(self, results):
-        """Pad semantic segmentation map according to
-        ``results['pad_shape']``."""
-        for key in results.get('seg_fields', []):
-            results[key] = mmcv.impad(results[key],
-                                      shape=results['pad_shape'][:2])
 
     def __call__(self, results):
         """Call function to pad images, masks, semantic segmentation maps.
@@ -34,10 +22,15 @@ class Pad(object):
             dict: Updated result dict.
         """
         # ((d1_padL, d1_padR), (d2_padL, d2_padR))
-        pad_shape = [[0, x - y]
-                     for x, y in zip(self.size, results['video'].shape)]
+        video_pad_shape = [[0, x - y]
+                     for x, y in zip(self.video_pad_size, results['video'].shape)]
+        audio_pad_shape = [[0, x - y]
+                     for x, y in zip(self.audio_pad_size, results['audio'].shape)]
         results['video'] = np.pad(results['video'],
-                                  pad_shape,
+                                  video_pad_shape,
+                                  constant_values=self.pad_val)
+        results['audio'] = np.pad(results['audio'],
+                                  audio_pad_shape,
                                   constant_values=self.pad_val)
         return results
 

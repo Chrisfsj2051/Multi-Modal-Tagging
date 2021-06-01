@@ -2,7 +2,7 @@ from mmcv.utils import Registry, build_from_cfg
 from torch import nn
 
 FUSION = Registry('fusion')
-VIDEO = Registry('video')
+FRAME = Registry('frame')
 IMAGE = Registry('image')
 TEXT = Registry('text')
 HEAD = Registry('head')
@@ -30,8 +30,8 @@ def build(cfg, registry, default_args=None):
         return build_from_cfg(cfg, registry, default_args)
 
 
-def build_video_branch(cfg):
-    return build(cfg, VIDEO)
+def build_frame_branch(cfg):
+    return build(cfg, FRAME)
 
 def build_text_branch(cfg):
     return build(cfg, TEXT)

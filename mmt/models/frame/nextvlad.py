@@ -3,11 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
 
-from mmt.models.builder import VIDEO
+from mmt.models.builder import FRAME
 
 
 # based on https://github.com/lyakaap/NetVLAD-pytorch/blob/master/netvlad.py
-@VIDEO.register_module()
+@FRAME.register_module()
 class NeXtVLAD(nn.Module):
     """NetVLAD layer implementation."""
     def __init__(self,

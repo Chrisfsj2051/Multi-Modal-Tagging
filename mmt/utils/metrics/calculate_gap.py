@@ -136,7 +136,7 @@ def calculate_gap(predictions, actuals, top_k=20):
         Dimensions are 'batch' x 'num_classes'.
       actuals: Matrix containing the ground truth labels.
         Dimensions are 'batch' x 'num_classes'.
-      top_k: How many predictions to use per video.
+      top_k: How many predictions to use per frame.
 
     Returns:
       float: The global average precision.
@@ -150,7 +150,7 @@ def calculate_gap(predictions, actuals, top_k=20):
 
 
 def top_k_by_class(predictions, labels, k=20):
-    """Extracts the top k predictions for each video, sorted by class.
+    """Extracts the top k predictions for each frame, sorted by class.
 
     Args:
       predictions: A numpy matrix containing the outputs of the model.
@@ -206,7 +206,7 @@ class EvaluationMetrics(object):
 
         Args:
           num_class: A positive integer specifying the number of classes.
-          top_k: A positive integer specifying how many predictions are considered per video.
+          top_k: A positive integer specifying how many predictions are considered per frame.
 
         Raises:
           ValueError: An error occurred when MeanAveragePrecisionCalculator cannot

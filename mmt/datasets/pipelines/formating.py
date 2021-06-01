@@ -160,6 +160,9 @@ class DefaultFormatBundle(object):
         results['video'] = DC(to_tensor(results['video']),
                               stack=True,
                               pad_dims=None)
+        results['audio'] = DC(to_tensor(results['audio']),
+                              stack=True,
+                              pad_dims=None)
         results['image'] = DC(to_tensor(results['image'].transpose(2, 0, 1)),
                               stack=True,
                               pad_dims=None)

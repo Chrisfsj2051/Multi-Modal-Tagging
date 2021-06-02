@@ -30,11 +30,13 @@ class FCHead(nn.Module):
 
 @HEAD.register_module()
 class ClsHead(FCHead):
-    def __init__(self, in_dim, out_dim, loss):
-        super(ClsHead, self).__init__(in_dim, out_dim)
+    def __init__(self, in_dim, out_dim, loss, dropout_p=None):
+        super(ClsHead, self).__init__(in_dim, out_dim, dropout_p)
         self.loss = build_loss(loss)
 
     def forward_train(self, x, gt_labels):
+        if self.use_dropout:
+            x = self.dropout(x)
         pred = self.linear(x)
         return [
             self.loss(pred[i], gt_labels[i]) for i in range(len(x))

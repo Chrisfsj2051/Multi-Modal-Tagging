@@ -10,9 +10,9 @@ model = dict(
     head_config=dict(
         fusion=dict(type='SEHead', in_dim=20480, out_dim=82,
                     gating_reduction=8, hidden_size=1024,
+                    input_dropout_p=0.5, dropout_p=0.1,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )
-data = dict(workers_per_gpu=8,
-           samples_per_gpu=64)
+data = dict(workers_per_gpu=2)
 optimizer = dict(_delete_=True, type='SGD', lr=0.05, weight_decay=0.0001)

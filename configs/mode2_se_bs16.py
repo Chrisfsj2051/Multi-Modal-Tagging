@@ -13,5 +13,6 @@ model = dict(
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )
-data = dict(workers_per_gpu=2)
+data = dict(workers_per_gpu=8,
+           samples_per_gpu=16)
 optimizer = dict(_delete_=True, type='SGD', lr=0.05, weight_decay=0.0001)

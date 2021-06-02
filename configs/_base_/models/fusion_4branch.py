@@ -3,7 +3,7 @@ modal_used=['image', 'video', 'text', 'audio']
 model = dict(
     type='MultiBranchesFusionModel',
     pretrained=dict(
-        image='../pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
+        image='pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
     use_layer_norm=False,
     mode=3,

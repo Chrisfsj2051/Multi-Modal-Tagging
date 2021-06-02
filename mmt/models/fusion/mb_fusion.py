@@ -7,11 +7,6 @@ from mmt.models.fusion import BaseFusionModel
 from mmt.utils import get_root_logger
 import torch.nn as nn
 
-def resnet_trans_key(ckpt):
-    ret = dict()
-    for key, val in ckpt.items():
-        ret[key.replace('backbone.', '')] = val
-    return ret
 
 
 @FUSION.register_module()
@@ -47,14 +42,17 @@ class MultiBranchesFusionModel(BaseFusionModel):
         self.use_layer_norm = use_layer_norm
         if self.use_layer_norm:
             self.fusion_layer_norm = nn.LayerNorm(head_config['fusion']['in_dim'])
-        if pretrained and 'video' in pretrained:
-            self.load_pretrained(self.video_branch, pretrained['viedo'])
-        if pretrained and 'image' in pretrained:
-            trans_key = None
-            if 'ResNet' in branch_config['image']['type']:
-                trans_key = resnet_trans_key
-            self.load_pretrained(self.image_branch, pretrained['image'],
-                                 trans_key)
+        if pretrained and 'video' in pretrained and 'video' in modal_used:
+            self.load_pretrained(self.video_branch, pretrained['video'])
+        if pretrained and 'text' in pretrained and 'text' in modal_used:
+            self.load_pretrained(self.text_branch, pretrained['text'])
+        if pretrained and 'audio' in pretrained and 'text' in modal_used:
+            self.load_pretrained(self.audio_branch, pretrained['audio'])
+        if pretrained and 'image' in pretrained and 'image' in modal_used:
+            # trans_key = None
+            # if 'ResNet' in branch_config['image']['type']:
+            #     trans_key = resnet_trans_key
+            self.load_pretrained(self.image_branch, pretrained['image'])
 
         if mode == 1:
             for param in self.fusion_head.parameters():
@@ -65,7 +63,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
                     for param in self.__getattr__(f'{modal}_{arch}').parameters():
                         param.requires_grad=False
 
-    def load_pretrained(self, model, pretrained, trans_key=None):
+
+    def load_pretrained(self, model, pretrained):
         logger = get_root_logger()
         checkpoint = _load_checkpoint(pretrained)
         # OrderedDict is a subclass of dict
@@ -80,8 +79,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
         # strip prefix of state_dict
         if list(state_dict.keys())[0].startswith('module.'):
             state_dict = {k[7:]: v for k, v in state_dict.items()}
-        if trans_key:
-            state_dict = trans_key(state_dict)
         # load state_dict
         load_state_dict(model, state_dict, strict=False, logger=logger)
 

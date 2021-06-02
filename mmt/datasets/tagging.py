@@ -21,7 +21,6 @@ class TaggingDataset:
         self.flag = np.zeros((len(self.video_anns))).astype(np.int)
         self.pipeline = Compose(pipeline)
 
-
     def load_label_dict(self, dict_file):
         index_to_tag = {}
         tag_to_index = {}
@@ -70,7 +69,7 @@ class TaggingDataset:
                            image_anns=self.image_anns[i],
                            text_anns=self.test_anns[i])
             if not self.test_mode:
-                results['gt_labels']=self.gt_label[i]
+                results['gt_labels'] = self.gt_label[i]
             results = self.pipeline(results)
             if results is not None:
                 return results
@@ -79,6 +78,7 @@ class TaggingDataset:
             i = random.randint(0, len(self) - 1)
 
     def format_results(self, outputs, save_dir='submit/submit.json', **kwargs):
+        outputs = [x['fusion'][0] for x in outputs]
         outputs = torch.cat([x[None] for x in outputs])
         outputs = outputs.sigmoid()
         topk_score, topk_label = outputs.topk(20, 1, True, True)
@@ -95,9 +95,8 @@ class TaggingDataset:
                     }
                 ]}
         with open(save_dir, 'w', encoding='utf-8') as f:
-            json.dump(ret_json, f, ensure_ascii=False, indent = 4)
+            json.dump(ret_json, f, ensure_ascii=False, indent=4)
             print(f'Saved at {save_dir}')
-
 
     def evaluate(self, preds, logger):
         results = {}

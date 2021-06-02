@@ -15,7 +15,6 @@ model = dict(
     head_config=dict(
         fusion=dict(type='SEHead', in_dim=20480, out_dim=82,
                     gating_reduction=8, hidden_size=1024,
-                    # input_dropout_p=0.3, dropout_p=0.3,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

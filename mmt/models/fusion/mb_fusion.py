@@ -140,6 +140,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if self.use_layer_norm:
+                feats = self.__getattr__(f'{modal}_ln')(feats)
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)

@@ -1,10 +1,8 @@
-| bs | optimizer | lr     | fusion_GAP            |
-|--- | --------- | ------ | --------------------- | --------- | -------- | --------- |
-| 32 | Adam      | 0.0001 | 0.6104 (from scratch) |
+| bs | optimizer | lr     | weight decay | fusion GAP |
+|--- | --------- | ------ | ------------ | ---------- |
+| 2  | SGD       | 0.1    | 1e-4         | 0.7511     |
+| 2  | SGD       | 0.05   | 1e-4         | 0.7529     |
+| 2  | SGD       | 0.02   | 1e-4         | 0.746      |
+| 2  | ADAM      | 0.001  | 1e-4         | 0.7436     |
+| 2  | ADAM      | 0.0001 | 1e-4         | 0.7491     |
 
-
-* bs是samples_per_gpu
-* image最优setting: bs=2, SGD, lr=0.02
-* video最优setting: bs=2, ADAM, lr=0.001
-* text最优setting: bs=2, SGD, lr=0.02
-* audio最优setting: bs=2, ADAM, lr=0.001

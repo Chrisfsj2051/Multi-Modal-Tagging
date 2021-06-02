@@ -88,7 +88,7 @@ class TaggingDataset:
             label = [self.index_to_tag[x.item()] for x in topk_label[i]]
             score = [f'{x:.2f}' for x in topk_score[i].tolist()]
             ret_json[item_id] = {
-                'results': [
+                'result': [
                     {
                         'labels': label,
                         'scores': score

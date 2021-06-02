@@ -7,6 +7,7 @@ from mmt.models.fusion import BaseFusionModel
 from mmt.utils import get_root_logger
 import torch.nn as nn
 
+import numpy as np
 
 
 @FUSION.register_module()
@@ -15,6 +16,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
     Args:
         mode (int): mode1: Train branches; mode2: Train fusion head; mode3: Train All.
     """
+
     def __init__(self,
                  mode,
                  modal_used,
@@ -64,8 +66,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
             for modal in self.modal_list:
                 for arch in ('branch', 'ebd', 'head'):
                     for param in self.__getattr__(f'{modal}_{arch}').parameters():
-                        param.requires_grad=False
-
+                        param.requires_grad = False
 
     def load_pretrained(self, model, pretrained):
         logger = get_root_logger()
@@ -115,14 +116,16 @@ class MultiBranchesFusionModel(BaseFusionModel):
         return losses
 
     def apply_modal_dropout(self, modal_inputs):
-        # dropout_p = [[self.modal_dropout_p[x] for x in self.modal_list]
-        #              for _ in range(modal_inputs[0].shape[0])]
-        # import numpy as np
-        # np.random.binomial(1, dropout_p)
-        # print('in')
-        return modal_inputs
-
-
+        dropout_p = [[1 - self.modal_dropout_p[x]
+                      for _ in range(modal_inputs[0].shape[0])]
+                     for x in self.modal_list]
+        mask = np.random.binomial(1, dropout_p)
+        for i in range(mask.shape[1]):
+            if sum(mask[:, i]) == 0:
+                mask[np.random.randint(0, mask.shape[0] - 1), i] = 1
+        mask = torch.from_numpy(mask).cuda()
+        outs = [x * y[..., None] for (x, y) in zip(modal_inputs, mask)]
+        return outs
 
     def simple_test(self, video, image, text, audio):
         ebd_list, losses = [], {}

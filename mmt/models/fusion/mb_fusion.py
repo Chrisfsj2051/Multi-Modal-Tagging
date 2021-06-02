@@ -22,7 +22,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  ebd_config,
                  head_config,
                  use_layer_norm,
-                 pretrained):
+                 pretrained,
+                 modal_dropout):
         super(MultiBranchesFusionModel, self).__init__()
         build_branch_method = {'video': build_frame_branch,
                                'image': build_image_branch,
@@ -37,11 +38,13 @@ class MultiBranchesFusionModel(BaseFusionModel):
                             build_head(ebd_config[modal]))
             self.add_module(f'{modal}_head',
                             build_head(head_config[modal]))
+            if use_layer_norm:
+                self.add_module(f'{modal}_ln',
+                                nn.LayerNorm(ebd_config[modal]['in_dim']))
+
         assert 'fusion' in head_config.keys()
         self.add_module('fusion_head', build_head(head_config['fusion']))
         self.use_layer_norm = use_layer_norm
-        if self.use_layer_norm:
-            self.fusion_layer_norm = nn.LayerNorm(head_config['fusion']['in_dim'])
         if pretrained and 'video' in pretrained and 'video' in modal_used:
             self.load_pretrained(self.video_branch, pretrained['video'])
         if pretrained and 'text' in pretrained and 'text' in modal_used:
@@ -96,16 +99,17 @@ class MultiBranchesFusionModel(BaseFusionModel):
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if self.use_layer_norm:
+                feats = self.__getattr__(f'{modal}_ln')(feats)
             ebd_list.append(feats)
             if self.mode != 2:
                 ebd = self.__getattr__(f'{modal}_ebd')(feats)
                 losses[f'{modal}_loss'] = self.__getattr__(
                     f'{modal}_head').forward_train(ebd, gt_labels)
+
         if self.mode == 1:
             return losses
         ebd = torch.cat(ebd_list, 1)
-        if self.use_layer_norm:
-            ebd = self.fusion_layer_norm(ebd)
         losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
         return losses
 
@@ -123,7 +127,5 @@ class MultiBranchesFusionModel(BaseFusionModel):
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
         ebd = torch.cat(ebd_list, 1)
-        if self.use_layer_norm:
-            ebd = self.fusion_layer_norm(ebd)
         test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)
         return test_results

@@ -10,10 +10,12 @@ model = dict(
     pretrained=dict(
         _delete_=True
     ),
+    use_layer_norm=True,
+    modal_dropout=None,
     head_config=dict(
         fusion=dict(type='SEHead', in_dim=20480, out_dim=82,
                     gating_reduction=8, hidden_size=1024,
-                    input_dropout_p=0.3, dropout_p=0.3,
+                    # input_dropout_p=0.3, dropout_p=0.3,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

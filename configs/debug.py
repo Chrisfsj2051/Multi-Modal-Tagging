@@ -19,4 +19,6 @@ model = dict(
 optimizer_config = dict(
     _delete_=True, grad_clip=dict(max_norm=10, norm_type=2))
 
-data = dict(workers_per_gpu=0)
+data = dict(workers_per_gpu=0,
+            test=dict(type='TaggingDataset',
+                      ann_file='dataset/tagging/GroundTruth/datafile/train.txt'))

@@ -147,6 +147,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
+        if self.mode == 1:
+            return test_results
         ebd = torch.cat(ebd_list, 1)
         attn = self.attn(ebd)
         test_results[0]['fusion'] = self.fusion_head.simple_test(attn)

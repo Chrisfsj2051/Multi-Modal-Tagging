@@ -10,7 +10,7 @@ model = dict(
     # ),
 )
 
-data=dict(samples_per_gpu=1,
+data=dict(samples_per_gpu=2,
           workers_per_gpu=2)
 
 optimizer = dict(_delete_=True, type='Adam', lr=0.001, weight_decay=0.0001)

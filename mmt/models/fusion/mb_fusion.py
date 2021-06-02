@@ -64,6 +64,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         if mode == 1:
             for param in self.fusion_head.parameters():
                 param.requires_grad = False
+            for param in self.attn.parameters():
+                param.requires_grad = False
         elif mode == 2:
             for modal in self.modal_list:
                 for arch in ('branch', 'ebd', 'head'):

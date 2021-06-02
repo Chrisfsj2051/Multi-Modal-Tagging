@@ -44,3 +44,25 @@ class ClsHead(FCHead):
 
     def simple_test(self, x):
         return self.linear(x)
+
+@HEAD.register_module()
+class MLPHead(ClsHead):
+    def __init__(self, in_dim, out_dim, **kwargs):
+        super(ClsHead, self).__init__(in_dim, out_dim, **kwargs)
+        self.linear = nn.Sequential(
+            nn.Linear(in_dim, 512),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.Linear(512, out_dim)
+        )
+
+    def forward_train(self, x, gt_labels):
+        if self.use_dropout:
+            x = self.dropout(x)
+        pred = self.linear(x)
+        return [
+            self.loss(pred[i], gt_labels[i]) for i in range(len(x))
+        ]
+
+    def simple_test(self, x):
+        return self.linear(x)

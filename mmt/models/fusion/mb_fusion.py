@@ -23,7 +23,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  head_config,
                  use_layer_norm,
                  pretrained,
-                 modal_dropout):
+                 modal_dropout_p):
         super(MultiBranchesFusionModel, self).__init__()
         build_branch_method = {'video': build_frame_branch,
                                'image': build_image_branch,
@@ -31,6 +31,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                                'audio': build_frame_branch}
         self.mode = mode
         self.modal_list = modal_used
+        self.modal_dropout_p = modal_dropout_p
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
                             build_branch_method[modal](branch_config[modal]))
@@ -41,7 +42,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
             if use_layer_norm:
                 self.add_module(f'{modal}_ln',
                                 nn.LayerNorm(ebd_config[modal]['in_dim']))
-
         assert 'fusion' in head_config.keys()
         self.add_module('fusion_head', build_head(head_config['fusion']))
         self.use_layer_norm = use_layer_norm
@@ -106,12 +106,23 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 ebd = self.__getattr__(f'{modal}_ebd')(feats)
                 losses[f'{modal}_loss'] = self.__getattr__(
                     f'{modal}_head').forward_train(ebd, gt_labels)
-
         if self.mode == 1:
             return losses
+        if self.modal_dropout_p is not None:
+            ebd_list = self.apply_modal_dropout(ebd_list)
         ebd = torch.cat(ebd_list, 1)
         losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
         return losses
+
+    def apply_modal_dropout(self, modal_inputs):
+        # dropout_p = [[self.modal_dropout_p[x] for x in self.modal_list]
+        #              for _ in range(modal_inputs[0].shape[0])]
+        # import numpy as np
+        # np.random.binomial(1, dropout_p)
+        # print('in')
+        return modal_inputs
+
+
 
     def simple_test(self, video, image, text, audio):
         ebd_list, losses = [], {}

@@ -5,12 +5,11 @@ _base_ = ['_base_/default_runtime.py',
 
 model = dict(
     mode=1,
-    modal_used=['video', 'text'],
+    modal_used=['text', 'image'],
+    use_layer_norm=True,
     head_config=dict(
-        fusion=dict(in_dim=17408)
+        fusion=dict(in_dim=3072)
     )
 )
 
-optimizer = dict(_delete_=True, type='Adam', lr=0.001, weight_decay=0.0001)
-
-data = dict(samples_per_gpu=4)
+optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)

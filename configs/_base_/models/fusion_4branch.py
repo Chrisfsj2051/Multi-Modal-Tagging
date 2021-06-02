@@ -1,4 +1,4 @@
-modal_used=['image', 'video', 'text', 'audio']
+modal_used = ['image', 'video', 'text', 'audio']
 
 model = dict(
     type='MultiBranchesFusionModel',
@@ -8,7 +8,7 @@ model = dict(
     modal_dropout_p=None,
     use_layer_norm=False,
     mode=3,
-    modal_used = modal_used,
+    modal_used=modal_used,
     branch_config=dict(
         video=dict(
             type='NeXtVLAD',
@@ -48,16 +48,20 @@ model = dict(
         text=dict(type='FCHead', in_dim=1024, out_dim=1024),
         audio=dict(type='FCHead', in_dim=1024, out_dim=1024)
     ),
+    attn_config=dict(
+        type='SEHead', in_dim=20480,
+        gating_reduction=8, out_dim=1024
+    ),
     head_config=dict(
         video=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         image=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         text=dict(type='ClsHead', in_dim=1024, out_dim=82,
-                   loss=dict(type='MultiLabelBCEWithLogitsLoss')),
+                  loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         audio=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=20480, out_dim=82,
+        fusion=dict(type='ClsHead', in_dim=1024, out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

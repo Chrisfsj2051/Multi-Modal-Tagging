@@ -24,6 +24,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  ebd_config,
                  head_config,
                  use_layer_norm,
+                 attn_config,
                  pretrained,
                  modal_dropout_p):
         super(MultiBranchesFusionModel, self).__init__()
@@ -34,6 +35,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
         self.mode = mode
         self.modal_list = modal_used
         self.modal_dropout_p = modal_dropout_p
+        self.add_module('attn', build_head(attn_config))
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
                             build_branch_method[modal](branch_config[modal]))
@@ -112,7 +114,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         if self.modal_dropout_p is not None:
             ebd_list = self.apply_modal_dropout(ebd_list)
         ebd = torch.cat(ebd_list, 1)
-        losses['fusion_loss'] = self.fusion_head.forward_train(ebd, gt_labels)
+        attn = self.attn(ebd)
+        losses['fusion_loss'] = self.fusion_head.forward_train(attn, gt_labels)
         return losses
 
     def apply_modal_dropout(self, modal_inputs):
@@ -141,5 +144,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
         ebd = torch.cat(ebd_list, 1)
-        test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)
+        attn = self.attn(ebd)
+        test_results[0]['fusion'] = self.fusion_head.simple_test(attn)
         return test_results

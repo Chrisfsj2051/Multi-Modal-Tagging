@@ -11,15 +11,7 @@ model = dict(
         _delete_=True
     ),
     use_layer_norm=True,
-    modal_dropout_p=dict(
-        _delete_=True,
-        text=0.99, video=0.99, image=0.99, audio=0.99),
-    head_config=dict(
-        fusion=dict(type='SEHead', in_dim=20480, out_dim=82,
-                    gating_reduction=8, hidden_size=1024,
-                    # input_dropout_p=0.3, dropout_p=0.3,
-                    loss=dict(type='MultiLabelBCEWithLogitsLoss'))
-    )
+    modal_dropout_p=dict(_delete_=True, text=0.5, video=0.5, image=0.5, audio=0.5),
 )
 optimizer_config = dict(
     _delete_=True, grad_clip=dict(max_norm=10, norm_type=2))

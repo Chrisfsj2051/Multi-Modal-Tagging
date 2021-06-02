@@ -47,9 +47,13 @@ class MultiBranchesFusionModel(BaseFusionModel):
         self.use_layer_norm = use_layer_norm
         if self.use_layer_norm:
             self.fusion_layer_norm = nn.LayerNorm(head_config['fusion']['in_dim'])
-        if pretrained and 'video' in pretrained:
+        if pretrained and 'video' in pretrained and 'video' in modal_used:
             self.load_pretrained(self.video_branch, pretrained['viedo'])
-        if pretrained and 'image' in pretrained:
+        if pretrained and 'text' in pretrained and 'text' in modal_used:
+            self.load_pretrained(self.text_branch, pretrained['text'])
+        if pretrained and 'audio' in pretrained and 'text' in modal_used:
+            self.load_pretrained(self.audio_branch, pretrained['audio'])
+        if pretrained and 'image' in pretrained and 'image' in modal_used:
             trans_key = None
             if 'ResNet' in branch_config['image']['type']:
                 trans_key = resnet_trans_key
@@ -64,6 +68,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 for arch in ('branch', 'ebd', 'head'):
                     for param in self.__getattr__(f'{modal}_{arch}').parameters():
                         param.requires_grad=False
+
 
     def load_pretrained(self, model, pretrained, trans_key=None):
         logger = get_root_logger()

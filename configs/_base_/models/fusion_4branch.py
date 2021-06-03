@@ -19,7 +19,6 @@ model = dict(
         audio=dict(
             type='NeXtVLAD',
             feature_size=128,
-expansion=4,
             max_frames=300,
             cluster_size=64
         ),

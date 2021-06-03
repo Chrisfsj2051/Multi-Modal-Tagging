@@ -48,7 +48,7 @@ class ClsHead(FCHead):
 @HEAD.register_module()
 class MLPHead(ClsHead):
     def __init__(self, in_dim, out_dim, **kwargs):
-        super(ClsHead, self).__init__(in_dim, out_dim, **kwargs)
+        super(MLPHead, self).__init__(in_dim, out_dim, **kwargs)
         self.linear = nn.Sequential(
             nn.Linear(in_dim, 512),
             nn.BatchNorm2d(512),

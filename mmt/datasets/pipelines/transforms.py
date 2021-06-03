@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import mmcv
 import numpy as np
-
+import os
 from ..builder import PIPELINES
 from ...utils.tokenization import FullTokenizer
 
@@ -211,6 +211,8 @@ class FrameRandomSwap(FrameAugBox):
         return x
 
 
+
+
 @PIPELINES.register_module()
 class TextOfflineAug(object):
 
@@ -218,14 +220,15 @@ class TextOfflineAug(object):
         self.aug_prob = aug_prob
         self.aug_root = aug_root
 
+
     def __call__(self, results):
         if random.uniform(0, 1) < self.aug_prob:
             return results
         assert 'id_name' in results.keys()
-        for key in ['video_asr', 'video_orc']:
-            data_path = self.aug_root + '/' + results['id_name'] + '/' +key + '/'
+        for key in ['video_asr', 'video_ocr']:
+            data_path = os.path.join(self.aug_root, results['id_name'], key)
             file = random.choice(os.listdir(data_path))
-            with open(data_path + file, 'r', encoding='utf-8') as f:
+            with open(os.path.join(data_path, file), 'r', encoding='utf-8') as f:
                 results['text'][key] = f.read().strip()
 
         return results

@@ -23,7 +23,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                  branch_config,
                  ebd_config,
                  head_config,
-                 use_layer_norm,
+                 use_batch_norm,
                  attn_config,
                  pretrained,
                  modal_dropout_p):
@@ -43,12 +43,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
                             build_head(ebd_config[modal]))
             self.add_module(f'{modal}_head',
                             build_head(head_config[modal]))
-            if use_layer_norm:
-                self.add_module(f'{modal}_ln',
+            if use_batch_norm:
+                self.add_module(f'{modal}_bn',
                                 nn.LayerNorm(ebd_config[modal]['in_dim']))
         assert 'fusion' in head_config.keys()
         self.add_module('fusion_head', build_head(head_config['fusion']))
-        self.use_layer_norm = use_layer_norm
+        self.use_batch_norm = use_batch_norm
         if pretrained and 'video' in pretrained and 'video' in modal_used:
             self.load_pretrained(self.video_branch, pretrained['video'])
         if pretrained and 'text' in pretrained and 'text' in modal_used:
@@ -104,8 +104,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
-            if self.use_layer_norm:
-                feats = self.__getattr__(f'{modal}_ln')(feats)
+            if self.use_batch_norm:
+                feats = self.__getattr__(f'{modal}_bn')(feats)
             ebd_list.append(feats)
             if self.mode != 2:
                 ebd = self.__getattr__(f'{modal}_ebd')(feats)
@@ -142,8 +142,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
-            if self.use_layer_norm:
-                feats = self.__getattr__(f'{modal}_ln')(feats)
+            if self.use_batch_norm:
+                feats = self.__getattr__(f'{modal}_bn')(feats)
             ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)

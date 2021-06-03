@@ -216,20 +216,22 @@ class FrameRandomSwap(FrameAugBox):
 class TextAugBox(object):
 
     def __init__(self, random_rate=0.0, similar_rate=0.0, homophone_rate=0.0, delete_rate=0.0, exchange_rate=0.0,  equivalen_rate=0.0):
-        self.aug_list = []
+        # self.aug_list = []
+
         create_num = 3
-        if random_rate > 0:
-            self.aug_list.append(nlpcda.Randomword(create_num=create_num, change_rate=random_rate))
-        if similar_rate > 0:
-            self.aug_list.append(nlpcda.Similarword(create_num=create_num, change_rate=similar_rate))
-        if homophone_rate >0 :
-            self.aug_list.append(nlpcda.Homophone(create_num=create_num, change_rate=homophone_rate))
-        if delete_rate > 0:
-            self.aug_list.append(nlpcda.RandomDeleteChar(create_num=create_num, change_rate=delete_rate))
-        if exchange_rate > 0:
-            self.aug_list.append(nlpcda.CharPositionExchange(create_num=create_num, change_rate=exchange_rate,char_gram=3))
-        if equivalen_rate > 0:
-            self.aug_list.append(nlpcda.EquivalentChar(create_num=create_num, change_rate=equivalen_rate))
+        self.aug = nlpcda.Randomword(create_num=create_num, change_rate=random_rate)
+        # if random_rate > 0:
+        #     self.aug_list.append(nlpcda.Randomword(create_num=create_num, change_rate=random_rate))
+        # if similar_rate > 0:
+        #     self.aug_list.append(nlpcda.Similarword(create_num=create_num, change_rate=similar_rate))
+        # if homophone_rate >0 :
+        #     self.aug_list.append(nlpcda.Homophone(create_num=create_num, change_rate=homophone_rate))
+        # if delete_rate > 0:
+        #     self.aug_list.append(nlpcda.RandomDeleteChar(create_num=create_num, change_rate=delete_rate))
+        # if exchange_rate > 0:
+        #     self.aug_list.append(nlpcda.CharPositionExchange(create_num=create_num, change_rate=exchange_rate,char_gram=3))
+        # if equivalen_rate > 0:
+        #     self.aug_list.append(nlpcda.EquivalentChar(create_num=create_num, change_rate=equivalen_rate))
 
 
     def apply_aug(self, text):
@@ -238,6 +240,7 @@ class TextAugBox(object):
         return text
 
     def __call__(self, results):
+        return results
         random.shuffle(self.aug_list)
         results['text']['video_ocr'] = self.apply_aug(results['text']['video_ocr'])
         results['text']['video_asr'] = self.apply_aug(results['text']['video_asr'])

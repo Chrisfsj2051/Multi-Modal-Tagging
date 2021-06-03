@@ -7,6 +7,8 @@ train_pipeline = [
          vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='FrameRandomSwap', key_fields=['video'],
+         aug_num_frame=30, aug_max_len=10, aug_num_block=10, aug_max_size=300),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

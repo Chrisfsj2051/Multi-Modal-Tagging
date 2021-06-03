@@ -6,7 +6,7 @@ model = dict(
         image='pretrained/resnet50_batch256_imagenet_20200708-cfb998bf.pth'
     ),
     modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
-    use_layer_norm=False,
+    use_batch_norm=False,
     mode=3,
     modal_used=modal_used,
     branch_config=dict(
@@ -19,6 +19,7 @@ model = dict(
         audio=dict(
             type='NeXtVLAD',
             feature_size=128,
+expansion=4,
             max_frames=300,
             cluster_size=64
         ),

@@ -8,22 +8,21 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
+    dict(type='TextAugBox',
+         random_rate=0, similar_rate=0.3, homophone_rate=0.0, delete_rate=0.0, exchange_rate=0.0, equivalen_rate=0.0),
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    dict(type='FrameRandomSwap', key_fields=['video'],
-         aug_num_frame=30, aug_max_len=10, aug_num_block=10, aug_max_size=100),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
 ]
 
-
 model = dict(
     mode=1,
-    modal_used=['video']
+    modal_used=['text']
 )
 
 optimizer = dict(_delete_=True, type='Adam', lr=0.001, weight_decay=0.0001)

@@ -13,6 +13,8 @@ class LoadAnnotations(object):
             results['video'] = np.load(results['video_anns'])
             with open(results['text_anns'], 'r', encoding='utf-8') as f:
                 results['text'] = json.load(f)
+
+            results['text']['video_ocr'] = results['text']['video_ocr'].replace('|', ',')
             results['image'] = mmcv.imread(results['image_anns'])
             assert results['image'] is not None
             return results

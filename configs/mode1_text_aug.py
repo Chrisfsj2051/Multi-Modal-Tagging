@@ -8,8 +8,7 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
-    dict(type='TextAugBox',
-         random_rate=0, similar_rate=0.0, homophone_rate=0.0, delete_rate=0.3, exchange_rate=0.0, equivalen_rate=0.0),
+    dict(type='TextOfflineAug', aug_prob=0.5, aug_root='dataset/text_aug/'),
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',
          max_length=256),

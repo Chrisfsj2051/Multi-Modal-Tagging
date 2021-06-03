@@ -1,11 +1,10 @@
 import abc
+import os
 import random
-from abc import ABC
 from copy import deepcopy
 
 import mmcv
 import numpy as np
-import nlpcda
 
 from ..builder import PIPELINES
 from ...utils.tokenization import FullTokenizer
@@ -213,35 +212,20 @@ class FrameRandomSwap(FrameAugBox):
 
 
 @PIPELINES.register_module()
-class TextAugBox(object):
+class TextOfflineAug(object):
 
-    def __init__(self, random_rate=0.0, similar_rate=0.0, homophone_rate=0.0, delete_rate=0.0, exchange_rate=0.0,  equivalen_rate=0.0):
-        # self.aug_list = []
-
-        create_num = 3
-        self.aug = nlpcda.Randomword(create_num=create_num, change_rate=random_rate)
-        # if random_rate > 0:
-        #     self.aug_list.append(nlpcda.Randomword(create_num=create_num, change_rate=random_rate))
-        # if similar_rate > 0:
-        #     self.aug_list.append(nlpcda.Similarword(create_num=create_num, change_rate=similar_rate))
-        # if homophone_rate >0 :
-        #     self.aug_list.append(nlpcda.Homophone(create_num=create_num, change_rate=homophone_rate))
-        # if delete_rate > 0:
-        #     self.aug_list.append(nlpcda.RandomDeleteChar(create_num=create_num, change_rate=delete_rate))
-        # if exchange_rate > 0:
-        #     self.aug_list.append(nlpcda.CharPositionExchange(create_num=create_num, change_rate=exchange_rate,char_gram=3))
-        # if equivalen_rate > 0:
-        #     self.aug_list.append(nlpcda.EquivalentChar(create_num=create_num, change_rate=equivalen_rate))
-
-
-    def apply_aug(self, text):
-        for aug in self.aug_list:
-            text = aug.replace(text)[-1]
-        return text
+    def __init__(self, aug_prob, aug_root):
+        self.aug_prob = aug_prob
+        self.aug_root = aug_root
 
     def __call__(self, results):
-        return results
-        random.shuffle(self.aug_list)
-        results['text']['video_ocr'] = self.apply_aug(results['text']['video_ocr'])
-        results['text']['video_asr'] = self.apply_aug(results['text']['video_asr'])
+        if random.uniform(0, 1) < self.aug_prob:
+            return results
+        assert 'id_name' in results.keys()
+        for key in ['video_asr', 'video_orc']:
+            data_path = self.aug_root + '/' + results['id_name'] + '/' +key + '/'
+            file = random.choice(os.listdir(data_path))
+            with open(data_path + file, 'r', encoding='utf-8') as f:
+                results['text'][key] = f.read().strip()
+
         return results

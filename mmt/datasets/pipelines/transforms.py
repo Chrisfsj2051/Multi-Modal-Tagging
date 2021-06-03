@@ -1,3 +1,5 @@
+import random
+
 import mmcv
 import numpy as np
 
@@ -110,3 +112,23 @@ class Normalize(object):
         repr_str = self.__class__.__name__
         repr_str += f'(mean={self.mean}, std={self.std}, to_rgb={self.to_rgb})'
         return repr_str
+
+
+
+@PIPELINES.register_module()
+class FrameRandomErase(object):
+    def __init__(self, key_fields, erase_num, erase_max_len):
+        self.key_fields = key_fields
+        self.erase_num = erase_num
+        self.erase_max_len = erase_max_len
+
+    def __call__(self, results):
+        for key in self.key_fields:
+            assert key  in results.keys()
+            item = results[key]
+            assert item.ndim == 2
+            for cnt in range(self.erase_num):
+                st = random.randint(0, item.shape[0]-1)
+                ed = random.randint(st+1, min(item.shape[0], st+self.erase_max_len))
+                results[key][st:ed] *= 0
+        return results

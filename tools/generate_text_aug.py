@@ -31,12 +31,18 @@ data_root = 'dataset/tagging/tagging_dataset_train_5k/text_txt/tagging/'
 mmcv.mkdir_or_exist(save_path)
 
 def go(data):
-    print(data)
+    # print(data)
     id_name = data.split('.')[0]
     cur_save_path = save_path + id_name + '/'
+    if os.path.isdir(data_root + data):
+        print(f'Skip {data_root + data}')
+        return
+
     with open(data_root + data, 'r', encoding='utf-8') as f:
         results = json.load(f)
     for key in ['video_ocr', 'video_asr']:
+        if os.path.exists(cur_save_path + key):
+            continue
         mmcv.mkdir_or_exist(cur_save_path + key)
         text = results[key].replace('|', '，')
         aug_results = [text]

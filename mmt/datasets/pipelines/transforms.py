@@ -1,4 +1,7 @@
+import abc
 import random
+from abc import ABC
+from copy import deepcopy
 
 import mmcv
 import numpy as np
@@ -25,9 +28,9 @@ class Pad(object):
         """
         # ((d1_padL, d1_padR), (d2_padL, d2_padR))
         video_pad_shape = [[0, x - y]
-                     for x, y in zip(self.video_pad_size, results['video'].shape)]
+                           for x, y in zip(self.video_pad_size, results['video'].shape)]
         audio_pad_shape = [[0, x - y]
-                     for x, y in zip(self.audio_pad_size, results['audio'].shape)]
+                           for x, y in zip(self.audio_pad_size, results['audio'].shape)]
         results['video'] = np.pad(results['video'],
                                   video_pad_shape,
                                   constant_values=self.pad_val)
@@ -56,6 +59,7 @@ class Resize(object):
                                               return_scale=True)
         results['image'] = img
         return results
+
 
 @PIPELINES.register_module()
 class Tokenize(object):
@@ -89,6 +93,7 @@ class Normalize(object):
         to_rgb (bool): Whether to convert the image from BGR to RGB,
             default is true.
     """
+
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
@@ -114,38 +119,93 @@ class Normalize(object):
         return repr_str
 
 
+class FrameAugBox(metaclass=abc.ABCMeta):
 
-@PIPELINES.register_module()
-class FrameRandomErase(object):
-    def __init__(self, key_fields, erase_num_frame, erase_num_block, erase_max_len, erase_max_size):
+    def __init__(self, key_fields, aug_num_frame, aug_num_block, aug_max_len, aug_max_size):
         self.key_fields = key_fields
-        self.erase_num_frame = erase_num_frame
-        self.erase_num_block = erase_num_block
-        self.erase_max_len = erase_max_len
-        self.erase_max_size = erase_max_size
+        self.aug_num_frame = aug_num_frame
+        self.aug_num_block = aug_num_block
+        self.aug_max_len = aug_max_len
+        self.aug_max_size = aug_max_size
 
-    def erase_frame(self, results):
+    def frame_aug(self, results):
         for key in self.key_fields:
             assert key in results.keys()
-            item = results[key]
-            assert item.ndim == 2
-            for cnt in range(self.erase_num_frame):
-                st = random.randint(0, item.shape[0] - 1)
-                ed = random.randint(st + 1, min(item.shape[0], st + self.erase_max_len))
-                results[key][st:ed] *= 0
+            assert results[key].ndim == 2
+            results[key] = self.apply_frame_aug(results[key])
+        return results
 
-    def erase_block(self, results):
+    def block_aug(self, results):
         for key in self.key_fields:
             assert key in results.keys()
-            item = results[key]
-            assert item.ndim == 2
-            for cnt in range(self.erase_num_block):
-                st = random.randint(0, item.shape[1] - 1)
-                ed = random.randint(st + 1, min(item.shape[1], st + self.erase_max_size))
-                results[key][:, st:ed] *= 0
-
+            assert results[key].ndim == 2
+            results[key] = self.apply_block_aug(results[key])
 
     def __call__(self, results):
-        self.erase_block(results)
-        self.erase_frame(results)
+        self.frame_aug(results)
+        self.block_aug(results)
         return results
+
+
+@PIPELINES.register_module()
+class FrameRandomErase(FrameAugBox):
+
+    def apply_frame_aug(self, x):
+        for cnt in range(self.aug_num_frame):
+            st = random.randint(0, x.shape[0] - 1)
+            ed = random.randint(st + 1, min(x.shape[0], st + self.aug_max_len))
+            x[st:ed] *= 0
+        return x
+
+    def apply_block_aug(self, x):
+        for cnt in range(self.aug_num_block):
+            st = random.randint(0, x.shape[1] - 1)
+            ed = random.randint(st + 1, min(x.shape[1], st + self.aug_max_size))
+            x[:, st:ed] *= 0
+        return x
+
+
+@PIPELINES.register_module()
+class FrameRandomReverse(FrameAugBox):
+
+    def apply_frame_aug(self, x):
+        for cnt in range(self.aug_num_frame):
+            st = random.randint(0, x.shape[0] - 1)
+            ed = random.randint(st + 1, min(x.shape[0], st + self.aug_max_len))
+            x[st:ed] = x[st:ed][::-1]
+
+        return x
+
+    def apply_block_aug(self, x):
+        for cnt in range(self.aug_num_block):
+            st = random.randint(0, x.shape[1] - 1)
+            ed = random.randint(st + 1, min(x.shape[1], st + self.aug_max_size))
+            x[st:ed] = x[st:ed][::-1]
+        return x
+
+
+@PIPELINES.register_module()
+class FrameRandomSwap(FrameAugBox):
+
+    def apply_frame_aug(self, x):
+        for cnt in range(self.aug_num_frame):
+            st1 = random.randint(0, x.shape[0] - 1)
+            ed1 = random.randint(st1 + 1, min(x.shape[0], st1 + self.aug_max_len))
+            st2 = random.randint(0, x.shape[0] - ed1 + st1)
+            ed2 = st2 + ed1 - st1
+            temp = deepcopy(x[st1: ed1])
+            x[st1:ed1] = x[st2:ed2]
+            x[st2:ed2] = temp
+
+        return x
+
+    def apply_block_aug(self, x):
+        for cnt in range(self.aug_num_block):
+            st1 = random.randint(0, x.shape[1] - 1)
+            ed1 = random.randint(st1 + 1, min(x.shape[1], st1 + self.aug_max_size))
+            st2 = random.randint(0, x.shape[1] - ed1 + st1)
+            ed2 = st2 + ed1 - st1
+            temp = deepcopy(x[:, st1: ed1])
+            x[:, st1:ed1] = x[:, st2:ed2]
+            x[:, st2:ed2] = temp
+        return x

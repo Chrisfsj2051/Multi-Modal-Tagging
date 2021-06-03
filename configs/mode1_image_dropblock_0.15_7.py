@@ -12,7 +12,7 @@ model = dict(
                 dict(
                     cfg=dict(
                         type='DropBlock',
-                        drop_prob=0.05,
+                        drop_prob=0.15,
                         block_size=7,
                         postfix='_1'),
                     stages=(False, False, True, True),
@@ -20,7 +20,7 @@ model = dict(
                 dict(
                     cfg=dict(
                         type='DropBlock',
-                        drop_prob=0.05,
+                        drop_prob=0.15,
                         block_size=7,
                         postfix='_2'),
                     stages=(False, False, True, True),
@@ -28,7 +28,7 @@ model = dict(
                 dict(
                     cfg=dict(
                         type='DropBlock',
-                        drop_prob=0.05,
+                        drop_prob=0.15,
                         block_size=7,
                         postfix='_3'),
                     stages=(False, False, True, True),

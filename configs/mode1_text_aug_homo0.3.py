@@ -25,7 +25,6 @@ model = dict(
     modal_used=['text']
 )
 
-optimizer = dict(_delete_=True, type='Adam', lr=0.001, weight_decay=0.0001)
+optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
 
-data = dict(samples_per_gpu=4,
-            train=dict(pipeline=train_pipeline))
+data = dict(train=dict(pipeline=train_pipeline))

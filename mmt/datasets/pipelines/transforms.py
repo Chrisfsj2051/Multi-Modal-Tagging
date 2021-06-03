@@ -117,18 +117,35 @@ class Normalize(object):
 
 @PIPELINES.register_module()
 class FrameRandomErase(object):
-    def __init__(self, key_fields, erase_num, erase_max_len):
+    def __init__(self, key_fields, erase_num_frame, erase_num_block, erase_max_len, erase_max_size):
         self.key_fields = key_fields
-        self.erase_num = erase_num
+        self.erase_num_frame = erase_num_frame
+        self.erase_num_block = erase_num_block
         self.erase_max_len = erase_max_len
+        self.erase_max_size = erase_max_size
 
-    def __call__(self, results):
+    def erase_frame(self, results):
         for key in self.key_fields:
-            assert key  in results.keys()
+            assert key in results.keys()
             item = results[key]
             assert item.ndim == 2
-            for cnt in range(self.erase_num):
-                st = random.randint(0, item.shape[0]-1)
-                ed = random.randint(st+1, min(item.shape[0], st+self.erase_max_len))
+            for cnt in range(self.erase_num_frame):
+                st = random.randint(0, item.shape[0] - 1)
+                ed = random.randint(st + 1, min(item.shape[0], st + self.erase_max_len))
                 results[key][st:ed] *= 0
+
+    def erase_block(self, results):
+        for key in self.key_fields:
+            assert key in results.keys()
+            item = results[key]
+            assert item.ndim == 2
+            for cnt in range(self.erase_num_block):
+                st = random.randint(0, item.shape[1] - 1)
+                ed = random.randint(st + 1, min(item.shape[1], st + self.erase_max_size))
+                results[key][:, st:ed] *= 0
+
+
+    def __call__(self, results):
+        self.erase_block(results)
+        self.erase_frame(results)
         return results

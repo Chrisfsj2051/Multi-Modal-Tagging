@@ -211,15 +211,12 @@ class FrameRandomSwap(FrameAugBox):
         return x
 
 
-
-
 @PIPELINES.register_module()
 class TextOfflineAug(object):
 
     def __init__(self, aug_prob, aug_root):
         self.aug_prob = aug_prob
         self.aug_root = aug_root
-
 
     def __call__(self, results):
         if random.uniform(0, 1) < self.aug_prob:
@@ -297,9 +294,6 @@ class RandomFlip(object):
         return self.__class__.__name__ + f'(flip_ratio={self.flip_ratio})'
 
 
-
-
-
 @PIPELINES.register_module()
 class PhotoMetricDistortion(object):
 
@@ -314,27 +308,18 @@ class PhotoMetricDistortion(object):
         self.hue_delta = hue_delta
 
     def __call__(self, results):
-
-        if 'img_fields' in results:
-            assert results['img_fields'] == ['img'], \
-                'Only single img_fields is allowed'
         ori_dtype = results['image'].dtype
         img = results['image'].astype(np.float32)
-        assert img.dtype == np.float32, \
-            'PhotoMetricDistortion needs the input image of dtype np.float32,'\
-            ' please set "to_float32=True" in "LoadImageFromFile" pipeline'
         # random brightness
-        if random.randint(2):
-            delta = random.uniform(-self.brightness_delta,
+        if np.random.randint(0, 2):
+            delta = np.random.uniform(-self.brightness_delta,
                                    self.brightness_delta)
             img += delta
 
-        # mode == 0 --> do random contrast first
-        # mode == 1 --> do random contrast last
-        mode = random.randint(2)
+        mode = np.random.randint(2)
         if mode == 1:
-            if random.randint(2):
-                alpha = random.uniform(self.contrast_lower,
+            if np.random.randint(2):
+                alpha = np.random.uniform(self.contrast_lower,
                                        self.contrast_upper)
                 img *= alpha
 
@@ -342,13 +327,13 @@ class PhotoMetricDistortion(object):
         img = mmcv.bgr2hsv(img)
 
         # random saturation
-        if random.randint(2):
-            img[..., 1] *= random.uniform(self.saturation_lower,
+        if np.random.randint(2):
+            img[..., 1] *= np.random.uniform(self.saturation_lower,
                                           self.saturation_upper)
 
         # random hue
-        if random.randint(2):
-            img[..., 0] += random.uniform(-self.hue_delta, self.hue_delta)
+        if np.random.randint(2):
+            img[..., 0] += np.random.uniform(-self.hue_delta, self.hue_delta)
             img[..., 0][img[..., 0] > 360] -= 360
             img[..., 0][img[..., 0] < 0] += 360
 
@@ -357,16 +342,16 @@ class PhotoMetricDistortion(object):
 
         # random contrast
         if mode == 0:
-            if random.randint(2):
-                alpha = random.uniform(self.contrast_lower,
+            if np.random.randint(2):
+                alpha = np.random.uniform(self.contrast_lower,
                                        self.contrast_upper)
                 img *= alpha
 
         # randomly swap channels
-        if random.randint(2):
-            img = img[..., random.permutation(3)]
+        if np.random.randint(2):
+            img = img[..., np.random.permutation(3)]
 
-        results['image'] = img.to(ori_dtype)
+        results['image'] = img.astype(ori_dtype)
         return results
 
     def __repr__(self):

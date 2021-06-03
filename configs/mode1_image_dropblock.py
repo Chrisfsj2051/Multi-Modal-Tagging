@@ -3,13 +3,8 @@ _base_ = ['_base_/default_runtime.py',
           '_base_/models/fusion_4branch.py',
           '_base_/datasets/base_dataset.py']
 
-
-
 model = dict(
     mode=1,
-    pretrained=dict(
-        _delete_=True
-    ),
     modal_used=['image'],
     branch_config=dict(
         image_branch=dict(

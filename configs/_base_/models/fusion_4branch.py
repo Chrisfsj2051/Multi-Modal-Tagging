@@ -30,33 +30,7 @@ model = dict(
             frozen_stages=1,
             norm_cfg=dict(type='BN', requires_grad=True),
             norm_eval=True,
-            style='pytorch',
-            # plugins=[
-            #     dict(
-            #         cfg=dict(
-            #             type='DropBlock',
-            #             drop_prob=0.1,
-            #             block_size=5,
-            #             postfix='_1'),
-            #         stages=(False, False, True, True),
-            #         position='after_conv1'),
-            #     dict(
-            #         cfg=dict(
-            #             type='DropBlock',
-            #             drop_prob=0.1,
-            #             block_size=5 ,
-            #             postfix='_2'),
-            #         stages=(False, False, True, True),
-            #         position='after_conv2'),
-            #     dict(
-            #         cfg=dict(
-            #             type='DropBlock',
-            #             drop_prob=0.1,
-            #             block_size=5,
-            #             postfix='_3'),
-            #         stages=(False, False, True, True),
-            #         position='after_conv3')
-            # ]
+            style='pytorch'
         ),
         text=dict(
             type='TwoStreamTextCNN',

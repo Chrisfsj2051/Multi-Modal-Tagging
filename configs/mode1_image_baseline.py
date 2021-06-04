@@ -5,12 +5,9 @@ _base_ = ['_base_/default_runtime.py',
 
 model = dict(
     mode=1,
-    use_batch_norm=True,
     modal_used=['image'],
     ebd_config=dict(
-        image=dict(type='FCHead', dropout_p=0.5)
+        image=dict(type='FCHead', dropout_p=0.3)
     )
 )
-optimizer = dict(_delete_=True, type='SGD', lr=0.08, weight_decay=0.0001)
-data = dict(samples_per_gpu=16)
-evaluation = dict(interval=250)
+optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)

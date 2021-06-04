@@ -5,9 +5,12 @@ _base_ = ['_base_/default_runtime.py',
 
 model = dict(
     mode=1,
-    use_batch_norm=True,
     modal_used=['image']
 )
 optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
-data = dict(samples_per_gpu=32)
-evaluation = dict(interval=250)
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=8,
+    test=dict(type='TaggingDataset',
+              ann_file='dataset/tagging/GroundTruth/datafile/train.txt'),
+)

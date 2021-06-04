@@ -5,6 +5,7 @@ _base_ = ['_base_/default_runtime.py',
 
 model = dict(
     mode=1,
+    head_config=dict(video=dict(dropout_p=0.5)),
     modal_used=['image'],
     branch_config=dict(
         image_branch=dict(

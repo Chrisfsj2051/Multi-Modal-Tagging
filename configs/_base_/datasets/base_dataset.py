@@ -17,6 +17,15 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadAnnotations'),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(
+        type='FrameRandomErase',
+        key_fields=['video'],
+        erase_num_frame=30,
+        erase_max_len=10,
+        erase_num_block=10,
+        erase_max_size=100),
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',
          max_length=256),
@@ -29,7 +38,7 @@ val_pipeline = [
 
 data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=2,
+    workers_per_gpu=8,
     train=dict(type='TaggingDataset',
                ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
                label_id_file='dataset/tagging/label_id.txt',

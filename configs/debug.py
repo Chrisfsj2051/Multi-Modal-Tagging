@@ -8,7 +8,6 @@ evaluation = dict(interval=100)
 model = dict(
     type='MultiBranchesFusionModel',
     pretrained=dict(_delete_=True),
-    use_layer_norm=True,
     modal_dropout_p=dict(_delete_=True, text=0.5, video=0.5, image=0.5, audio=0.5),
 )
 optimizer_config = dict(

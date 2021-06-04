@@ -2,7 +2,6 @@ import torch.nn as nn
 
 from mmt.models.builder import HEAD, build_loss
 
-
 """
 TODO:
 1. SE-GATING
@@ -22,7 +21,7 @@ class FCHead(nn.Module):
             self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x):
-        out  = self.linear(x)
+        out = self.linear(x)
         if self.use_dropout:
             out = self.dropout(out)
         return out
@@ -44,6 +43,7 @@ class ClsHead(FCHead):
 
     def simple_test(self, x):
         return self.linear(x)
+
 
 @HEAD.register_module()
 class MLPHead(ClsHead):

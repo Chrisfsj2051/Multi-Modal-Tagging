@@ -3,7 +3,11 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
-    dict(type='PhotoMetricDistortion'),
+    dict(type='PhotoMetricDistortion',
+         brightness_delta=16,
+         contrast_range=(0.75, 1.25),
+         saturation_range=(0.75, 1.25),
+         hue_delta=9),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',

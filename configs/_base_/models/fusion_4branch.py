@@ -35,16 +35,16 @@ model = dict(
                 dict(
                     cfg=dict(
                         type='DropBlock',
-                        drop_prob=0.2,
-                        block_size=30,
+                        drop_prob=0.1,
+                        block_size=5,
                         postfix='_1'),
                     stages=(False, False, True, True),
                     position='after_conv1'),
                 dict(
                     cfg=dict(
                         type='DropBlock',
-                        drop_prob=0.15,
-                        block_size=10,
+                        drop_prob=0.1,
+                        block_size=5 ,
                         postfix='_2'),
                     stages=(False, False, True, True),
                     position='after_conv2'),
@@ -52,7 +52,7 @@ model = dict(
                     cfg=dict(
                         type='DropBlock',
                         drop_prob=0.1,
-                        block_size=7,
+                        block_size=5,
                         postfix='_3'),
                     stages=(False, False, True, True),
                     position='after_conv3')
@@ -68,26 +68,26 @@ model = dict(
         )
     ),
     ebd_config=dict(
-        video=dict(type='FCHead', in_dim=16384, out_dim=1024, dropout_p=0.3),
-        image=dict(type='FCHead', in_dim=2048, out_dim=1024, dropout_p=0.3),
-        text=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.3),
-        audio=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.3)
+        video=dict(type='FCHead', in_dim=16384, out_dim=1024, dropout_p=0.2),
+        image=dict(type='FCHead', in_dim=2048, out_dim=1024, dropout_p=0.2),
+        text=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.2),
+        audio=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.2)
     ),
     attn_config=dict(
         type='SEHead', in_dim=20480,
         gating_reduction=8, out_dim=1024,
-        input_dropout_p=0.3
+        input_dropout_p=0.2
     ),
     head_config=dict(
-        video=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.3,
+        video=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        image=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.3,
+        image=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        text=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.3,
+        text=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
                   loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        audio=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.3,
+        audio=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.3,
+        fusion=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

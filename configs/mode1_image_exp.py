@@ -7,7 +7,7 @@ model = dict(
     mode=1,
     modal_used=['image'],
     ebd_config=dict(
-        image=dict(type='FCHead', dropout_p=0.3)
+        image=dict(type='FCHead', dropout_p=0.0)
     )
 )
 optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)

@@ -110,6 +110,48 @@ class TaggingDataset:
     def __len__(self):
         return len(self.video_anns)
 
+@DATASETS.register_module()
+class SuperClassTaggingDataset(TaggingDataset):
+
+    def __init__(self, ann_file, label_id_file, pipeline, test_mode=False):
+        (self.index_to_tag, self.tag_to_index, self.index_to_super_index,
+         self.tag_to_super_index) = self.load_label_dict(label_id_file)
+        self.test_mode = test_mode
+        (self.video_anns, self.audio_anns, self.image_anns, self.test_anns,
+         self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
+        self.flag = np.zeros((len(self.video_anns))).astype(np.int)
+        self.pipeline = Compose(pipeline)
+
+    def load_label_dict(self, dict_file):
+        index_to_tag = {}
+        tag_to_index = {}
+        index_to_super_index = {}
+        tag_to_super_index = {}
+        with open(dict_file, 'r', encoding='utf-8') as f:
+            contents = f.readlines()
+        for i, line in enumerate(contents):
+            line = line.strip()
+            assert '\t' in line
+            tag, classes = line.split('\t')
+            index, super_index = classes.split(' ')
+            index, super_index = int(index), int(super_index)
+            index_to_tag[index] = tag
+            tag_to_index[tag] = index
+            index_to_super_index[index] = super_index
+            tag_to_super_index[tag] = super_index
+
+        return index_to_tag, tag_to_index, index_to_super_index, tag_to_super_index
+
+    def evaluate(self, preds, metric=None, logger=None):
+        results = {}
+        gt_onehot = np.array(self.gt_onehot)
+        for modal in preds[0].keys():
+            modal_preds = [x[modal][0] for x in preds]
+            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            results[f'{modal}_GAP'] = calculate_gap(modal_preds, gt_onehot)
+        print_str = ''
+        return results
+
 
 if __name__ == '__main__':
     TaggingDataset('data/tagging/GroundTruth/datafile/train.txt',

@@ -3,10 +3,19 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(
+        type='FrameRandomErase',
+        key_fields=['video'],
+        aug_num_frame=30,
+        aug_max_len=10,
+        aug_num_block=10,
+        aug_max_size=100),
     dict(type='FrameRandomSwap', key_fields=['video'],
          aug_num_frame=30, aug_max_len=10, aug_num_block=10, aug_max_size=300),
     dict(type='Resize', size=(224, 224)),
@@ -17,15 +26,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadAnnotations'),
-    dict(type='PhotoMetricDistortion'),
-    dict(type='RandomFlip', flip_ratio=0.5),
-    dict(
-        type='FrameRandomErase',
-        key_fields=['video'],
-        erase_num_frame=30,
-        erase_max_len=10,
-        erase_num_block=10,
-        erase_max_size=100),
+
     dict(type='Tokenize',
          vocab_root='dataset/vocab_small.txt',
          max_length=256),

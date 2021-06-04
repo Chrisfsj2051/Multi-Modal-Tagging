@@ -98,7 +98,7 @@ class TaggingDataset:
             json.dump(ret_json, f, ensure_ascii=False, indent=4)
             print(f'Saved at {save_dir}')
 
-    def evaluate(self, preds, logger):
+    def evaluate(self, preds, metric, logger=None):
         results = {}
         gt_onehot = np.array(self.gt_onehot)
         for modal in preds[0].keys():

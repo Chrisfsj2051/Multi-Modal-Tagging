@@ -31,32 +31,32 @@ model = dict(
             norm_cfg=dict(type='BN', requires_grad=True),
             norm_eval=True,
             style='pytorch',
-            plugins=[
-                dict(
-                    cfg=dict(
-                        type='DropBlock',
-                        drop_prob=0.1,
-                        block_size=5,
-                        postfix='_1'),
-                    stages=(False, False, True, True),
-                    position='after_conv1'),
-                dict(
-                    cfg=dict(
-                        type='DropBlock',
-                        drop_prob=0.1,
-                        block_size=5 ,
-                        postfix='_2'),
-                    stages=(False, False, True, True),
-                    position='after_conv2'),
-                dict(
-                    cfg=dict(
-                        type='DropBlock',
-                        drop_prob=0.1,
-                        block_size=5,
-                        postfix='_3'),
-                    stages=(False, False, True, True),
-                    position='after_conv3')
-            ]
+            # plugins=[
+            #     dict(
+            #         cfg=dict(
+            #             type='DropBlock',
+            #             drop_prob=0.1,
+            #             block_size=5,
+            #             postfix='_1'),
+            #         stages=(False, False, True, True),
+            #         position='after_conv1'),
+            #     dict(
+            #         cfg=dict(
+            #             type='DropBlock',
+            #             drop_prob=0.1,
+            #             block_size=5 ,
+            #             postfix='_2'),
+            #         stages=(False, False, True, True),
+            #         position='after_conv2'),
+            #     dict(
+            #         cfg=dict(
+            #             type='DropBlock',
+            #             drop_prob=0.1,
+            #             block_size=5,
+            #             postfix='_3'),
+            #         stages=(False, False, True, True),
+            #         position='after_conv3')
+            # ]
         ),
         text=dict(
             type='TwoStreamTextCNN',
@@ -68,26 +68,26 @@ model = dict(
         )
     ),
     ebd_config=dict(
-        video=dict(type='FCHead', in_dim=16384, out_dim=1024, dropout_p=0.2),
-        image=dict(type='FCHead', in_dim=2048, out_dim=1024, dropout_p=0.2),
-        text=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.2),
-        audio=dict(type='FCHead', in_dim=1024, out_dim=1024, dropout_p=0.2)
+        video=dict(type='FCHead', in_dim=16384, out_dim=1024),
+        image=dict(type='FCHead', in_dim=2048, out_dim=1024),
+        text=dict(type='FCHead', in_dim=1024, out_dim=1024),
+        audio=dict(type='FCHead', in_dim=1024, out_dim=1024)
     ),
     attn_config=dict(
         type='SEHead', in_dim=20480,
         gating_reduction=8, out_dim=1024,
-        input_dropout_p=0.2
+        # input_dropout_p=0.2
     ),
     head_config=dict(
-        video=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
+        video=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        image=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
+        image=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        text=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
+        text=dict(type='ClsHead', in_dim=1024, out_dim=82,
                   loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        audio=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
+        audio=dict(type='ClsHead', in_dim=1024, out_dim=82,
                    loss=dict(type='MultiLabelBCEWithLogitsLoss')),
-        fusion=dict(type='ClsHead', in_dim=1024, out_dim=82, dropout_p=0.2,
+        fusion=dict(type='ClsHead', in_dim=1024, out_dim=82,
                     loss=dict(type='MultiLabelBCEWithLogitsLoss'))
     )
 )

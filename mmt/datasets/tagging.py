@@ -110,6 +110,7 @@ class TaggingDataset:
     def __len__(self):
         return len(self.video_anns)
 
+
 @DATASETS.register_module()
 class SuperClassTaggingDataset(TaggingDataset):
 
@@ -149,7 +150,26 @@ class SuperClassTaggingDataset(TaggingDataset):
             modal_preds = [x[modal][0] for x in preds]
             modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
             results[f'{modal}_GAP'] = calculate_gap(modal_preds, gt_onehot)
-        print_str = ''
+        print_str = '=' * 30 + '\n'
+        print_str += f'{"Modal":8}|{"Super Cls":12}|{"GAP":8}\n'
+        super_class = np.unique(list(self.tag_to_super_index.values()))
+        for modal in preds[0].keys():
+            print_str += '-' * 30 + '\n'
+            modal_preds = [x[modal][0] for x in preds]
+            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            num_classes = len(self.index_to_super_index)
+            for sc in super_class:
+                mask = [self.index_to_super_index[x] == sc for x in range(num_classes)]
+                mask = np.array(mask)
+                sc_modal_preds = modal_preds * mask[None]
+                sc_gt_onehot = gt_onehot * mask[None]
+                gap = calculate_gap(sc_modal_preds, sc_gt_onehot)
+                print_str += f'{modal:8}|{str(sc):12}|{gap:.4f}\n'
+
+        print_str += '-' * 30 + '\n'
+        logger = get_root_logger() 
+        logger.info('\n' + print_str)
+
         return results
 
 

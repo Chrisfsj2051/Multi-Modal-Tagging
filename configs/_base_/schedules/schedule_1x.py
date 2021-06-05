@@ -9,4 +9,3 @@ lr_config = dict(policy='step',
                  warmup_ratio=0.001,
                  step=[8000, 9000])
 runner = dict(type='IterBasedRunner', max_iters=10000)
-

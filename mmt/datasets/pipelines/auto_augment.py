@@ -85,7 +85,6 @@ class AutoAugment(object):
         >>> results = dict(img=img, gt_bboxes=gt_bboxes)
         >>> results = augmentation(results)
     """
-
     def __init__(self, policies):
         assert isinstance(policies, list) and len(policies) > 0, \
             'Policies must be a non-empty list.'
@@ -131,7 +130,6 @@ class Shear(object):
                 offset negative. Should be in range [0,1]
         interpolation (str): Same as in :func:`mmcv.imshear`.
     """
-
     def __init__(self,
                  level,
                  img_fill_val=128,
@@ -192,12 +190,11 @@ class Shear(object):
         """
         for key in results.get('img_fields', ['img']):
             img = results[key]
-            img_sheared = mmcv.imshear(
-                img,
-                magnitude,
-                direction,
-                border_value=self.img_fill_val,
-                interpolation=interpolation)
+            img_sheared = mmcv.imshear(img,
+                                       magnitude,
+                                       direction,
+                                       border_value=self.img_fill_val,
+                                       interpolation=interpolation)
             results[key] = img_sheared.astype(img.dtype)
 
     def _shear_bboxes(self, results, magnitude):
@@ -210,8 +207,9 @@ class Shear(object):
             shear_matrix = np.stack([[1, 0], [magnitude,
                                               1]]).astype(np.float32)
         for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(
-                results[key], results[key].shape[-1], axis=-1)
+            min_x, min_y, max_x, max_y = np.split(results[key],
+                                                  results[key].shape[-1],
+                                                  axis=-1)
             coordinates = np.stack([[min_x, min_y], [max_x, min_y],
                                     [min_x, max_y],
                                     [max_x, max_y]])  # [4, 2, nb_box, 1]
@@ -255,12 +253,12 @@ class Shear(object):
         """Shear the segmentation maps."""
         for key in results.get('seg_fields', []):
             seg = results[key]
-            results[key] = mmcv.imshear(
-                seg,
-                magnitude,
-                direction,
-                border_value=fill_val,
-                interpolation=interpolation).astype(seg.dtype)
+            results[key] = mmcv.imshear(seg,
+                                        magnitude,
+                                        direction,
+                                        border_value=fill_val,
+                                        interpolation=interpolation).astype(
+                                            seg.dtype)
 
     def _filter_invalid(self, results, min_bbox_size=0):
         """Filter bboxes and corresponding masks too small after shear
@@ -297,18 +295,16 @@ class Shear(object):
         self._shear_img(results, magnitude, self.direction, self.interpolation)
         self._shear_bboxes(results, magnitude)
         # fill_val set to 0 for background of mask.
-        self._shear_masks(
-            results,
-            magnitude,
-            self.direction,
-            fill_val=0,
-            interpolation=self.interpolation)
-        self._shear_seg(
-            results,
-            magnitude,
-            self.direction,
-            fill_val=self.seg_ignore_label,
-            interpolation=self.interpolation)
+        self._shear_masks(results,
+                          magnitude,
+                          self.direction,
+                          fill_val=0,
+                          interpolation=self.interpolation)
+        self._shear_seg(results,
+                        magnitude,
+                        self.direction,
+                        fill_val=self.seg_ignore_label,
+                        interpolation=self.interpolation)
         self._filter_invalid(results)
         return results
 
@@ -351,7 +347,6 @@ class Rotate(object):
         random_negative_prob (float): The probability that turns the
              offset negative.
     """
-
     def __init__(self,
                  level,
                  scale=1,
@@ -417,16 +412,20 @@ class Rotate(object):
         """
         for key in results.get('img_fields', ['img']):
             img = results[key].copy()
-            img_rotated = mmcv.imrotate(
-                img, angle, center, scale, border_value=self.img_fill_val)
+            img_rotated = mmcv.imrotate(img,
+                                        angle,
+                                        center,
+                                        scale,
+                                        border_value=self.img_fill_val)
             results[key] = img_rotated.astype(img.dtype)
 
     def _rotate_bboxes(self, results, rotate_matrix):
         """Rotate the bboxes."""
         h, w, c = results['img_shape']
         for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(
-                results[key], results[key].shape[-1], axis=-1)
+            min_x, min_y, max_x, max_y = np.split(results[key],
+                                                  results[key].shape[-1],
+                                                  axis=-1)
             coordinates = np.stack([[min_x, min_y], [max_x, min_y],
                                     [min_x, max_y],
                                     [max_x, max_y]])  # [4, 2, nb_bbox, 1]
@@ -441,18 +440,19 @@ class Rotate(object):
             rotated_coords = np.matmul(rotate_matrix,
                                        coordinates)  # [nb_bbox, 4, 2, 1]
             rotated_coords = rotated_coords[..., 0]  # [nb_bbox, 4, 2]
-            min_x, min_y = np.min(
-                rotated_coords[:, :, 0], axis=1), np.min(
-                    rotated_coords[:, :, 1], axis=1)
-            max_x, max_y = np.max(
-                rotated_coords[:, :, 0], axis=1), np.max(
-                    rotated_coords[:, :, 1], axis=1)
-            min_x, min_y = np.clip(
-                min_x, a_min=0, a_max=w), np.clip(
-                    min_y, a_min=0, a_max=h)
-            max_x, max_y = np.clip(
-                max_x, a_min=min_x, a_max=w), np.clip(
-                    max_y, a_min=min_y, a_max=h)
+            min_x, min_y = np.min(rotated_coords[:, :, 0],
+                                  axis=1), np.min(rotated_coords[:, :, 1],
+                                                  axis=1)
+            max_x, max_y = np.max(rotated_coords[:, :, 0],
+                                  axis=1), np.max(rotated_coords[:, :, 1],
+                                                  axis=1)
+            min_x, min_y = np.clip(min_x, a_min=0, a_max=w), np.clip(min_y,
+                                                                     a_min=0,
+                                                                     a_max=h)
+            max_x, max_y = np.clip(max_x, a_min=min_x,
+                                   a_max=w), np.clip(max_y,
+                                                     a_min=min_y,
+                                                     a_max=h)
             results[key] = np.stack([min_x, min_y, max_x, max_y],
                                     axis=-1).astype(results[key].dtype)
 
@@ -477,9 +477,12 @@ class Rotate(object):
         """Rotate the segmentation map."""
         for key in results.get('seg_fields', []):
             seg = results[key].copy()
-            results[key] = mmcv.imrotate(
-                seg, angle, center, scale,
-                border_value=fill_val).astype(seg.dtype)
+            results[key] = mmcv.imrotate(seg,
+                                         angle,
+                                         center,
+                                         scale,
+                                         border_value=fill_val).astype(
+                                             seg.dtype)
 
     def _filter_invalid(self, results, min_bbox_size=0):
         """Filter bboxes and corresponding masks too small after rotate
@@ -521,8 +524,11 @@ class Rotate(object):
         rotate_matrix = cv2.getRotationMatrix2D(center, -angle, self.scale)
         self._rotate_bboxes(results, rotate_matrix)
         self._rotate_masks(results, angle, center, self.scale, fill_val=0)
-        self._rotate_seg(
-            results, angle, center, self.scale, fill_val=self.seg_ignore_label)
+        self._rotate_seg(results,
+                         angle,
+                         center,
+                         self.scale,
+                         fill_val=self.seg_ignore_label)
         self._filter_invalid(results)
         return results
 
@@ -565,7 +571,6 @@ class Translate(object):
         min_size (int | float): The minimum pixel for filtering
             invalid bboxes after the translation.
     """
-
     def __init__(self,
                  level,
                  prob=0.5,
@@ -625,8 +630,9 @@ class Translate(object):
         """Shift bboxes horizontally or vertically, according to offset."""
         h, w, c = results['img_shape']
         for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(
-                results[key], results[key].shape[-1], axis=-1)
+            min_x, min_y, max_x, max_y = np.split(results[key],
+                                                  results[key].shape[-1],
+                                                  axis=-1)
             if self.direction == 'horizontal':
                 min_x = np.maximum(0, min_x + offset)
                 max_x = np.minimum(w, max_x + offset)
@@ -699,8 +705,10 @@ class Translate(object):
         self._translate_masks(results, offset, self.direction)
         # fill_val set to ``seg_ignore_label`` for the ignored value
         # of segmentation map.
-        self._translate_seg(
-            results, offset, self.direction, fill_val=self.seg_ignore_label)
+        self._translate_seg(results,
+                            offset,
+                            self.direction,
+                            fill_val=self.seg_ignore_label)
         self._filter_invalid(results, min_size=self.min_size)
         return results
 
@@ -714,7 +722,6 @@ class ColorTransform(object):
         level (int | float): Should be in range [0,_MAX_LEVEL].
         prob (float): The probability for performing Color transformation.
     """
-
     def __init__(self, level, prob=0.5):
         assert isinstance(level, (int, float)), \
             'The level must be type int or float.'
@@ -762,7 +769,6 @@ class EqualizeTransform(object):
     Args:
         prob (float): The probability for performing Equalize transformation.
     """
-
     def __init__(self, prob=0.5):
         assert 0 <= prob <= 1.0, \
             'The probability should be in range [0,1].'
@@ -802,7 +808,6 @@ class BrightnessTransform(object):
         level (int | float): Should be in range [0,_MAX_LEVEL].
         prob (float): The probability for performing Brightness transformation.
     """
-
     def __init__(self, level, prob=0.5):
         assert isinstance(level, (int, float)), \
             'The level must be type int or float.'
@@ -851,7 +856,6 @@ class ContrastTransform(object):
         level (int | float): Should be in range [0,_MAX_LEVEL].
         prob (float): The probability for performing Contrast transformation.
     """
-
     def __init__(self, level, prob=0.5):
         assert isinstance(level, (int, float)), \
             'The level must be type int or float.'

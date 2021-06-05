@@ -5,9 +5,16 @@ import torch.nn.functional as F
 from mmt.models.builder import TEXT
 from mmt.utils.tokenization import FullTokenizer
 
+
 @TEXT.register_module()
 class TextCNN(nn.Module):
-    def __init__(self, vocab_size, ebd_dim, channel_in, channel_out, filter_size, dropout_p=None):
+    def __init__(self,
+                 vocab_size,
+                 ebd_dim,
+                 channel_in,
+                 channel_out,
+                 filter_size,
+                 dropout_p=None):
         super(TextCNN, self).__init__()
         self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, ebd_dim)
@@ -27,18 +34,19 @@ class TextCNN(nn.Module):
         assert x.max().item() < self.vocab_size
         out = self.embedding(x)
         out = out.unsqueeze(1)
-        out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
+        out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs],
+                        1)
         out = self.fc(out)
         if self.use_dropout and self.training:
             out = self.dropout(out)
         return out
 
+
 @TEXT.register_module()
 class TwoStreamTextCNN(TextCNN):
-
     def forward(self, x):
         assert x.ndim == 2
-        ocr, asr = x.split(x.shape[1]//2, dim=1)
+        ocr, asr = x.split(x.shape[1] // 2, dim=1)
         ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
         asr_feat = super(TwoStreamTextCNN, self).forward(asr)
         out = (ocr_feat + asr_feat) / 2
@@ -55,4 +63,3 @@ if __name__ == '__main__':
     inputs = inputs + pad_token * (128 - len(inputs))
     inputs = torch.LongTensor(inputs)[None]
     model(inputs)
-

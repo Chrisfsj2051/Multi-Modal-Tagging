@@ -12,6 +12,7 @@ def parse_args():
     parser.add_argument('out', help='checkpoint file')
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
     text_ckpt = torch.load(args.text)
@@ -20,12 +21,13 @@ def main():
     audio_ckpt = torch.load(args.audio)
     ret = {}
     for typ, dic in zip(['text', 'image', 'video', 'audio'],
-                         [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):
+                        [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):
         for key, val in dic.items():
             if key.startswith(typ):
                 ret[key] = val
     torch.save(ret, args.out)
     print(f'Saved as {args.out}')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

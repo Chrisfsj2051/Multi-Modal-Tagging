@@ -1,37 +1,33 @@
+import numpy as np
 import torch
-from mmcv.runner import _load_checkpoint, load_checkpoint, load_state_dict
+import torch.nn as nn
+from mmcv.runner import _load_checkpoint, load_state_dict
 
-from mmt.models.builder import (FUSION, build_head, build_image_branch,
-                                build_frame_branch, build_text_branch)
+from mmt.models.builder import (FUSION, build_frame_branch, build_head,
+                                build_image_branch, build_text_branch)
 from mmt.models.fusion import BaseFusionModel
 from mmt.utils import get_root_logger
-import torch.nn as nn
-
-import numpy as np
 
 
 @FUSION.register_module()
 class MultiBranchesFusionModel(BaseFusionModel):
     """
     Args:
-        mode (int): mode1: Train branches; mode2: Train fusion head; mode3: Train All.
+        mode (int):
+            mode1: Train branches;
+            mode2: Train fusion head;
+            mode3: Train All.
     """
-
-    def __init__(self,
-                 mode,
-                 modal_used,
-                 branch_config,
-                 ebd_config,
-                 head_config,
-                 use_batch_norm,
-                 attn_config,
-                 pretrained,
+    def __init__(self, mode, modal_used, branch_config, ebd_config,
+                 head_config, use_batch_norm, attn_config, pretrained,
                  modal_dropout_p):
         super(MultiBranchesFusionModel, self).__init__()
-        build_branch_method = {'video': build_frame_branch,
-                               'image': build_image_branch,
-                               'text': build_text_branch,
-                               'audio': build_frame_branch}
+        build_branch_method = {
+            'video': build_frame_branch,
+            'image': build_image_branch,
+            'text': build_text_branch,
+            'audio': build_frame_branch
+        }
         self.mode = mode
         self.modal_list = modal_used
         self.modal_dropout_p = modal_dropout_p
@@ -39,10 +35,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
                             build_branch_method[modal](branch_config[modal]))
-            self.add_module(f'{modal}_ebd',
-                            build_head(ebd_config[modal]))
-            self.add_module(f'{modal}_head',
-                            build_head(head_config[modal]))
+            self.add_module(f'{modal}_ebd', build_head(ebd_config[modal]))
+            self.add_module(f'{modal}_head', build_head(head_config[modal]))
             if use_batch_norm:
                 self.add_module(f'{modal}_bn',
                                 nn.LayerNorm(ebd_config[modal]['in_dim']))
@@ -69,7 +63,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         elif mode == 2:
             for modal in self.modal_list:
                 for arch in ('branch', 'ebd', 'head'):
-                    for param in self.__getattr__(f'{modal}_{arch}').parameters():
+                    for param in self.__getattr__(
+                            f'{modal}_{arch}').parameters():
                         param.requires_grad = False
 
     def load_pretrained(self, model, pretrained):
@@ -97,10 +92,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
                     self.__getattr__(f'{modal}_{arch}').eval()
 
         ebd_list, losses = [], {}
-        modal_inputs = {'video': video,
-                        'image': image,
-                        'text': text,
-                        'audio': audio}
+        modal_inputs = {
+            'video': video,
+            'image': image,
+            'text': text,
+            'audio': audio
+        }
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             feats = self.__getattr__(f'{modal}_branch')(inputs)
@@ -121,9 +118,10 @@ class MultiBranchesFusionModel(BaseFusionModel):
         return losses
 
     def apply_modal_dropout(self, modal_inputs):
-        dropout_p = [[1 - self.modal_dropout_p[x]
-                      for _ in range(modal_inputs[0].shape[0])]
-                     for x in self.modal_list]
+        dropout_p = [[
+            1 - self.modal_dropout_p[x]
+            for _ in range(modal_inputs[0].shape[0])
+        ] for x in self.modal_list]
         mask = np.random.binomial(1, dropout_p)
         for i in range(mask.shape[1]):
             if sum(mask[:, i]) == 0:
@@ -133,11 +131,13 @@ class MultiBranchesFusionModel(BaseFusionModel):
         return outs
 
     def simple_test(self, video, image, text, audio):
-        ebd_list, losses = [], {}
-        modal_inputs = {'video': video,
-                        'image': image,
-                        'text': text,
-                        'audio': audio}
+        ebd_list = []
+        modal_inputs = {
+            'video': video,
+            'image': image,
+            'text': text,
+            'audio': audio
+        }
         test_results = [{}]
         for modal in self.modal_list:
             inputs = modal_inputs[modal]

@@ -1,3 +1,3 @@
 from .textcnn import TwoStreamTextCNN
 
-__all__= ['TwoStreamTextCNN']
+__all__ = ['TwoStreamTextCNN']

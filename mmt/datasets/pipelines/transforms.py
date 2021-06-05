@@ -5,9 +5,9 @@ from copy import deepcopy
 
 import mmcv
 import numpy as np
-import os
-from ..builder import PIPELINES
+
 from ...utils.tokenization import FullTokenizer
+from ..builder import PIPELINES
 
 
 @PIPELINES.register_module()
@@ -27,10 +27,12 @@ class Pad(object):
             dict: Updated result dict.
         """
         # ((d1_padL, d1_padR), (d2_padL, d2_padR))
-        video_pad_shape = [[0, x - y]
-                           for x, y in zip(self.video_pad_size, results['video'].shape)]
-        audio_pad_shape = [[0, x - y]
-                           for x, y in zip(self.audio_pad_size, results['audio'].shape)]
+        video_pad_shape = [[
+            0, x - y
+        ] for x, y in zip(self.video_pad_size, results['video'].shape)]
+        audio_pad_shape = [[
+            0, x - y
+        ] for x, y in zip(self.audio_pad_size, results['audio'].shape)]
         results['video'] = np.pad(results['video'],
                                   video_pad_shape,
                                   constant_values=self.pad_val)
@@ -93,7 +95,6 @@ class Normalize(object):
         to_rgb (bool): Whether to convert the image from BGR to RGB,
             default is true.
     """
-
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
@@ -120,8 +121,8 @@ class Normalize(object):
 
 
 class FrameAugBox(metaclass=abc.ABCMeta):
-
-    def __init__(self, key_fields, aug_num_frame, aug_num_block, aug_max_len, aug_max_size):
+    def __init__(self, key_fields, aug_num_frame, aug_num_block, aug_max_len,
+                 aug_max_size):
         self.key_fields = key_fields
         self.aug_num_frame = aug_num_frame
         self.aug_num_block = aug_num_block
@@ -149,7 +150,6 @@ class FrameAugBox(metaclass=abc.ABCMeta):
 
 @PIPELINES.register_module()
 class FrameRandomErase(FrameAugBox):
-
     def apply_frame_aug(self, x):
         for cnt in range(self.aug_num_frame):
             st = random.randint(0, x.shape[0] - 1)
@@ -160,14 +160,14 @@ class FrameRandomErase(FrameAugBox):
     def apply_block_aug(self, x):
         for cnt in range(self.aug_num_block):
             st = random.randint(0, x.shape[1] - 1)
-            ed = random.randint(st + 1, min(x.shape[1], st + self.aug_max_size))
+            ed = random.randint(st + 1, min(x.shape[1],
+                                            st + self.aug_max_size))
             x[:, st:ed] *= 0
         return x
 
 
 @PIPELINES.register_module()
 class FrameRandomReverse(FrameAugBox):
-
     def apply_frame_aug(self, x):
         for cnt in range(self.aug_num_frame):
             st = random.randint(0, x.shape[0] - 1)
@@ -179,21 +179,22 @@ class FrameRandomReverse(FrameAugBox):
     def apply_block_aug(self, x):
         for cnt in range(self.aug_num_block):
             st = random.randint(0, x.shape[1] - 1)
-            ed = random.randint(st + 1, min(x.shape[1], st + self.aug_max_size))
+            ed = random.randint(st + 1, min(x.shape[1],
+                                            st + self.aug_max_size))
             x[st:ed] = x[st:ed][::-1]
         return x
 
 
 @PIPELINES.register_module()
 class FrameRandomSwap(FrameAugBox):
-
     def apply_frame_aug(self, x):
         for cnt in range(self.aug_num_frame):
             st1 = random.randint(0, x.shape[0] - 1)
-            ed1 = random.randint(st1 + 1, min(x.shape[0], st1 + self.aug_max_len))
+            ed1 = random.randint(st1 + 1,
+                                 min(x.shape[0], st1 + self.aug_max_len))
             st2 = random.randint(0, x.shape[0] - ed1 + st1)
             ed2 = st2 + ed1 - st1
-            temp = deepcopy(x[st1: ed1])
+            temp = deepcopy(x[st1:ed1])
             x[st1:ed1] = x[st2:ed2]
             x[st2:ed2] = temp
 
@@ -202,10 +203,11 @@ class FrameRandomSwap(FrameAugBox):
     def apply_block_aug(self, x):
         for cnt in range(self.aug_num_block):
             st1 = random.randint(0, x.shape[1] - 1)
-            ed1 = random.randint(st1 + 1, min(x.shape[1], st1 + self.aug_max_size))
+            ed1 = random.randint(st1 + 1,
+                                 min(x.shape[1], st1 + self.aug_max_size))
             st2 = random.randint(0, x.shape[1] - ed1 + st1)
             ed2 = st2 + ed1 - st1
-            temp = deepcopy(x[:, st1: ed1])
+            temp = deepcopy(x[:, st1:ed1])
             x[:, st1:ed1] = x[:, st2:ed2]
             x[:, st2:ed2] = temp
         return x
@@ -213,7 +215,6 @@ class FrameRandomSwap(FrameAugBox):
 
 @PIPELINES.register_module()
 class TextOfflineAug(object):
-
     def __init__(self, aug_prob, aug_root):
         self.aug_prob = aug_prob
         self.aug_root = aug_root
@@ -225,7 +226,8 @@ class TextOfflineAug(object):
         for key in ['video_asr', 'video_ocr']:
             data_path = os.path.join(self.aug_root, results['id_name'], key)
             file = random.choice(os.listdir(data_path))
-            with open(os.path.join(data_path, file), 'r', encoding='utf-8') as f:
+            with open(os.path.join(data_path, file), 'r',
+                      encoding='utf-8') as f:
                 results['text'][key] = f.read().strip()
 
         return results
@@ -285,8 +287,8 @@ class RandomFlip(object):
 
         flip_direction = cur_dir
         if use_flip:
-            results['image'] = mmcv.imflip(
-                results['image'], direction=flip_direction)
+            results['image'] = mmcv.imflip(results['image'],
+                                           direction=flip_direction)
 
         return results
 
@@ -296,7 +298,6 @@ class RandomFlip(object):
 
 @PIPELINES.register_module()
 class PhotoMetricDistortion(object):
-
     def __init__(self,
                  brightness_delta=32,
                  contrast_range=(0.5, 1.5),
@@ -313,14 +314,14 @@ class PhotoMetricDistortion(object):
         # random brightness
         if np.random.randint(0, 2):
             delta = np.random.uniform(-self.brightness_delta,
-                                   self.brightness_delta)
+                                      self.brightness_delta)
             img += delta
 
         mode = np.random.randint(2)
         if mode == 1:
             if np.random.randint(2):
                 alpha = np.random.uniform(self.contrast_lower,
-                                       self.contrast_upper)
+                                          self.contrast_upper)
                 img *= alpha
 
         # convert color from BGR to HSV
@@ -329,7 +330,7 @@ class PhotoMetricDistortion(object):
         # random saturation
         if np.random.randint(2):
             img[..., 1] *= np.random.uniform(self.saturation_lower,
-                                          self.saturation_upper)
+                                             self.saturation_upper)
 
         # random hue
         if np.random.randint(2):
@@ -344,7 +345,7 @@ class PhotoMetricDistortion(object):
         if mode == 0:
             if np.random.randint(2):
                 alpha = np.random.uniform(self.contrast_lower,
-                                       self.contrast_upper)
+                                          self.contrast_upper)
                 img *= alpha
 
         # randomly swap channels

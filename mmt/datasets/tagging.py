@@ -2,8 +2,8 @@ import json
 import random
 
 import numpy as np
-
 import torch
+
 from mmt.datasets.builder import DATASETS
 from mmt.datasets.pipelines import Compose
 from mmt.utils import get_root_logger
@@ -88,12 +88,11 @@ class TaggingDataset:
             label = [self.index_to_tag[x.item()] for x in topk_label[i]]
             score = [f'{x:.2f}' for x in topk_score[i].tolist()]
             ret_json[item_id] = {
-                'result': [
-                    {
-                        'labels': label,
-                        'scores': score
-                    }
-                ]}
+                'result': [{
+                    'labels': label,
+                    'scores': score
+                }]
+            }
         with open(save_dir, 'w', encoding='utf-8') as f:
             json.dump(ret_json, f, ensure_ascii=False, indent=4)
             print(f'Saved at {save_dir}')
@@ -113,7 +112,6 @@ class TaggingDataset:
 
 @DATASETS.register_module()
 class SuperClassTaggingDataset(TaggingDataset):
-
     def __init__(self, ann_file, label_id_file, pipeline, test_mode=False):
         (self.index_to_tag, self.tag_to_index, self.index_to_super_index,
          self.tag_to_super_index) = self.load_label_dict(label_id_file)
@@ -141,7 +139,8 @@ class SuperClassTaggingDataset(TaggingDataset):
             index_to_super_index[index] = super_index
             tag_to_super_index[tag] = super_index
 
-        return index_to_tag, tag_to_index, index_to_super_index, tag_to_super_index
+        return (index_to_tag, tag_to_index, index_to_super_index,
+                tag_to_super_index)
 
     def evaluate(self, preds, metric=None, logger=None):
         results = {}
@@ -159,7 +158,10 @@ class SuperClassTaggingDataset(TaggingDataset):
             modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
             num_classes = len(self.index_to_super_index)
             for sc in super_class:
-                mask = [self.index_to_super_index[x] == sc for x in range(num_classes)]
+                mask = [
+                    self.index_to_super_index[x] == sc
+                    for x in range(num_classes)
+                ]
                 mask = np.array(mask)
                 sc_modal_preds = modal_preds * mask[None]
                 sc_gt_onehot = gt_onehot * mask[None]
@@ -167,7 +169,7 @@ class SuperClassTaggingDataset(TaggingDataset):
                 print_str += f'{modal:8}|{str(sc):12}|{gap:.4f}\n'
 
         print_str += '-' * 30 + '\n'
-        logger = get_root_logger() 
+        logger = get_root_logger()
         logger.info('\n' + print_str)
 
         return results

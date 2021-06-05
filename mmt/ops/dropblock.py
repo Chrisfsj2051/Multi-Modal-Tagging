@@ -20,7 +20,6 @@ class DropBlock(nn.Module):
             from `0` to `drop_prob` during the first `warmup_iters` iterations.
             Default: 2000.
     """
-
     def __init__(self, drop_prob, block_size, warmup_iters=2000, **kwargs):
         super(DropBlock, self).__init__()
         assert block_size % 2 == 1
@@ -50,20 +49,19 @@ class DropBlock(nn.Module):
         mask = torch.bernoulli(torch.full(mask_shape, gamma, device=x.device))
 
         mask = F.pad(mask, [self.block_size // 2] * 4, value=0)
-        mask = F.max_pool2d(
-            input=mask,
-            stride=(1, 1),
-            kernel_size=(self.block_size, self.block_size),
-            padding=self.block_size // 2)
+        mask = F.max_pool2d(input=mask,
+                            stride=(1, 1),
+                            kernel_size=(self.block_size, self.block_size),
+                            padding=self.block_size // 2)
         mask = 1 - mask
         x = x * mask * mask.numel() / (eps + mask.sum())
         return x
 
     def _compute_gamma(self, feat_size):
-        """
-        Compute the value of gamma according to paper.
-        gamma is the parameter of bernoulli distribution, which controls
-        the number of features to drop.
+        """Compute the value of gamma according to paper. gamma is the
+        parameter of bernoulli distribution, which controls the number of
+        features to drop.
+
         gamma = (drop_prob * fm_area) / (drop_area * keep_area)
 
         Args:

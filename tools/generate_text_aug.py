@@ -3,12 +3,10 @@ import os
 import random
 from multiprocessing import Pool
 
-import nlpcda
 import mmcv
-from tqdm import tqdm
+import nlpcda
 
 # nlpcda.Homophone(create_num=3, change_rate=0.3),
-
 
 all_aug_list = [
     nlpcda.Randomword(create_num=3, change_rate=0.1),
@@ -29,6 +27,7 @@ single_aug_list = [
 save_path = 'dataset/text_aug/'
 data_root = 'dataset/tagging/tagging_dataset_train_5k/text_txt/tagging/'
 mmcv.mkdir_or_exist(save_path)
+
 
 def go(data):
     # print(data)
@@ -56,8 +55,10 @@ def go(data):
             for aug in all_aug_list:
                 text = aug.replace(text)[-1]
             aug_results.append(text)
-        with open(cur_save_path + key + f'/{cnt}.txt', 'w', encoding='utf-8') as f:
+        with open(cur_save_path + key + f'/{cnt}.txt', 'w',
+                  encoding='utf-8') as f:
             f.write(text)
+
 
 pool = Pool(8)
 pool.map(go, os.listdir(data_root))

@@ -33,8 +33,10 @@ def build(cfg, registry, default_args=None):
 def build_frame_branch(cfg):
     return build(cfg, FRAME)
 
+
 def build_text_branch(cfg):
     return build(cfg, TEXT)
+
 
 def build_head(cfg):
     return build(cfg, HEAD)

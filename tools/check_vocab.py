@@ -1,5 +1,6 @@
 import json
 import os
+
 from tqdm import tqdm
 
 from mmt.utils.tokenization import FullTokenizer

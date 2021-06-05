@@ -13,8 +13,8 @@ from mmt.utils.metrics.calculate_gap import calculate_gap
 @DATASETS.register_module()
 class TaggingDataset:
     def __init__(self, ann_file, label_id_file, pipeline, test_mode=False):
-        self.index_to_tag, self.tag_to_index = self.load_label_dict(
-            label_id_file)
+        (self.index_to_tag, self.tag_to_index, self.index_to_super_index,
+         self.tag_to_super_index) = self.load_label_dict(label_id_file)
         self.test_mode = test_mode
         (self.video_anns, self.audio_anns, self.image_anns, self.test_anns,
          self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
@@ -39,6 +39,9 @@ class TaggingDataset:
             tag_to_index[tag] = index
             index_to_super_index[index] = super_index
             tag_to_super_index[tag] = super_index
+
+        return (index_to_tag, tag_to_index, index_to_super_index,
+                tag_to_super_index)
 
     def load_annotations(self, ann_file):
         with open(ann_file, 'r', encoding='utf-8') as f:

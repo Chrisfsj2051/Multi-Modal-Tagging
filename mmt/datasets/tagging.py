@@ -34,7 +34,6 @@ class TaggingDataset:
                 index, tag = i, line.rsplit(' ', 1)[0]
             else:
                 index, tag = i, line
-
             try:
                 index = int(index)
             except Exception:

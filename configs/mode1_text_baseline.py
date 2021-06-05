@@ -3,6 +3,8 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
+seed = 1
+
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 
@@ -18,8 +20,17 @@ train_pipeline = [
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
 ]
 
-model = dict(mode=1, modal_used=['text'])
+model = dict(
+    mode=1,
+    modal_used=['text'],
+    branch_config=dict(text=dict(type='TwoStreamTextCNN',
+                                 vocab_size=9906,
+                                 ebd_dim=300,
+                                 channel_in=256,
+                                 channel_out=1024,
+                                 filter_size=(2, 3, 4))),
+    # ebd_config=dict(text=dict(dropout_p=0.5))
+)
 
 optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
-
 data = dict(train=dict(pipeline=train_pipeline))

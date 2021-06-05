@@ -1,13 +1,7 @@
 import torch.nn as nn
 
+# from mmt import TaggingDataset
 from mmt.models.builder import HEAD, build_loss
-"""
-TODO:
-1. SE-GATING
-2. LAYER NORM
-3. TWO STAGE TRAINING
-4. ...
-"""
 
 
 @HEAD.register_module()
@@ -40,6 +34,23 @@ class ClsHead(FCHead):
 
     def simple_test(self, x):
         return self.linear(x)
+
+
+# @HEAD.register_module()
+# class HMCHead(nn.Module):
+#     def __init__(self, in_dim, out_dim, loss, dropout_p=None):
+#         super(HMCHead, self).__init__(in_dim, out_dim, dropout_p)
+#         self.loss = build_loss(loss)
+#         # TaggingDataset
+#
+#     def forward_train(self, x, gt_labels):
+#         if self.use_dropout:
+#             x = self.dropout(x)
+#         pred = self.linear(x)
+#         return [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+#
+#     def simple_test(self, x):
+#         return self.linear(x)
 
 
 @HEAD.register_module()

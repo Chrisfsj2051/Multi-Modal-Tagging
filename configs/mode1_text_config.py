@@ -20,17 +20,15 @@ train_pipeline = [
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
 ]
 
-model = dict(
-    mode=1,
-    modal_used=['text'],
-    branch_config=dict(text=dict(type='TwoStreamTextCNN',
-                                 vocab_size=9906,
-                                 ebd_dim=300,
-                                 channel_in=256,
-                                 channel_out=1024,
-                                 filter_size=(2, 3, 4))),
-    # ebd_config=dict(text=dict(dropout_p=0.5))
-)
+model = dict(mode=1,
+             modal_used=['text'],
+             branch_config=dict(text=dict(type='TwoStreamTextCNN',
+                                          vocab_size=9906,
+                                          ebd_dim=300,
+                                          channel_in=256,
+                                          channel_out=1024,
+                                          filter_size=(2, 3, 4))),
+             ebd_config=dict(text=dict(dropout_p=0.5)))
 
-optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
-data = dict(train=dict(pipeline=train_pipeline))
+# optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
+# data = dict(train=dict(pipeline=train_pipeline))

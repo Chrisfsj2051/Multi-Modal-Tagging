@@ -106,15 +106,20 @@ class MultiBranchesFusionModel(BaseFusionModel):
             ebd_list.append(feats)
             if self.mode != 2:
                 ebd = self.__getattr__(f'{modal}_ebd')(feats)
-                losses[f'{modal}_loss'] = self.__getattr__(
-                    f'{modal}_head').forward_train(ebd, gt_labels)
+                modal_loss = self.__getattr__(f'{modal}_head').forward_train(
+                    ebd, gt_labels)
+                for key, val in modal_loss.items():
+                    losses[f'{modal}_{key}'] = val
+
         if self.mode == 1:
             return losses
         if self.modal_dropout_p is not None:
             ebd_list = self.apply_modal_dropout(ebd_list)
         ebd = torch.cat(ebd_list, 1)
         attn = self.attn(ebd)
-        losses['fusion_loss'] = self.fusion_head.forward_train(attn, gt_labels)
+        fusion_loss = self.fusion_head.forward_train(attn, gt_labels)
+        for key, val in fusion_loss.items():
+            losses[f'fusion_{key}'] = val
         return losses
 
     def apply_modal_dropout(self, modal_inputs):

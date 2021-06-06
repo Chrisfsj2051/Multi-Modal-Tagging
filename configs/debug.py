@@ -10,6 +10,7 @@ model = dict(
     head_config=dict(
         fusion=dict(type='HMCHead',
                     feat_dim=512,
+                    loss=dict(apply_onehot=False, with_sigmoid=False),
                     label_id_file='dataset/tagging/label_super_id.txt')),
     modal_dropout_p=dict(_delete_=True,
                          text=0.5,

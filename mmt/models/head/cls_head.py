@@ -32,7 +32,8 @@ class ClsHead(FCHead):
         if self.use_dropout:
             x = self.dropout(x)
         pred = self.linear(x)
-        return [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        loss_list = [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        return dict(cls_loss=loss_list)
 
     def simple_test(self, x):
         return self.linear(x)
@@ -63,14 +64,13 @@ class HMCHead(nn.Module):
                 nn.Sequential(nn.Linear(feat_dim, feat_dim), nn.ReLU()))
             wl_list.append(
                 nn.Sequential(nn.Linear(feat_dim, out_dim), nn.Sigmoid()))
-        wg_list.append(nn.Sequential(nn.Linear(feat_dim, out_dim), nn.ReLU()))
+        wg_list.append(
+            nn.Sequential(nn.Linear(feat_dim, out_dim), nn.Sigmoid()))
         self.wg_list = nn.ModuleList(wg_list)
         self.wl_list = nn.ModuleList(wl_list)
         self.wt_list = nn.ModuleList(wt_list)
 
-    def forward_train(self, x, gt_labels):
-        # if self.use_dropout:
-        #     x = self.dropout(x)
+    def forward(self, x, gt_labels=None, with_loss=False):
         feat_in = x
         local_preds = []
         for i in range(self.num_super_class):
@@ -81,24 +81,33 @@ class HMCHead(nn.Module):
             local_preds.append(self.wl_list[i](feat_A))
         global_outputs = self.wg_list[-1](feat_in)
         local_combined = torch.zeros_like(global_outputs)
-        # losses = {}
+        if with_loss:
+            losses = {}
+            gt_onehot = torch.zeros_like(global_outputs)
+            for i, gt_lab in enumerate(gt_labels):
+                gt_onehot[i][gt_lab] = 1
         for i in range(self.num_super_class):
             mask = [
                 int(self.index_to_super_index[x] == i)
                 for x in self.index_to_super_index.keys()
             ]
             mask = torch.BoolTensor(mask).cuda()
-            print('in')
-            local_combined += local_preds[i][:, mask]
+            local_combined[:, mask] = local_preds[i][:, mask]
+            if with_loss:
+                losses[f'HMC_loc_loss_{i}'] = self.loss(
+                    local_preds[i][:, mask], gt_onehot[:, mask])
+        global_preds = global_outputs * 0.5 + local_combined * 0.5
+        if with_loss:
+            losses['HMC_global_loss'] = self.loss(global_preds, gt_onehot)
+            return losses
+        else:
+            return global_preds
 
-        print('in')
-
-        print('in')
-        pred = self.linear(x)
-        return [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+    def forward_train(self, x, gt_labels):
+        return self(x, gt_labels, with_loss=True)
 
     def simple_test(self, x):
-        return self.linear(x)
+        return self(x)
 
 
 @HEAD.register_module()

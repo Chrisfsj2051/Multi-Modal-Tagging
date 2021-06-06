@@ -6,9 +6,11 @@ from mmt.models.builder import LOSS
 
 @LOSS.register_module()
 class MultiLabelBCEWithLogitsLoss(nn.Module):
-    def __init__(self, loss_weight=1):
+    def __init__(self, loss_weight=1, apply_onehot=True, with_sigmoid=True):
         super(MultiLabelBCEWithLogitsLoss, self).__init__()
         self.loss_weight = loss_weight
+        self.apply_onehot = apply_onehot
+        self.loss = (nn.BCEWithLogitsLoss() if with_sigmoid else nn.BCELoss())
 
     def forward(self, preds, gt_labels):
         """
@@ -16,6 +18,10 @@ class MultiLabelBCEWithLogitsLoss(nn.Module):
             preds (torch.Tensor): (82, )
             gt_labels (torch.Tensor): (NUM_C, )
         """
-        gt_onehot = torch.zeros_like(preds)
-        gt_onehot[gt_labels] = 1
-        return self.loss_weight * nn.BCEWithLogitsLoss()(preds, gt_onehot)
+        if self.apply_onehot:
+            gt_onehot = torch.zeros_like(preds)
+            gt_onehot[gt_labels] = 1
+        else:
+            gt_onehot = gt_labels
+            assert gt_onehot.shape == preds.shape
+        return self.loss_weight * self.loss(preds, gt_onehot)

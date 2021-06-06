@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import torch.nn as nn
 
 from mmt import TaggingDataset
@@ -52,6 +53,7 @@ class HMCHead(nn.Module):
          _) = TaggingDataset.load_label_dict(label_id_file)
         num_super_class = np.unique(list(self.index_to_super_index.values()))
         num_super_class = len(num_super_class)
+        self.num_super_class = num_super_class
         wg_list, wt_list, wl_list = [], [], []
         for i in range(num_super_class):
             prev_dim = in_dim if i == 0 else in_dim + feat_dim
@@ -61,11 +63,36 @@ class HMCHead(nn.Module):
                 nn.Sequential(nn.Linear(feat_dim, feat_dim), nn.ReLU()))
             wl_list.append(
                 nn.Sequential(nn.Linear(feat_dim, out_dim), nn.Sigmoid()))
-        wg_list.append(nn.Sequential(nn.Linear(prev_dim, out_dim), nn.ReLU()))
+        wg_list.append(nn.Sequential(nn.Linear(feat_dim, out_dim), nn.ReLU()))
+        self.wg_list = nn.ModuleList(wg_list)
+        self.wl_list = nn.ModuleList(wl_list)
+        self.wt_list = nn.ModuleList(wt_list)
 
     def forward_train(self, x, gt_labels):
         # if self.use_dropout:
         #     x = self.dropout(x)
+        feat_in = x
+        local_preds = []
+        for i in range(self.num_super_class):
+            if i != 0:
+                feat_in = torch.cat([x, feat_in], 1)
+            feat_in = self.wg_list[i](feat_in)
+            feat_A = self.wt_list[i](feat_in)
+            local_preds.append(self.wl_list[i](feat_A))
+        global_outputs = self.wg_list[-1](feat_in)
+        local_combined = torch.zeros_like(global_outputs)
+        # losses = {}
+        for i in range(self.num_super_class):
+            mask = [
+                int(self.index_to_super_index[x] == i)
+                for x in self.index_to_super_index.keys()
+            ]
+            mask = torch.BoolTensor(mask).cuda()
+            print('in')
+            local_combined += local_preds[i][:, mask]
+
+        print('in')
+
         print('in')
         pred = self.linear(x)
         return [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]

@@ -30,7 +30,6 @@ mmcv.mkdir_or_exist(save_path)
 
 
 def go(data):
-    # print(data)
     id_name = data.split('.')[0]
     cur_save_path = save_path + id_name + '/'
     if os.path.isdir(data_root + data):
@@ -40,8 +39,8 @@ def go(data):
     with open(data_root + data, 'r', encoding='utf-8') as f:
         results = json.load(f)
     for key in ['video_ocr', 'video_asr']:
-        if os.path.exists(cur_save_path + key):
-            continue
+        # if os.path.exists(cur_save_path + key):
+        #     continue
         mmcv.mkdir_or_exist(cur_save_path + key)
         text = results[key].replace('|', '，')
         aug_results = [text]
@@ -55,10 +54,14 @@ def go(data):
             for aug in all_aug_list:
                 text = aug.replace(text)[-1]
             aug_results.append(text)
-        with open(cur_save_path + key + f'/{cnt}.txt', 'w',
-                  encoding='utf-8') as f:
-            f.write(text)
+
+        for cnt in range(len(aug_results)):
+            with open(cur_save_path + key + f'/{cnt}.txt',
+                      'w',
+                      encoding='utf-8') as f:
+                # print(cur_save_path + key + f'/{cnt}.txt')
+                f.write(aug_results[cnt])
 
 
-pool = Pool(8)
+pool = Pool(16)
 pool.map(go, os.listdir(data_root))

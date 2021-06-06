@@ -7,7 +7,10 @@ checkpoint_config = dict(interval=1000)
 evaluation = dict(interval=100)
 model = dict(
     type='MultiBranchesFusionModel',
-    pretrained=dict(_delete_=True),
+    head_config=dict(
+        fusion=dict(type='HMCHead',
+                    feat_dim=512,
+                    label_id_file='dataset/tagging/label_super_id.txt')),
     modal_dropout_p=dict(_delete_=True,
                          text=0.5,
                          video=0.5,
@@ -18,6 +21,6 @@ optimizer_config = dict(_delete_=True,
                         grad_clip=dict(max_norm=10, norm_type=2))
 
 data = dict(workers_per_gpu=0,
-            test=dict(type='SuperClassTaggingDataset',
+            test=dict(type='TaggingDataset',
                       label_id_file='dataset/tagging/label_super_id.txt',
                       ann_file='dataset/tagging/GroundTruth/datafile/val.txt'))

@@ -215,17 +215,21 @@ class FrameRandomSwap(FrameAugBox):
 
 @PIPELINES.register_module()
 class TextOfflineAug(object):
-    def __init__(self, aug_prob, aug_root):
+    def __init__(self, aug_prob, aug_root, valid_index=None):
         self.aug_prob = aug_prob
         self.aug_root = aug_root
+        self.valid_index = valid_index
 
     def __call__(self, results):
-        if random.uniform(0, 1) < self.aug_prob:
+        if random.uniform(0, 1) > self.aug_prob:
             return results
         assert 'id_name' in results.keys()
         for key in ['video_asr', 'video_ocr']:
             data_path = os.path.join(self.aug_root, results['id_name'], key)
-            file = random.choice(os.listdir(data_path))
+            file_list = sorted(list(os.listdir(data_path)))
+            # if self.valid_index is not None:
+            #     print('in')
+            file = random.choice(file_list)
             with open(os.path.join(data_path, file), 'r',
                       encoding='utf-8') as f:
                 results['text'][key] = f.read().strip()

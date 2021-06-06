@@ -8,7 +8,10 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
-    dict(type='TextOfflineAug', aug_prob=0.5, aug_root='dataset/text_aug/'),
+    dict(type='TextOfflineAug',
+         aug_prob=0.5,
+         aug_root='dataset/text_aug/',
+         valid_index=[6, 7, 8]),
     dict(type='Tokenize', vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),

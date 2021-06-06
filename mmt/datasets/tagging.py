@@ -67,7 +67,8 @@ class TaggingDataset:
                            video_anns=self.video_anns[i],
                            image_anns=self.image_anns[i],
                            text_anns=self.test_anns[i])
-            results['gt_labels'] = self.gt_label[i]
+            if not self.test_mode:
+                results['gt_labels'] = self.gt_label[i]
             results = self.pipeline(results)
             if results is not None:
                 return results

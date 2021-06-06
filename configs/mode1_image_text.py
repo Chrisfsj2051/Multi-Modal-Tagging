@@ -4,4 +4,8 @@ _base_ = [
 ]
 
 model = dict(mode=1, modal_used=['text', 'image'])
-optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)
+optimizer = dict(_delete_=True,
+                 type='SGD',
+                 momentum=0.9,
+                 lr=0.02,
+                 weight_decay=0.0001)

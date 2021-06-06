@@ -12,4 +12,8 @@ model = dict(
                     feat_dim=512,
                     loss=dict(apply_onehot=False, with_sigmoid=False),
                     label_id_file='dataset/tagging/label_super_id.txt')))
-optimizer = dict(_delete_=True, type='SGD', lr=0.05, weight_decay=0.0001)
+optimizer = dict(_delete_=True,
+                 type='SGD',
+                 lr=0.05,
+                 momentum=0.9,
+                 weight_decay=0.0001)

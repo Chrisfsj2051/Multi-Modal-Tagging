@@ -5,9 +5,16 @@ _base_ = [
 
 load_from = 'pretrained/text0.717_audio0.675_video0.707_image0.706.pth'
 
-model = dict(mode=2)
+model = dict(
+    mode=2,
+    head_config=dict(
+        fusion=dict(type='HMCHead',
+                    feat_dim=512,
+                    loss=dict(apply_onehot=False, with_sigmoid=False),
+                    label_id_file='dataset/tagging/label_super_id.txt')))
 optimizer = dict(_delete_=True,
                  type='SGD',
-                 lr=0.02,
+                 lr=0.05,
                  momentum=0.9,
                  weight_decay=0.0001)
+data = dict(samples_per_gpu=2)

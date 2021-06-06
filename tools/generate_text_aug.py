@@ -45,14 +45,15 @@ def go(data):
         text = results[key].replace('|', '，')
         aug_results = [text]
         for aug in single_aug_list:
-            for _ in range(3):
-                aug_results.append(aug.replace(text))
+            new_text = aug.replace(text)
+            for tex in new_text:
+                aug_results.append(tex)
         random.shuffle(all_aug_list)
 
         for cnt in range(6):
             text = aug_results[0]
             for aug in all_aug_list:
-                text = aug.replace(text)[-1]
+                text = random.choice(aug.replace(text))
             aug_results.append(text)
 
         for cnt in range(len(aug_results)):

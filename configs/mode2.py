@@ -5,9 +5,11 @@ _base_ = [
 
 load_from = 'pretrained/text0.717_audio0.675_video0.707_image0.706.pth'
 
-model = dict(mode=2)
+model = dict(
+    mode=2,
+)
 optimizer = dict(_delete_=True,
                  type='SGD',
-                 lr=0.1,
+                 lr=0.05,
                  momentum=0.9,
                  weight_decay=0.0001)

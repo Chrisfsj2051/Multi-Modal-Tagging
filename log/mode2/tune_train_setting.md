@@ -1,4 +1,4 @@
-* hmc
+* hmc (all with aug (color, flip, video_frame)) 去掉aug会掉点
 | optimizer | lr     | bs | fc_GAP | hmc_GAP |
 | --------- | ------ | -- | ------ | ------- |
 | Adam      | 0.0001 | 2  |        | 0.7514  |

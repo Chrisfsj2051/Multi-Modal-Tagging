@@ -5,10 +5,7 @@ _base_ = [
 
 load_from = 'pretrained/text0.717_audio0.675_video0.707_image0.706.pth'
 
-model = dict(
-    mode=2,
-    head_config=dict(fusion=dict(feat_dim=1024))
-)
+model = dict(mode=2, head_config=dict(fusion=dict(feat_dim=1024)))
 optimizer = dict(_delete_=True,
                  type='SGD',
                  lr=0.05,

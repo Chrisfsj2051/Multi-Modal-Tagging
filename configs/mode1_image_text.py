@@ -3,7 +3,5 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-model = dict(mode=1,
-             modal_used=['text', 'image'],
-             head_config=dict(fusion=dict(in_dim=3072)))
+model = dict(mode=1, modal_used=['text', 'image'])
 optimizer = dict(_delete_=True, type='SGD', lr=0.02, weight_decay=0.0001)

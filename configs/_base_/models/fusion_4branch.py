@@ -19,7 +19,7 @@ model = dict(
                        image=dict(type='ResNet',
                                   depth=50,
                                   num_stages=4,
-                                  out_indices=(3,),
+                                  out_indices=(3, ),
                                   frozen_stages=1,
                                   norm_cfg=dict(type='BN', requires_grad=True),
                                   norm_eval=True,
@@ -27,7 +27,7 @@ model = dict(
                        text=dict(type='TwoStreamTextCNN',
                                  vocab_size=9906,
                                  ebd_dim=300,
-                                 channel_in=128,
+                                 channel_in=256,
                                  channel_out=1024,
                                  filter_size=(2, 3, 4),
                                  dropout_p=0.5)),
@@ -64,6 +64,7 @@ model = dict(
                  feat_dim=512,
                  out_dim=82,
                  in_dim=1024,
-                 loss=dict(type='MultiLabelBCEWithLogitsLoss', apply_onehot=False, with_sigmoid=False),
-                 label_id_file='dataset/tagging/label_super_id.txt')))
-)
+                 loss=dict(type='MultiLabelBCEWithLogitsLoss',
+                           apply_onehot=False,
+                           with_sigmoid=False),
+                 label_id_file='dataset/tagging/label_super_id.txt'))))

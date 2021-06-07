@@ -3,9 +3,11 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-# load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
+load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
 
 model = dict(mode=2,
+             modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
+             attn_config=dict(input_dropout_p=0.3),
              head_config=dict(
                  fusion=dict(
                      _delete_=True,
@@ -20,5 +22,4 @@ optimizer = dict(_delete_=True,
                  momentum=0.9,
                  weight_decay=0.0001)
 
-optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 

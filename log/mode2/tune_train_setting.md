@@ -19,3 +19,12 @@ done
 | hmc feat dim=1024 | 0.7490 |
 | attn drop=0.2     | 0.7494 |
 | drop modal=0.3    | 0.7427 |
+
+
+---
+
+
+text0.7178_audio0.6702_video0.7139_image0.7039.pth
+
+fc_baseline: 0.7479
+HMC_baseline: 0.7463

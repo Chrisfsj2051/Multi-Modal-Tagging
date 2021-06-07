@@ -21,4 +21,4 @@ optimizer = dict(_delete_=True,
                  weight_decay=0.0001)
 
 
-data = dict(workers_per_gpu=0)
+# data = dict(workers_per_gpu=0)

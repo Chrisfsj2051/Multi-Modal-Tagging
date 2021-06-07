@@ -115,14 +115,20 @@ class MLPHead(ClsHead):
     def __init__(self, in_dim, out_dim, **kwargs):
         super(MLPHead, self).__init__(in_dim, out_dim, **kwargs)
         self.linear = nn.Sequential(nn.Linear(in_dim, 512),
-                                    nn.BatchNorm2d(512), nn.ReLU(),
-                                    nn.Linear(512, out_dim))
+                                    nn.BatchNorm1d(512), nn.ReLU(),
+                                    nn.Dropout(0.5),
+                                    nn.Linear(512, 256),
+                                    nn.BatchNorm1d(256), nn.ReLU(),
+                                    nn.Dropout(0.5),
+                                    nn.Linear(256, out_dim),
+                                    )
 
     def forward_train(self, x, gt_labels):
         if self.use_dropout:
             x = self.dropout(x)
         pred = self.linear(x)
-        return [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        loss_list = [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        return dict(cls_loss=loss_list)
 
     def simple_test(self, x):
         return self.linear(x)

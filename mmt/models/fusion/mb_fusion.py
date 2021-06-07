@@ -103,9 +103,9 @@ class MultiBranchesFusionModel(BaseFusionModel):
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            feats_list.append(feats)
+            ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            feats_list.append(ebd)
             if self.mode != 2:
-                ebd = self.__getattr__(f'{modal}_ebd')(feats)
                 modal_loss = self.__getattr__(f'{modal}_head').forward_train(
                     ebd, gt_labels)
                 for key, val in modal_loss.items():

@@ -38,7 +38,7 @@ model = dict(
 
     attn_config=dict(
         type='SEHead',
-        in_dim=20480,
+        in_dim=1024*4,
         gating_reduction=8,
         out_dim=1024
     ),

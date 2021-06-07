@@ -9,16 +9,16 @@ def parse_args():
     parser.add_argument('--image', help='checkpoint file')
     parser.add_argument('--video', help='checkpoint file')
     parser.add_argument('--audio', help='checkpoint file')
-    parser.add_argument('out', help='checkpoint file')
+    parser.add_argument('--out', help='checkpoint file')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    text_ckpt = torch.load(args.text)
-    image_ckpt = torch.load(args.image)
-    video_ckpt = torch.load(args.video)
-    audio_ckpt = torch.load(args.audio)
+    text_ckpt = torch.load(args.text)['state_dict']
+    image_ckpt = torch.load(args.image)['state_dict']
+    video_ckpt = torch.load(args.video)['state_dict']
+    audio_ckpt = torch.load(args.audio)['state_dict']
     ret = {}
     for typ, dic in zip(['text', 'image', 'video', 'audio'],
                         [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):

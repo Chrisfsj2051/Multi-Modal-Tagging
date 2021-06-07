@@ -3,11 +3,9 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-load_from = 'pretrained/text0.717_audio0.675_video0.707_image0.706.pth'
+load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
 
-model = dict(
-    mode=2,
-)
+model = dict(mode=2, )
 optimizer = dict(_delete_=True,
                  type='SGD',
                  lr=0.05,

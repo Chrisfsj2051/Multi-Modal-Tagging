@@ -19,7 +19,7 @@ model = dict(
                        image=dict(type='ResNet',
                                   depth=50,
                                   num_stages=4,
-                                  out_indices=(3, ),
+                                  out_indices=(3,),
                                   frozen_stages=1,
                                   norm_cfg=dict(type='BN', requires_grad=True),
                                   norm_eval=True,
@@ -35,11 +35,12 @@ model = dict(
                     image=dict(type='FCHead', in_dim=2048, out_dim=1024),
                     text=dict(type='FCHead', in_dim=1024, out_dim=1024),
                     audio=dict(type='FCHead', in_dim=1024, out_dim=1024)),
+
     attn_config=dict(
         type='SEHead',
-        in_dim=20480,
+        in_dim=1024*4,
         gating_reduction=8,
-        out_dim=1024,
+        out_dim=1024
     ),
     head_config=dict(video=dict(type='ClsHead',
                                 in_dim=1024,

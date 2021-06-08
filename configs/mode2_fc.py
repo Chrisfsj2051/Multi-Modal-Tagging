@@ -5,7 +5,7 @@ _base_ = [
 
 load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
 
-model = dict(mode=3,
+model = dict(mode=2,
              head_config=dict(
                  fusion=dict(
                      _delete_=True,
@@ -15,7 +15,10 @@ model = dict(mode=3,
                      loss=dict(type='MultiLabelBCEWithLogitsLoss'))
              ))
 optimizer = dict(_delete_=True,
-                 type='Adam',
-                 lr=0.001,
+                 type='SGD',
+                 lr=0.05,
+                 momentum=0.9,
                  weight_decay=0.0001)
 
+
+# data = dict(workers_per_gpu=0)

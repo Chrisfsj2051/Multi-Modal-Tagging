@@ -91,7 +91,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 for arch in ('branch', 'ebd', 'head'):
                     self.__getattr__(f'{modal}_{arch}').eval()
 
-        ebd_list, losses = [], {}
+        feats_list, losses = [], {}
         modal_inputs = {
             'video': video,
             'image': image,
@@ -103,9 +103,9 @@ class MultiBranchesFusionModel(BaseFusionModel):
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            ebd_list.append(feats)
+            ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            feats_list.append(ebd)
             if self.mode != 2:
-                ebd = self.__getattr__(f'{modal}_ebd')(feats)
                 modal_loss = self.__getattr__(f'{modal}_head').forward_train(
                     ebd, gt_labels)
                 for key, val in modal_loss.items():
@@ -114,8 +114,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         if self.mode == 1:
             return losses
         if self.modal_dropout_p is not None:
-            ebd_list = self.apply_modal_dropout(ebd_list)
-        ebd = torch.cat(ebd_list, 1)
+            feats_list = self.apply_modal_dropout(feats_list)
+        ebd = torch.cat(feats_list, 1)
         attn = self.attn(ebd)
         fusion_loss = self.fusion_head.forward_train(attn, gt_labels)
         for key, val in fusion_loss.items():

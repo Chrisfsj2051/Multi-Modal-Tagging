@@ -17,6 +17,13 @@ class BaseFusionModel(nn.Module, metaclass=ABCMeta):
         self.fp16_enabled = False
 
     def train_step(self, data, optimizer):
+
+        # for name, param in self.named_parameters():
+        #     print(name)
+
+        # for param in optimizer.param_groups:
+        #     print(param['lr'])
+
         losses = self(**data)
         loss, log_vars = self._parse_losses(losses)
 

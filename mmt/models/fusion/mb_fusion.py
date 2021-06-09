@@ -18,8 +18,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
             mode2: Train fusion head;
             mode3: Train All.
     """
-    def __init__(self, mode, modal_used, branch_config, ebd_config,
-                 head_config, use_batch_norm, attn_config, pretrained,
+    def __init__(self, mode, modal_used, branch_config,
+                 head_config, use_batch_norm, pretrained,
                  modal_dropout_p):
         super(MultiBranchesFusionModel, self).__init__()
         build_branch_method = {
@@ -31,15 +31,15 @@ class MultiBranchesFusionModel(BaseFusionModel):
         self.mode = mode
         self.modal_list = modal_used
         self.modal_dropout_p = modal_dropout_p
-        self.add_module('attn', build_head(attn_config))
+        # self.add_module('attn', build_head(attn_config))
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
                             build_branch_method[modal](branch_config[modal]))
-            self.add_module(f'{modal}_ebd', build_head(ebd_config[modal]))
+            # self.add_module(f'{modal}_ebd', build_head(ebd_config[modal]))
             self.add_module(f'{modal}_head', build_head(head_config[modal]))
             if use_batch_norm:
                 self.add_module(f'{modal}_bn',
-                                nn.LayerNorm(ebd_config[modal]['in_dim']))
+                                nn.LayerNorm(head_config[modal]['in_dim']))
         assert 'fusion' in head_config.keys()
         self.add_module('fusion_head', build_head(head_config['fusion']))
         self.use_batch_norm = use_batch_norm
@@ -103,11 +103,11 @@ class MultiBranchesFusionModel(BaseFusionModel):
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            ebd = self.__getattr__(f'{modal}_ebd')(feats)
-            feats_list.append(ebd)
+            # ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            feats_list.append(feats)
             if self.mode != 2:
                 modal_loss = self.__getattr__(f'{modal}_head').forward_train(
-                    ebd, gt_labels)
+                    feats, gt_labels)
                 for key, val in modal_loss.items():
                     losses[f'{modal}_{key}'] = val
 
@@ -115,9 +115,9 @@ class MultiBranchesFusionModel(BaseFusionModel):
             return losses
         if self.modal_dropout_p is not None:
             feats_list = self.apply_modal_dropout(feats_list)
-        ebd = torch.cat(feats_list, 1)
-        attn = self.attn(ebd)
-        fusion_loss = self.fusion_head.forward_train(attn, gt_labels)
+        feats = torch.cat(feats_list, 1)
+        # attn = self.attn(ebd)
+        fusion_loss = self.fusion_head.forward_train(feats, gt_labels)
         for key, val in fusion_loss.items():
             losses[f'fusion_{key}'] = val
         return losses
@@ -149,12 +149,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
             feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            ebd = self.__getattr__(f'{modal}_ebd')(feats)
+            # ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(feats)
-            test_results[0][modal] = self.__getattr__(f'{modal}_head')(ebd)
+            test_results[0][modal] = self.__getattr__(f'{modal}_head').simple_test(feats)
         if self.mode == 1:
             return test_results
         ebd = torch.cat(ebd_list, 1)
-        attn = self.attn(ebd)
-        test_results[0]['fusion'] = self.fusion_head.simple_test(attn)
+        # attn = self.attn(ebd)
+        test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)
         return test_results

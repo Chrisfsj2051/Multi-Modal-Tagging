@@ -167,3 +167,15 @@ class LMF(nn.Module):
         if self.use_softmax:
             output = F.softmax(output)
         return output
+
+
+if __name__=='__main__':
+    model = LMF(input_dims=(10, 20, 30),
+                hidden_dims=(100, 200, 300),
+                text_out=55,
+                dropouts=(0, 0, 0, 0),
+                output_dim=100, rank=100)
+    audio_in = torch.randn((2, 10))
+    video_in = torch.randn((2, 20))
+    text_in = torch.randn((2, 4, 30))
+    model(audio_in, video_in, text_in)

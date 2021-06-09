@@ -69,6 +69,9 @@ class HMCHead(nn.Module):
         self.wg_list = nn.ModuleList(wg_list)
         self.wl_list = nn.ModuleList(wl_list)
         self.wt_list = nn.ModuleList(wt_list)
+        if dropout_p is None or dropout_p == 0:
+            dropout_p = 1e-11
+        self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x, gt_labels=None, with_loss=False):
         feat_in = x
@@ -76,6 +79,7 @@ class HMCHead(nn.Module):
         for i in range(self.num_super_class):
             if i != 0:
                 feat_in = torch.cat([x, feat_in], 1)
+            feat_in = self.dropout(feat_in)
             feat_in = self.wg_list[i](feat_in)
             feat_A = self.wt_list[i](feat_in)
             local_preds.append(self.wl_list[i](feat_A))
@@ -120,7 +124,7 @@ class MLPHead(ClsHead):
                                     nn.Linear(512, 256),
                                     nn.BatchNorm1d(256), nn.ReLU(),
                                     nn.Dropout(0.5),
-                                    nn.Linear(256, out_dim),
+                                    nn.Linear(256, out_dim)
                                     )
 
     def forward_train(self, x, gt_labels):

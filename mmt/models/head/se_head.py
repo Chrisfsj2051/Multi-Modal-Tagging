@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from torch.nn import init
 
-from mmt.models.builder import HEAD
+from mmt.models.builder import HEAD, build_head
+
 """
 TODO:
 1. SE-GATING
@@ -18,8 +19,10 @@ class SEHead(nn.Module):
                  in_dim,
                  out_dim,
                  gating_reduction,
-                 input_dropout_p=None):
+                 cls_head_config,
+                 dropout_p=0.0):
         super(SEHead, self).__init__()
+        self.cls_head = build_head(cls_head_config)
         self.out_dim = out_dim
         self.in_dim = in_dim
         self.hidden_weight = nn.Parameter(torch.randn(in_dim, out_dim))
@@ -29,9 +32,9 @@ class SEHead(nn.Module):
         self.gatting_bn_1 = nn.BatchNorm1d(out_dim // gating_reduction)
         self.gatting_weight_2 = nn.Parameter(
             torch.randn(out_dim // gating_reduction, out_dim))
-        self.use_input_dropout = input_dropout_p is not None
-        if self.use_input_dropout:
-            self.input_dropout = nn.Dropout(p=input_dropout_p)
+        if dropout_p == 0:
+            dropout_p = 1e-11
+        self.input_dropout = nn.Dropout(dropout_p)
         # self.gatting_bn_2 = nn.BatchNorm1d(out_dim)
         for layer in (self.hidden_weight, self.gatting_weight_1,
                       self.gatting_weight_2):
@@ -39,12 +42,11 @@ class SEHead(nn.Module):
 
     def forward(self, x):
         assert x.shape[1] == self.in_dim
-        if self.use_input_dropout:
-            x = self.input_dropout(x)
+        x = self.input_dropout(x)
         activation = torch.matmul(x, self.hidden_weight)
         activation = self.hidden_bn(activation)
         gates = torch.matmul(activation, self.gatting_weight_1)
-        gates = self.gatting_bn_1(gates)
+        gates = nn.ReLU()(self.gatting_bn_1(gates))
         gates = torch.matmul(gates, self.gatting_weight_2)
         gates = gates.sigmoid()
         activation = activation * gates
@@ -52,8 +54,8 @@ class SEHead(nn.Module):
 
     def forward_train(self, x, gt_labels):
         activation = self(x)
-        return activation
+        return self.cls_head.forward_train(activation, gt_labels)
 
     def simple_test(self, x):
         activation = self(x)
-        return activation
+        return self.cls_head.simple_test(activation)

@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -58,11 +60,11 @@ class MultiBranchesFusionModel(BaseFusionModel):
         if mode == 1:
             for param in self.fusion_head.parameters():
                 param.requires_grad = False
-            for param in self.attn.parameters():
-                param.requires_grad = False
+            # for param in self.attn.parameters():
+            #     param.requires_grad = False
         elif mode == 2:
             for modal in self.modal_list:
-                for arch in ('branch', 'ebd', 'head'):
+                for arch in ('branch', 'head'):
                     for param in self.__getattr__(
                             f'{modal}_{arch}').parameters():
                         param.requires_grad = False
@@ -130,7 +132,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
         mask = np.random.binomial(1, dropout_p)
         for i in range(mask.shape[1]):
             if sum(mask[:, i]) == 0:
-                mask[np.random.randint(0, mask.shape[0] - 1), i] = 1
+                mask[random.randint(0, mask.shape[0]-1), i] = 1
         mask = torch.from_numpy(mask).cuda()
         outs = [x * y[..., None] for (x, y) in zip(modal_inputs, mask)]
         return outs

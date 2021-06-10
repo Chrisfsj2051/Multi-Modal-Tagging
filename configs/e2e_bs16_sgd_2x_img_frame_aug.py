@@ -9,9 +9,9 @@ train_total_iters = 20000
 
 optimizer = dict(
     _delete_=True,
-    type='Adam',
-    amsgrad=True,
-    lr=0.01,
+    type='SGD',
+    momentum=0.9,
+    lr=0.1,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
@@ -19,6 +19,14 @@ optimizer = dict(
                      'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
                      'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
                      'fusion': dict(weight_decay_mult=1.0)})
+)
+
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[train_total_iters // 10 * 8, train_total_iters // 10 * 9]
 )
 
 model = dict(
@@ -35,13 +43,6 @@ model = dict(
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
 # learning policy
-lr_config = dict(
-    policy='step',
-    warmup='linear',
-    warmup_iters=500,
-    warmup_ratio=0.001,
-    step=[train_total_iters // 3, 2 * train_total_iters // 3]
-)
 
 runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
 
@@ -59,12 +60,12 @@ train_pipeline = [
     dict(type='Tokenize', vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    # dict(type='FrameRandomErase',
-    #      key_fields=['video'],
-    #      aug_num_frame=30,
-    #      aug_max_len=10,
-    #      aug_num_block=10,
-    #      aug_max_size=100),
+    dict(type='FrameRandomErase',
+         key_fields=['video'],
+         aug_num_frame=30,
+         aug_max_len=10,
+         aug_num_block=10,
+         aug_max_size=100),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

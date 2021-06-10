@@ -9,9 +9,9 @@ train_total_iters = 10000
 
 optimizer = dict(
     _delete_=True,
-    type='Adam',
-    amsgrad=True,
-    lr=0.01,
+    type='SGD',
+    momentum=0.9,
+    lr=0.1,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
@@ -24,6 +24,8 @@ optimizer = dict(
 model = dict(
     mode=3,
     # modal_used=['video'],
+    pretrained=dict(image='torchvision://resnet101'),
+    branch_config=dict(image=dict(depth=101)),
     modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
     # attn_config=dict(
     #     in_dim=20480,
@@ -40,7 +42,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[train_total_iters // 3, 2 * train_total_iters // 3]
+    step=[train_total_iters // 10 * 8, train_total_iters // 10 * 9]
 )
 
 runner = dict(type='IterBasedRunner', max_iters=train_total_iters)

@@ -41,7 +41,7 @@ class NeXtVLAD(nn.Module):
 
     def forward(self, input):
         input = torch.matmul(input, self.w1)
-        attention = torch.matmul(input, self.w2)
+        attention = torch.matmul(input, self.w2).sigmoid()
         attention = attention.reshape([-1, self.max_frames * self.groups, 1])
         reshaped_input = input.reshape(
             [-1, self.expansion * self.feature_size])

@@ -22,7 +22,7 @@ class BaseFusionModel(nn.Module, metaclass=ABCMeta):
         #     print(name)
 
         # for param in optimizer.param_groups:
-        #     print(param['lr'])
+        #     print(param['params'][0].shape, param['lr'])
 
         losses = self(**data)
         loss, log_vars = self._parse_losses(losses)

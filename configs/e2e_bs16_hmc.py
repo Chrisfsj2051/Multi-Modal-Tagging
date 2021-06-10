@@ -9,9 +9,9 @@ train_total_iters = 10000
 
 optimizer = dict(
     _delete_=True,
-    type='SGD',
-    momentum=0.9,
-    lr=0.1,
+    type='Adam',
+    amsgrad=True,
+    lr=0.01,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
@@ -21,29 +21,37 @@ optimizer = dict(
                      'fusion': dict(weight_decay_mult=1.0)})
 )
 
-model = dict(
-    mode=3,
-    # modal_used=['video'],
-    pretrained=dict(image='torchvision://resnet101'),
-    branch_config=dict(image=dict(depth=101)),
-    modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
-    # attn_config=dict(
-    #     in_dim=20480,
-    #     input_dropout_p=0.3,
-    # ),
-    # head_config=dict(fusion=dict(in_dim=16384))
-)
-
-optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
-
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[train_total_iters // 10 * 8, train_total_iters // 10 * 9]
+    step=[train_total_iters // 3, 2 * train_total_iters // 3]
 )
+
+
+model = dict(
+    mode=3,
+    modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
+    head_config=dict(
+        fusion=dict(
+            cls_head_config=dict(
+                type='HMCHead',
+                feat_dim=512,
+                out_dim=82,
+                in_dim=1024,
+                loss=dict(type='MultiLabelBCEWithLogitsLoss',
+                          apply_onehot=False,
+                          with_sigmoid=False),
+                label_id_file='dataset/tagging/label_super_id.txt'
+            )
+        )
+    )
+)
+
+optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
+
 
 runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
 

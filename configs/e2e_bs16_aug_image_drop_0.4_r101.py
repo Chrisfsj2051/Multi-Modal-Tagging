@@ -9,9 +9,9 @@ train_total_iters = 10000
 
 optimizer = dict(
     _delete_=True,
-    type='SGD',
-    momentum=0.9,
-    lr=0.1,
+    type='Adam',
+    amsgrad=True,
+    lr=0.01,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
@@ -21,31 +21,21 @@ optimizer = dict(
                      'fusion': dict(weight_decay_mult=1.0)})
 )
 
+# learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[train_total_iters // 10 * 8, train_total_iters // 10 * 9]
+    step=[train_total_iters // 3, 2 * train_total_iters // 3]
 )
+
 
 model = dict(
     mode=3,
-    modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
-    head_config=dict(
-        fusion=dict(
-            cls_head_config=dict(
-                type='HMCHead',
-                feat_dim=512,
-                out_dim=82,
-                in_dim=1024,
-                loss=dict(type='MultiLabelBCEWithLogitsLoss',
-                          apply_onehot=False,
-                          with_sigmoid=False),
-                label_id_file='dataset/tagging/label_super_id.txt'
-            )
-        )
-    )
+    pretrained=dict(image='torchvision://resnet101'),
+    branch_config=dict(image=dict(depth=101)),
+    modal_dropout_p=dict(text=0.3, video=0.3, image=0.4, audio=0.3),
 )
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
@@ -67,12 +57,12 @@ train_pipeline = [
     dict(type='Tokenize', vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    # dict(type='FrameRandomErase',
-    #      key_fields=['video'],
-    #      aug_num_frame=30,
-    #      aug_max_len=10,
-    #      aug_num_block=10,
-    #      aug_max_size=100),
+    dict(type='FrameRandomErase',
+         key_fields=['video'],
+         aug_num_frame=30,
+         aug_max_len=10,
+         aug_num_block=10,
+         aug_max_size=100),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

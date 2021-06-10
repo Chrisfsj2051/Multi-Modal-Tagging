@@ -41,7 +41,7 @@ class SEHead(nn.Module):
             init.kaiming_uniform_(layer, mode='fan_in')
 
     def forward(self, x):
-        assert x.shape[1] == self.in_dim
+        assert x.shape[1] == self.in_dim, f'Input shape: {x.shape[1]}, Param shape: {self.in_dim}'
         x = self.input_dropout(x)
         activation = torch.matmul(x, self.hidden_weight)
         activation = self.hidden_bn(activation)

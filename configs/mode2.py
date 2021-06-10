@@ -3,7 +3,9 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
+# load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
+
+# load_from = 'pretrained/text0.6808_audio0.6803_video0.7365_image0.5794.pth'
 
 model = dict(mode=2, )
 optimizer = dict(_delete_=True,

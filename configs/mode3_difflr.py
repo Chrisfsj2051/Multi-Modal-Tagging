@@ -23,13 +23,13 @@ optimizer = dict(
 
 model = dict(
     mode=3,
-    modal_used=['video'],
+    # modal_used=['video'],
     modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
     # attn_config=dict(
     #     in_dim=20480,
     #     input_dropout_p=0.3,
     # ),
-    head_config=dict(fusion=dict(in_dim=16384))
+    # head_config=dict(fusion=dict(in_dim=16384))
 )
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

@@ -90,7 +90,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
     def forward_train(self, video, image, text, audio, gt_labels):
         if self.mode == 2:
             for modal in self.modal_list:
-                for arch in ('branch', 'ebd', 'head'):
+                for arch in ('branch', 'head'):
                     self.__getattr__(f'{modal}_{arch}').eval()
 
         feats_list, losses = [], {}

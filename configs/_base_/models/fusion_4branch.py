@@ -2,8 +2,7 @@ modal_used = ['image', 'video', 'text', 'audio']
 
 model = dict(
     type='MultiBranchesFusionModel',
-    pretrained=dict(
-        image='torchvision://resnet50'),
+    pretrained=dict(image='torchvision://resnet50'),
     modal_dropout_p=dict(text=0.0, video=0.0, image=0.0, audio=0.0),
     use_batch_norm=False,
     mode=3,

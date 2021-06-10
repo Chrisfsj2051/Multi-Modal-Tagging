@@ -15,10 +15,19 @@ def parse_args():
 
 def main():
     args = parse_args()
-    text_ckpt = torch.load(args.text)['state_dict']
-    image_ckpt = torch.load(args.image)['state_dict']
-    video_ckpt = torch.load(args.video)['state_dict']
-    audio_ckpt = torch.load(args.audio)['state_dict']
+
+    text_ckpt = torch.load(args.text)
+    image_ckpt = torch.load(args.image)
+    video_ckpt = torch.load(args.video)
+    audio_ckpt = torch.load(args.audio)
+    if 'state_dict' in text_ckpt.keys():
+        text_ckpt = text_ckpt['state_dict']
+    if 'state_dict' in image_ckpt.keys():
+        image_ckpt = image_ckpt['state_dict']
+    if 'state_dict' in video_ckpt.keys():
+        video_ckpt = video_ckpt['state_dict']
+    if 'state_dict' in audio_ckpt.keys():
+        audio_ckpt = audio_ckpt['state_dict']
     ret = {}
     for typ, dic in zip(['text', 'image', 'video', 'audio'],
                         [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):

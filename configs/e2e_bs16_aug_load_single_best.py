@@ -3,7 +3,7 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
+load_from = 'pretrained/text0.7178_audio0.6803_video0.7365_image0.7039.pth'
 
 train_total_iters = 10000
 
@@ -55,10 +55,10 @@ train_pipeline = [
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='FrameRandomErase',
          key_fields=['video'],
-         aug_num_frame=30,
-         aug_max_len=10,
-         aug_num_block=10,
-         aug_max_size=100),
+         aug_num_frame=9,
+         aug_max_len=3,
+         aug_num_block=3,
+         aug_max_size=30),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

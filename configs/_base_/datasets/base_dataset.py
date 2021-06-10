@@ -42,5 +42,5 @@ data = dict(samples_per_gpu=2,
                      pipeline=val_pipeline),
             test=dict(type='TaggingDataset',
                       ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
-                      label_id_file='dataset/tagging/label_id.txt',
+                      label_id_file='dataset/tagging/label_super_id.txt',
                       pipeline=val_pipeline))

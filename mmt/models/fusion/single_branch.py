@@ -39,8 +39,6 @@ class SingleBranchesFusionModel(BaseFusionModel):
             if use_batch_norm:
                 self.add_module(f'{modal}_bn',
                                 nn.LayerNorm(head_config[modal]['in_dim']))
-        assert 'fusion' in head_config.keys()
-        self.add_module('fusion_head', build_head(head_config['fusion']))
         self.use_batch_norm = use_batch_norm
         if pretrained and 'video' in pretrained and 'video' in modal_used:
             self.load_pretrained(self.video_branch, pretrained['video'])
@@ -108,8 +106,4 @@ class SingleBranchesFusionModel(BaseFusionModel):
                 feats = self.__getattr__(f'{modal}_bn')(feats)
             ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(f'{modal}_head').simple_test(feats)
-        if self.mode == 1:
-            return test_results
-        ebd = torch.cat(ebd_list, 1)
-        test_results[0]['fusion'] = self.fusion_head.simple_test(ebd)
         return test_results

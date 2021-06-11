@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from mmcv.cnn import build_norm_layer
 from torch.nn import init
 
 from mmt.models.builder import HEAD, build_head
@@ -27,6 +28,8 @@ class SEHead(nn.Module):
         self.in_dim = in_dim
         self.hidden_weight = nn.Parameter(torch.randn(in_dim, out_dim))
         self.hidden_bn = nn.BatchNorm1d(out_dim)
+        # norm_cfg =
+        # self.hidden_bn = build_norm_layer(norm_cfg, planes * block.expansion)[1]nn.BatchNorm1d(out_dim)
         self.gatting_weight_1 = nn.Parameter(
             torch.randn(out_dim, out_dim // gating_reduction))
         self.gatting_bn_1 = nn.BatchNorm1d(out_dim // gating_reduction)

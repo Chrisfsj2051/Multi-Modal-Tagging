@@ -25,3 +25,8 @@
 https://chrisfsj2051.atlassian.net/wiki/spaces/CHRISFSJ20/pages/98393
 
  PORT=2048 nohup bash tools/dist_train.sh configs/image_adamW_bs16.py 2
+ 
+
+PORT=22048 nohup bash tools/dist_train.sh configs/image_adam0.001_bs16_aug0.5.py 2
+PORT=23048 nohup bash tools/dist_train.sh configs/image_adam0.001_bs16_aug1.py 2
+PORT=24048 nohup bash tools/dist_train.sh configs/image_adam0.002_bs16.py 2

@@ -34,7 +34,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[train_total_iters // 3, 2 * train_total_iters // 3]
+    step=[3* train_total_iters // 6, 4 * train_total_iters // 6]
 )
 
 runner = dict(type='IterBasedRunner', max_iters=train_total_iters)

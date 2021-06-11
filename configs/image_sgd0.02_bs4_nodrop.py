@@ -3,5 +3,11 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-model=dict(modal_used=['image'])
 data = dict(samples_per_gpu=2, workers_per_gpu=2)
+
+model = dict(
+    modal_used=['image'],
+    head_config=dict(
+        image=dict(dropout_p=0.0)
+    )
+)

@@ -403,6 +403,7 @@ class EfficientNet(nn.Module):
                         advprop=False,
                         in_channels=3,
                         num_classes=1000,
+                        load_fc=True,
                         **override_params):
         """Create an efficientnet model according to name.
 
@@ -436,7 +437,7 @@ class EfficientNet(nn.Module):
         load_pretrained_weights(model,
                                 model_name,
                                 weights_path=weights_path,
-                                load_fc=(num_classes == 1000),
+                                load_fc=load_fc,
                                 advprop=advprop)
         model._change_in_channels(in_channels)
         return model

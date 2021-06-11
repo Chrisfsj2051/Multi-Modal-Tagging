@@ -715,7 +715,8 @@ def load_pretrained_weights(model,
         ret = model.load_state_dict(state_dict, strict=False)
         assert set(ret.missing_keys) == set([
             '_fc.weight', '_fc.bias'
-        ]), 'Missing keys when loading pretrained weights: {}'.format(
+        ]) or len(ret.missing_keys) == 0, \
+            'Missing keys when loading pretrained weights: {}'.format(
             ret.missing_keys)
     assert not ret.unexpected_keys, 'Missing keys when loading pretrained weights: {}'.format(
         ret.unexpected_keys)

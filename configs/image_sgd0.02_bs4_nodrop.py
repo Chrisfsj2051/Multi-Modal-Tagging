@@ -3,7 +3,7 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-data = dict(samples_per_gpu=2, workers_per_gpu=2)
+data = dict(samples_per_gpu=2, workers_per_gpu=4)
 
 model = dict(
     modal_used=['image'],

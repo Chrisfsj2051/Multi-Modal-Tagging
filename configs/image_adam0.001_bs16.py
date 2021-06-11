@@ -4,3 +4,4 @@ _base_ = [
 ]
 
 model=dict(modal_used=['image'])
+data = dict(samples_per_gpu=8, workers_per_gpu=8)

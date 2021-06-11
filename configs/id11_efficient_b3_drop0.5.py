@@ -23,6 +23,21 @@ train_pipeline = [
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
 ]
 
+val_pipeline = [
+    dict(type='LoadAnnotations'),
+    dict(type='Tokenize', vocab_root='dataset/vocab_small.txt',
+         max_length=256),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='Resize', size=(300, 300)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio'])
+]
+
+data = dict(train=dict(pipeline=train_pipeline),
+            val=dict(pipeline=val_pipeline),
+            test=dict(pipeline=val_pipeline))
+
 data = dict(train=dict(pipeline=train_pipeline))
 model = dict(modal_used=['image'],
              pretrained=dict(_delete_=True),

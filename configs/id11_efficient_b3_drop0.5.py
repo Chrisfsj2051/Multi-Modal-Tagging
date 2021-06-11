@@ -1,7 +1,4 @@
-_base_ = [
-    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_sgd.py',
-    '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
-]
+_base_ = 'id11.py'
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])

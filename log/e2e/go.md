@@ -23,3 +23,5 @@
 
 
 https://chrisfsj2051.atlassian.net/wiki/spaces/CHRISFSJ20/pages/98393
+
+ PORT=2048 nohup bash tools/dist_train.sh configs/image_adamW_bs16.py 2

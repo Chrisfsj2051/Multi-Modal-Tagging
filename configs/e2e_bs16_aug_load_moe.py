@@ -70,4 +70,7 @@ train_pipeline = [
 data = dict(
     workers_per_gpu=8,
     samples_per_gpu=8,
-    train=dict(pipeline=train_pipeline))
+    train=dict(pipeline=train_pipeline, with_sigmoid=False),
+    val=dict(with_sigmoid=False),
+    test=dict(with_sigmoid=False),
+)

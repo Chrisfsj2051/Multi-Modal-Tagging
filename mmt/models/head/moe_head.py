@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from mmt.models.builder import HEAD, build_loss
-
+import math
 
 
 @HEAD.register_module()
@@ -29,5 +29,11 @@ class MoEHead(nn.Module):
         return dict(cls_loss=loss_list)
 
     def simple_test(self, x):
-        return self.linear(x)
+        gate_act = self.gate_fc(x).reshape((-1, self.num_experts+1))
+        expert_act = self.expert_fc(x).reshape((-1, self.num_experts))
+        gate_attn = gate_act.softmax(1)[:, :-1]
+        expert_pred = expert_act.sigmoid()
+        expert_pred = (gate_attn * expert_pred).mean(1)
+        pred = expert_pred.reshape((-1, self.num_classes))
+        return pred
 

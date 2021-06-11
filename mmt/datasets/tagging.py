@@ -12,7 +12,8 @@ from mmt.utils.metrics.calculate_gap import calculate_gap
 
 @DATASETS.register_module()
 class TaggingDataset:
-    def __init__(self, ann_file, label_id_file, pipeline, test_mode=False):
+    def __init__(self, ann_file, label_id_file, pipeline, test_mode=False,
+                 with_sigmoid=True):
         (self.index_to_tag, self.tag_to_index, self.index_to_super_index,
          self.tag_to_super_index) = self.load_label_dict(label_id_file)
         self.test_mode = test_mode
@@ -20,6 +21,7 @@ class TaggingDataset:
          self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
         self.flag = np.zeros((len(self.video_anns))).astype(np.int)
         self.pipeline = Compose(pipeline)
+        self.with_sigmoid = with_sigmoid
 
     @staticmethod
     def load_label_dict(dict_file):
@@ -101,7 +103,10 @@ class TaggingDataset:
         gt_onehot = np.array(self.gt_onehot)
         for modal in preds[0].keys():
             modal_preds = [x[modal][0] for x in preds]
-            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            if self.with_sigmoid:
+                modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            else:
+                modal_preds = np.array([x.tolist() for x in modal_preds])
             results[f'{modal}_GAP'] = calculate_gap(modal_preds, gt_onehot)
         print_str = '=' * 30 + '\n'
         print_str += f'{"Modal":8}|{"Super Cls":12}|{"GAP":8}\n'

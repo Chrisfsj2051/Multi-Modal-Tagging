@@ -5,6 +5,8 @@ _base_ = [
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
+norm_cfg = dict(type='SyncBN')
+# norm_cfg = dict(type='BN1d')
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
@@ -26,16 +28,17 @@ train_pipeline = [
 data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
             train=dict(pipeline=train_pipeline))
-
 model = dict(modal_used=['image'],
-             branch_config=dict(video=dict(norm_cfg=dict(type='SyncBN')),
-                                audio=dict(norm_cfg=dict(type='SyncBN'))),
-             head_config=dict(image=dict(dropout_p=0.8,
-                                         norm_cfg=dict(type='SyncBN')),
-                              video=dict(norm_cfg=dict(type='SyncBN')),
-                              text=dict(norm_cfg=dict(type='SyncBN')),
-                              audio=dict(norm_cfg=dict(type='SyncBN')),
-                              fusion=dict(norm_cfg=dict(type='SyncBN'))))
+             pretrained=dict(_delete_=True),
+             branch_config=dict(
+                 video=dict(norm_cfg=norm_cfg),
+                 audio=dict(norm_cfg=norm_cfg),
+             ),
+             head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
+                              video=dict(norm_cfg=norm_cfg),
+                              text=dict(norm_cfg=norm_cfg),
+                              audio=dict(norm_cfg=norm_cfg),
+                              fusion=dict(norm_cfg=norm_cfg)))
 
 optimizer = dict(lr=0.1,
                  paramwise_cfg=dict(

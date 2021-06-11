@@ -17,7 +17,7 @@ train_pipeline = [
     dict(type='Tokenize', vocab_root='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    dict(type='Resize', size=(260, 260)),
+    dict(type='Resize', size=(300, 300)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
@@ -27,5 +27,5 @@ data = dict(train=dict(pipeline=train_pipeline))
 model = dict(modal_used=['image'],
              pretrained=dict(_delete_=True),
              branch_config=dict(image=dict(
-                 _delete_=True, type='EffecientNet', arch='efficientnet-b2')),
-             head_config=dict(image=dict(dropout_p=0.5, in_dim=1408)))
+                 _delete_=True, type='EffecientNet', arch='efficientnet-b3')),
+             head_config=dict(image=dict(dropout_p=0.5, in_dim=1536)))

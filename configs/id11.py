@@ -1,4 +1,7 @@
-_base_ = 'id7.py'
+_base_ = [
+    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_sgd.py',
+    '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
+]
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
@@ -20,7 +23,9 @@ train_pipeline = [
     dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'gt_labels'])
 ]
 
-data = dict(train=dict(pipeline=train_pipeline))
+data = dict(samples_per_gpu=8,
+            workers_per_gpu=8,
+            train=dict(pipeline=train_pipeline))
 
 model = dict(modal_used=['image'],
              branch_config=dict(video=dict(norm_cfg=dict(type='SyncBN')),
@@ -31,3 +36,13 @@ model = dict(modal_used=['image'],
                               text=dict(norm_cfg=dict(type='SyncBN')),
                               audio=dict(norm_cfg=dict(type='SyncBN')),
                               fusion=dict(norm_cfg=dict(type='SyncBN'))))
+
+optimizer = dict(lr=0.1,
+                 paramwise_cfg=dict(
+                     custom_keys={
+                         'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'text_branch': dict(lr_mult=0.001, decay_mult=1.0),
+                         'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'fusion': dict(weight_decay_mult=1.0)
+                     }))

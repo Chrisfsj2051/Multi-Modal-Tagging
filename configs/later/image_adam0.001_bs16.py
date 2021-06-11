@@ -3,13 +3,5 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-model=dict(modal_used=['image'])
+model = dict(modal_used=['image'])
 data = dict(samples_per_gpu=8, workers_per_gpu=8)
-
-optimizer = dict(
-    _delete_=True,
-    type='Adam',
-    amsgrad=True,
-    lr=0.001,
-    weight_decay=0.0001
-)

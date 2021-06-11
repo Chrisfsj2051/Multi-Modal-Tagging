@@ -3,6 +3,6 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-model=dict(modal_used=['image'])
-optimizer = dict(type='AdamW')
+model = dict(modal_used=['image'])
+optimizer = dict(lr=0.002)
 data = dict(samples_per_gpu=8, workers_per_gpu=8)

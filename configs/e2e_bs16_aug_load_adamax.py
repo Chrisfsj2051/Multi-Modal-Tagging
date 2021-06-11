@@ -3,7 +3,7 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-load_from = 'pretrained/text0.7178_audio0.6702_video0.7139_image0.7039.pth'
+load_from = 'pretrained/text0.7178_audio0.6803_video0.7365_image0.7039.pth'
 
 train_total_iters = 10000
 

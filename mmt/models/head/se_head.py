@@ -21,13 +21,15 @@ class SEHead(nn.Module):
                  out_dim,
                  gating_reduction,
                  cls_head_config,
+                 norm_cfg=dict(type='BN1d'),
                  dropout_p=0.0):
         super(SEHead, self).__init__()
         self.cls_head = build_head(cls_head_config)
         self.out_dim = out_dim
         self.in_dim = in_dim
         self.hidden_weight = nn.Parameter(torch.randn(in_dim, out_dim))
-        self.hidden_bn = nn.BatchNorm1d(out_dim)
+        # self.hidden_bn = nn.BatchNorm1d(out_dim)
+        self.hidden_bn = build_norm_layer(norm_cfg, out_dim)[1]
         # norm_cfg =
         # self.hidden_bn = build_norm_layer(norm_cfg, planes * block.expansion)[1]nn.BatchNorm1d(out_dim)
         self.gatting_weight_1 = nn.Parameter(

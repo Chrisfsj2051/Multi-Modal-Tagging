@@ -188,7 +188,7 @@ class Shear(object):
                 or "vertical".
             interpolation (str): Same as in :func:`mmcv.imshear`.
         """
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key]
             img_sheared = mmcv.imshear(img,
                                        magnitude,
@@ -410,7 +410,7 @@ class Rotate(object):
             scale (int | float): Isotropic scale factor. Same in
                 ``mmcv.imrotate``.
         """
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key].copy()
             img_rotated = mmcv.imrotate(img,
                                         angle,
@@ -515,7 +515,7 @@ class Rotate(object):
         """
         if np.random.rand() > self.prob:
             return results
-        h, w = results['img'].shape[:2]
+        h, w = results['image'].shape[:2]
         center = self.center
         if center is None:
             center = ((w - 1) * 0.5, (h - 1) * 0.5)
@@ -621,7 +621,7 @@ class Translate(object):
             direction (str): The translate direction, either "horizontal"
                 or "vertical".
         """
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key].copy()
             results[key] = mmcv.imtranslate(
                 img, offset, direction, self.img_fill_val).astype(img.dtype)
@@ -735,7 +735,7 @@ class ColorTransform(object):
 
     def _adjust_color_img(self, results, factor=1.0):
         """Apply Color transformation to image."""
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             # NOTE defaultly the image should be BGR format
             img = results[key]
             results[key] = mmcv.adjust_color(img, factor).astype(img.dtype)
@@ -776,7 +776,7 @@ class EqualizeTransform(object):
 
     def _imequalize(self, results):
         """Equalizes the histogram of one image."""
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key]
             results[key] = mmcv.imequalize(img).astype(img.dtype)
 
@@ -821,7 +821,7 @@ class BrightnessTransform(object):
 
     def _adjust_brightness_img(self, results, factor=1.0):
         """Adjust the brightness of image."""
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key]
             results[key] = mmcv.adjust_brightness(img,
                                                   factor).astype(img.dtype)
@@ -869,7 +869,7 @@ class ContrastTransform(object):
 
     def _adjust_contrast_img(self, results, factor=1.0):
         """Adjust the image contrast."""
-        for key in results.get('img_fields', ['img']):
+        for key in results.get('img_fields', ['image']):
             img = results[key]
             results[key] = mmcv.adjust_contrast(img, factor).astype(img.dtype)
 

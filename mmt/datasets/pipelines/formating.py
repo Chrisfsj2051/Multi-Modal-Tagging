@@ -166,6 +166,9 @@ class DefaultFormatBundle(object):
         results['image'] = DC(to_tensor(results['image'].transpose(2, 0, 1)),
                               stack=True,
                               pad_dims=None)
+        if 'meta_info' not in results.keys():
+            results['meta_info'] = {}
+        results['meta_info'] = DC(results['meta_info'], cpu_only=True)
         text = torch.cat(
             [to_tensor(results['ocr_text']),
              to_tensor(results['asr_text'])])

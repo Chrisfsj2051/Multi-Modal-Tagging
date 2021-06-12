@@ -8,6 +8,7 @@ import numpy as np
 
 from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertTokenizer
 from mmt.utils.tokenization import FullTokenizer
+
 from ..builder import PIPELINES
 
 
@@ -90,14 +91,21 @@ class BertTokenize(object):
             mask = [1] * pad_size
             token_ids = token_ids[:pad_size]
             seq_len = pad_size
+        assert sum(mask) == seq_len
         return token_ids, mask, seq_len
 
     def __call__(self, results):
-        text_dict = results.pop('text')
-        results['ocr_text'] = self.tokenize(text_dict['video_ocr'])
-        results['asr_text'] = self.tokenize(text_dict['video_asr'])
+        text = results.pop('text')
+        if 'meta_info' not in results.keys():
+            results['meta_info'] = {}
+        ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
+        asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])
+        results['ocr_text'], results['asr_text'] = ocr_token, asr_token
+        results['meta_info']['ocr_mask'] = ocr_mask
+        results['meta_info']['asr_mask'] = asr_mask
+        results['meta_info']['ocr_seq_len'] = ocr_seq_len
+        results['meta_info']['asr_seq_len'] = asr_seq_len
         return results
-
 
 
 @PIPELINES.register_module()
@@ -133,7 +141,6 @@ class Normalize(object):
         to_rgb (bool): Whether to convert the image from BGR to RGB,
             default is true.
     """
-
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
@@ -431,7 +438,6 @@ class CutOut:
         fill_in (tuple[float, float, float] | tuple[int, int, int]): The value
             of pixel to fill in the dropped regions. Default: (0, 0, 0).
     """
-
     def __init__(self,
                  n_holes,
                  cutout_shape=None,

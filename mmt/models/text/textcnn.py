@@ -44,7 +44,7 @@ class TextCNN(nn.Module):
 
 @TEXT.register_module()
 class TwoStreamTextCNN(TextCNN):
-    def forward(self, x):
+    def forward(self, x, meta_info):
         assert x.ndim == 2
         ocr, asr = x.split(x.shape[1] // 2, dim=1)
         ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)

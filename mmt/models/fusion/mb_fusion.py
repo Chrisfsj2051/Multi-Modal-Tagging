@@ -20,9 +20,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
             mode2: Train fusion head;
             mode3: Train All.
     """
-    def __init__(self, mode, modal_used, branch_config,
-                 head_config, use_batch_norm, pretrained,
-                 modal_dropout_p):
+    def __init__(self, mode, modal_used, branch_config, head_config,
+                 use_batch_norm, pretrained, modal_dropout_p):
         super(MultiBranchesFusionModel, self).__init__()
         build_branch_method = {
             'video': build_frame_branch,
@@ -87,7 +86,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
         # load state_dict
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
-    def forward_train(self, video, image, text, audio, gt_labels):
+    def forward_train(self, video, image, text, audio, meta_info, gt_labels):
         if self.mode == 2:
             for modal in self.modal_list:
                 for arch in ('branch', 'head'):
@@ -102,7 +101,10 @@ class MultiBranchesFusionModel(BaseFusionModel):
         }
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
-            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if modal == 'text':
+                feats = self.__getattr__(f'{modal}_branch')(inputs, meta_info)
+            else:
+                feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
             # ebd = self.__getattr__(f'{modal}_ebd')(feats)
@@ -132,12 +134,12 @@ class MultiBranchesFusionModel(BaseFusionModel):
         mask = np.random.binomial(1, dropout_p)
         for i in range(mask.shape[1]):
             if sum(mask[:, i]) == 0:
-                mask[random.randint(0, mask.shape[0]-1), i] = 1
+                mask[random.randint(0, mask.shape[0] - 1), i] = 1
         mask = torch.from_numpy(mask).cuda()
         outs = [x * y[..., None] for (x, y) in zip(modal_inputs, mask)]
         return outs
 
-    def simple_test(self, video, image, text, audio):
+    def simple_test(self, video, image, text, audio, meta_info):
         ebd_list = []
         modal_inputs = {
             'video': video,
@@ -148,12 +150,16 @@ class MultiBranchesFusionModel(BaseFusionModel):
         test_results = [{}]
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
-            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if modal == 'text':
+                feats = self.__getattr__(f'{modal}_branch')(inputs, meta_info)
+            else:
+                feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
             # ebd = self.__getattr__(f'{modal}_ebd')(feats)
             ebd_list.append(feats)
-            test_results[0][modal] = self.__getattr__(f'{modal}_head').simple_test(feats)
+            test_results[0][modal] = self.__getattr__(
+                f'{modal}_head').simple_test(feats)
         if self.mode == 1:
             return test_results
         ebd = torch.cat(ebd_list, 1)

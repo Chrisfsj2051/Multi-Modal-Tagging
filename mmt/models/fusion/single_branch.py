@@ -20,8 +20,8 @@ class SingleBranchesFusionModel(BaseFusionModel):
             mode2: Train fusion head;
             mode3: Train All.
     """
-    def __init__(self, modal_used, branch_config,
-                 head_config, use_batch_norm, pretrained):
+    def __init__(self, modal_used, branch_config, head_config, use_batch_norm,
+                 pretrained):
         super(SingleBranchesFusionModel, self).__init__()
         assert len(modal_used) == 1
         build_branch_method = {
@@ -49,7 +49,6 @@ class SingleBranchesFusionModel(BaseFusionModel):
         if pretrained and 'image' in pretrained and 'image' in modal_used:
             self.load_pretrained(self.image_branch, pretrained['image'])
 
-
     def load_pretrained(self, model, pretrained):
         logger = get_root_logger()
         checkpoint = _load_checkpoint(pretrained)
@@ -68,7 +67,7 @@ class SingleBranchesFusionModel(BaseFusionModel):
         # load state_dict
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
-    def forward_train(self, video, image, text, audio, gt_labels):
+    def forward_train(self, video, image, text, audio, meta_info, gt_labels):
 
         feats_list, losses = [], {}
         modal_inputs = {
@@ -79,7 +78,10 @@ class SingleBranchesFusionModel(BaseFusionModel):
         }
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
-            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if modal == 'text':
+                feats = self.__getattr__(f'{modal}_branch')(inputs, meta_info)
+            else:
+                feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
             feats_list.append(feats)
@@ -89,8 +91,7 @@ class SingleBranchesFusionModel(BaseFusionModel):
                 losses[f'{modal}_{key}'] = val
         return losses
 
-
-    def simple_test(self, video, image, text, audio):
+    def simple_test(self, video, image, text, audio, meta_info):
         ebd_list = []
         modal_inputs = {
             'video': video,
@@ -101,9 +102,13 @@ class SingleBranchesFusionModel(BaseFusionModel):
         test_results = [{}]
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
-            feats = self.__getattr__(f'{modal}_branch')(inputs)
+            if modal == 'text':
+                feats = self.__getattr__(f'{modal}_branch')(inputs, meta_info)
+            else:
+                feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
             ebd_list.append(feats)
-            test_results[0][modal] = self.__getattr__(f'{modal}_head').simple_test(feats)
+            test_results[0][modal] = self.__getattr__(
+                f'{modal}_head').simple_test(feats)
         return test_results

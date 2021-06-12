@@ -1,4 +1,4 @@
-_base_ = 'id11.py'
+_base_ = 'id11_pretrain.py'
 
 model = dict(head_config=dict(
     image=dict(_delete_=True,

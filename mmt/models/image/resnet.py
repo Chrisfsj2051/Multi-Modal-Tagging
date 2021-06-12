@@ -712,7 +712,7 @@ class ResNet(nn.Module):
             if i in self.out_indices:
                 outs.append(x)
         assert len(outs) == 1
-        return F.adaptive_avg_pool2d(outs[0], (1, 1))[:, :, 0, 0]
+        return F.adaptive_avg_pool2d(outs[0], (1, 1)).view(x.shape[0], -1)
 
     def train(self, mode=True):
         """Convert the model into training mode while keep normalization layer

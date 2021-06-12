@@ -43,7 +43,7 @@ train_pipeline = [
                        (0.25, 0.25),
                        (0.3, 0.3)]),
     dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='BertTokenize', vocab_root='dataset/vocab_small.txt',
+    dict(type='BertTokenize', bert_path='dataset/vocab_small.txt',
          max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),

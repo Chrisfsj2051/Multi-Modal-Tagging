@@ -14,4 +14,5 @@ class Bert(nn.Module):
 if __name__=='__main__':
     # Bert()
     # if __name__ == '__main__':
-    BertTokenize('pretrained/bert')
+    pipeline = BertTokenize('pretrained/bert')
+    print(pipeline('江南皮革厂倒闭了！hello'))

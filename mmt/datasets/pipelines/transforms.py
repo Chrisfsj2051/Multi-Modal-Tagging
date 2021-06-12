@@ -66,19 +66,44 @@ class Resize(object):
 
 @PIPELINES.register_module()
 class BertTokenize(object):
-    def __init__(self, bert_path):
+    def __init__(self, bert_path, max_length, policy='head'):
+        assert max_length <= 512, 'Re-train bert if max_length>512'
+        assert policy in ('head', 'tail', 'head+tail')
+        if policy != 'head':
+            raise NotImplementedError
         self.tokenizer = BertTokenizer.from_pretrained(bert_path)
+        self.max_length = max_length
+
+    def tokenize(self, text):
+        PAD, CLS = '[PAD]', '[CLS]'
+        token = self.tokenizer.tokenize(text)
+        assert sum([x == '[UNK]' for x in token]) / len(token) < 0.5, \
+            'Please check if the vocab file is correctly loaded'
+        token = [CLS] + token
+        seq_len = len(token)
+        token_ids = self.tokenizer.convert_tokens_to_ids(token)
+        pad_size = self.max_length
+        if len(token) < pad_size:
+            mask = [1] * len(token_ids) + [0] * (pad_size - len(token))
+            token_ids += ([0] * (pad_size - len(token)))
+        else:
+            mask = [1] * pad_size
+            token_ids = token_ids[:pad_size]
+            seq_len = pad_size
+        return token_ids, mask, seq_len
 
     def __call__(self, results):
-        print('in')
-
+        text_dict = results.pop('text')
+        results['ocr_text'] = self.tokenize(text_dict['video_ocr'])
+        results['asr_text'] = self.tokenize(text_dict['video_asr'])
+        return results
 
 
 
 @PIPELINES.register_module()
 class Tokenize(object):
     def __init__(self, vocab_root, max_length):
-        raise NotImplemented('Please use BertTokenize')
+        # raise NotImplemented('Please use BertTokenize')
         self.tokenizer = FullTokenizer(vocab_root)
         self.max_length = max_length
 
@@ -108,6 +133,7 @@ class Normalize(object):
         to_rgb (bool): Whether to convert the image from BGR to RGB,
             default is true.
     """
+
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
@@ -405,6 +431,7 @@ class CutOut:
         fill_in (tuple[float, float, float] | tuple[int, int, int]): The value
             of pixel to fill in the dropped regions. Default: (0, 0, 0).
     """
+
     def __init__(self,
                  n_holes,
                  cutout_shape=None,

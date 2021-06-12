@@ -6,10 +6,10 @@ model = dict(modal_used=['image'],
                  _delete_=True, type='EffecientNet', arch='efficientnet-b0')),
              head_config=dict(image=dict(dropout_p=0.5, in_dim=1280)))
 
-optimizer = dict(lr=0.2,
+optimizer = dict(lr=0.1,
                  paramwise_cfg=dict(
                      custom_keys={
-                         'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'image_branch': dict(lr_mult=0.005, decay_mult=1.0),
                          'text_branch': dict(lr_mult=0.001, decay_mult=1.0),
                          'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
                          'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),

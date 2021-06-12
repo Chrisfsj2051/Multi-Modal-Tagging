@@ -369,9 +369,11 @@ class PhotoMetricDistortion(object):
         repr_str += f'hue_delta={self.hue_delta})'
         return repr_str
 
+
 @PIPELINES.register_module()
 class CutOut:
     """CutOut operation.
+
     Randomly drop some regions of image used in
     `Cutout <https://arxiv.org/abs/1708.04552>`_.
     Args:
@@ -390,7 +392,6 @@ class CutOut:
         fill_in (tuple[float, float, float] | tuple[int, int, int]): The value
             of pixel to fill in the dropped regions. Default: (0, 0, 0).
     """
-
     def __init__(self,
                  n_holes,
                  cutout_shape=None,
@@ -414,7 +415,7 @@ class CutOut:
 
     def __call__(self, results):
         """Call function to drop some regions of image."""
-        h, w, c = results['img'].shape
+        h, w, c = results['image'].shape
         n_holes = np.random.randint(self.n_holes[0], self.n_holes[1] + 1)
         for _ in range(n_holes):
             x1 = np.random.randint(0, w)
@@ -428,7 +429,7 @@ class CutOut:
 
             x2 = np.clip(x1 + cutout_w, 0, w)
             y2 = np.clip(y1 + cutout_h, 0, h)
-            results['img'][y1:y2, x1:x2, :] = self.fill_in
+            results['image'][y1:y2, x1:x2, :] = self.fill_in
 
         return results
 

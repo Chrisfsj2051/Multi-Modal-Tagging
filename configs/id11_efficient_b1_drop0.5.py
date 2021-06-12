@@ -35,7 +35,6 @@ data = dict(train=dict(pipeline=train_pipeline),
             val=dict(pipeline=val_pipeline),
             test=dict(pipeline=val_pipeline))
 
-data = dict(train=dict(pipeline=train_pipeline))
 model = dict(modal_used=['image'],
              pretrained=dict(_delete_=True),
              branch_config=dict(image=dict(

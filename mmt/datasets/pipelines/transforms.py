@@ -6,7 +6,8 @@ from copy import deepcopy
 import mmcv
 import numpy as np
 
-from ...utils.tokenization import FullTokenizer
+from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertTokenizer
+from mmt.utils.tokenization import FullTokenizer
 from ..builder import PIPELINES
 
 
@@ -64,8 +65,20 @@ class Resize(object):
 
 
 @PIPELINES.register_module()
+class BertTokenize(object):
+    def __init__(self, bert_path):
+        self.tokenizer = BertTokenizer.from_pretrained(bert_path)
+
+    def __call__(self, results):
+        print('in')
+
+
+
+
+@PIPELINES.register_module()
 class Tokenize(object):
     def __init__(self, vocab_root, max_length):
+        raise NotImplemented('Please use BertTokenize')
         self.tokenizer = FullTokenizer(vocab_root)
         self.max_length = max_length
 

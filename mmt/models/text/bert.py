@@ -1,11 +1,17 @@
-from third_party.bert.modeling import BertModel, BertConfig
+from mmt.datasets.pipelines.transforms import BertTokenize
+from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertModel, BertConfig
+
 import torch.nn as nn
 
 class Bert(nn.Module):
-    def __init__(self):
+    def __init__(self, ckpt_path='pretrained/bert/'):
         super(Bert, self).__init__()
-        self.bert = BertModel.from
+        self.bert = BertModel.from_pretrained(ckpt_path)
+
+    # def forward(self, ):
 
 
 if __name__=='__main__':
-    Bert()
+    # Bert()
+    # if __name__ == '__main__':
+    BertTokenize('pretrained/bert')

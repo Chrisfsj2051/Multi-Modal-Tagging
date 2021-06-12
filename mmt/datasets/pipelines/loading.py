@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import mmcv
 import numpy as np
@@ -19,6 +20,12 @@ class LoadAnnotations(object):
                 results['text'] = json.load(f)
             results['text']['video_ocr'] = results['text'][
                 'video_ocr'].replace('|', ',')
+            assert (len(results['text']['video_ocr']) or
+                    len(results['text']['video_asr']))
+            if len(results['text']['video_asr']) == 0:
+                results['text']['video_asr'] = deepcopy(results['text']['video_ocr'])
+            if len(results['text']['video_ocr']) == 0:
+                results['text']['video_ocr'] = deepcopy(results['text']['video_asr'])
             results['image'] = mmcv.imread(results['image_anns'])
             assert results['image'] is not None
             return results

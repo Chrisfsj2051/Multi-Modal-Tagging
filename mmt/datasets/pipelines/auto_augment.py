@@ -197,88 +197,6 @@ class Shear(object):
                                        interpolation=interpolation)
             results[key] = img_sheared.astype(img.dtype)
 
-    def _shear_bboxes(self, results, magnitude):
-        """Shear the bboxes."""
-        h, w, c = results['img_shape']
-        if self.direction == 'horizontal':
-            shear_matrix = np.stack([[1, magnitude],
-                                     [0, 1]]).astype(np.float32)  # [2, 2]
-        else:
-            shear_matrix = np.stack([[1, 0], [magnitude,
-                                              1]]).astype(np.float32)
-        for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(results[key],
-                                                  results[key].shape[-1],
-                                                  axis=-1)
-            coordinates = np.stack([[min_x, min_y], [max_x, min_y],
-                                    [min_x, max_y],
-                                    [max_x, max_y]])  # [4, 2, nb_box, 1]
-            coordinates = coordinates[..., 0].transpose(
-                (2, 1, 0)).astype(np.float32)  # [nb_box, 2, 4]
-            new_coords = np.matmul(shear_matrix[None, :, :],
-                                   coordinates)  # [nb_box, 2, 4]
-            min_x = np.min(new_coords[:, 0, :], axis=-1)
-            min_y = np.min(new_coords[:, 1, :], axis=-1)
-            max_x = np.max(new_coords[:, 0, :], axis=-1)
-            max_y = np.max(new_coords[:, 1, :], axis=-1)
-            min_x = np.clip(min_x, a_min=0, a_max=w)
-            min_y = np.clip(min_y, a_min=0, a_max=h)
-            max_x = np.clip(max_x, a_min=min_x, a_max=w)
-            max_y = np.clip(max_y, a_min=min_y, a_max=h)
-            results[key] = np.stack([min_x, min_y, max_x, max_y],
-                                    axis=-1).astype(results[key].dtype)
-
-    def _shear_masks(self,
-                     results,
-                     magnitude,
-                     direction='horizontal',
-                     fill_val=0,
-                     interpolation='bilinear'):
-        """Shear the masks."""
-        h, w, c = results['img_shape']
-        for key in results.get('mask_fields', []):
-            masks = results[key]
-            results[key] = masks.shear((h, w),
-                                       magnitude,
-                                       direction,
-                                       border_value=fill_val,
-                                       interpolation=interpolation)
-
-    def _shear_seg(self,
-                   results,
-                   magnitude,
-                   direction='horizontal',
-                   fill_val=255,
-                   interpolation='bilinear'):
-        """Shear the segmentation maps."""
-        for key in results.get('seg_fields', []):
-            seg = results[key]
-            results[key] = mmcv.imshear(seg,
-                                        magnitude,
-                                        direction,
-                                        border_value=fill_val,
-                                        interpolation=interpolation).astype(
-                                            seg.dtype)
-
-    def _filter_invalid(self, results, min_bbox_size=0):
-        """Filter bboxes and corresponding masks too small after shear
-        augmentation."""
-        bbox2label, bbox2mask, _ = bbox2fields()
-        for key in results.get('bbox_fields', []):
-            bbox_w = results[key][:, 2] - results[key][:, 0]
-            bbox_h = results[key][:, 3] - results[key][:, 1]
-            valid_inds = (bbox_w > min_bbox_size) & (bbox_h > min_bbox_size)
-            valid_inds = np.nonzero(valid_inds)[0]
-            results[key] = results[key][valid_inds]
-            # label fields. e.g. gt_labels and gt_labels_ignore
-            label_key = bbox2label.get(key)
-            if label_key in results:
-                results[label_key] = results[label_key][valid_inds]
-            # mask fields, e.g. gt_masks and gt_masks_ignore
-            mask_key = bbox2mask.get(key)
-            if mask_key in results:
-                results[mask_key] = results[mask_key][valid_inds]
-
     def __call__(self, results):
         """Call function to shear images, bounding boxes, masks and semantic
         segmentation maps.
@@ -293,19 +211,6 @@ class Shear(object):
             return results
         magnitude = random_negative(self.magnitude, self.random_negative_prob)
         self._shear_img(results, magnitude, self.direction, self.interpolation)
-        self._shear_bboxes(results, magnitude)
-        # fill_val set to 0 for background of mask.
-        self._shear_masks(results,
-                          magnitude,
-                          self.direction,
-                          fill_val=0,
-                          interpolation=self.interpolation)
-        self._shear_seg(results,
-                        magnitude,
-                        self.direction,
-                        fill_val=self.seg_ignore_label,
-                        interpolation=self.interpolation)
-        self._filter_invalid(results)
         return results
 
     def __repr__(self):
@@ -419,90 +324,6 @@ class Rotate(object):
                                         border_value=self.img_fill_val)
             results[key] = img_rotated.astype(img.dtype)
 
-    def _rotate_bboxes(self, results, rotate_matrix):
-        """Rotate the bboxes."""
-        h, w, c = results['img_shape']
-        for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(results[key],
-                                                  results[key].shape[-1],
-                                                  axis=-1)
-            coordinates = np.stack([[min_x, min_y], [max_x, min_y],
-                                    [min_x, max_y],
-                                    [max_x, max_y]])  # [4, 2, nb_bbox, 1]
-            # pad 1 to convert from format [x, y] to homogeneous
-            # coordinates format [x, y, 1]
-            coordinates = np.concatenate(
-                (coordinates,
-                 np.ones((4, 1, coordinates.shape[2], 1), coordinates.dtype)),
-                axis=1)  # [4, 3, nb_bbox, 1]
-            coordinates = coordinates.transpose(
-                (2, 0, 1, 3))  # [nb_bbox, 4, 3, 1]
-            rotated_coords = np.matmul(rotate_matrix,
-                                       coordinates)  # [nb_bbox, 4, 2, 1]
-            rotated_coords = rotated_coords[..., 0]  # [nb_bbox, 4, 2]
-            min_x, min_y = np.min(rotated_coords[:, :, 0],
-                                  axis=1), np.min(rotated_coords[:, :, 1],
-                                                  axis=1)
-            max_x, max_y = np.max(rotated_coords[:, :, 0],
-                                  axis=1), np.max(rotated_coords[:, :, 1],
-                                                  axis=1)
-            min_x, min_y = np.clip(min_x, a_min=0, a_max=w), np.clip(min_y,
-                                                                     a_min=0,
-                                                                     a_max=h)
-            max_x, max_y = np.clip(max_x, a_min=min_x,
-                                   a_max=w), np.clip(max_y,
-                                                     a_min=min_y,
-                                                     a_max=h)
-            results[key] = np.stack([min_x, min_y, max_x, max_y],
-                                    axis=-1).astype(results[key].dtype)
-
-    def _rotate_masks(self,
-                      results,
-                      angle,
-                      center=None,
-                      scale=1.0,
-                      fill_val=0):
-        """Rotate the masks."""
-        h, w, c = results['img_shape']
-        for key in results.get('mask_fields', []):
-            masks = results[key]
-            results[key] = masks.rotate((h, w), angle, center, scale, fill_val)
-
-    def _rotate_seg(self,
-                    results,
-                    angle,
-                    center=None,
-                    scale=1.0,
-                    fill_val=255):
-        """Rotate the segmentation map."""
-        for key in results.get('seg_fields', []):
-            seg = results[key].copy()
-            results[key] = mmcv.imrotate(seg,
-                                         angle,
-                                         center,
-                                         scale,
-                                         border_value=fill_val).astype(
-                                             seg.dtype)
-
-    def _filter_invalid(self, results, min_bbox_size=0):
-        """Filter bboxes and corresponding masks too small after rotate
-        augmentation."""
-        bbox2label, bbox2mask, _ = bbox2fields()
-        for key in results.get('bbox_fields', []):
-            bbox_w = results[key][:, 2] - results[key][:, 0]
-            bbox_h = results[key][:, 3] - results[key][:, 1]
-            valid_inds = (bbox_w > min_bbox_size) & (bbox_h > min_bbox_size)
-            valid_inds = np.nonzero(valid_inds)[0]
-            results[key] = results[key][valid_inds]
-            # label fields. e.g. gt_labels and gt_labels_ignore
-            label_key = bbox2label.get(key)
-            if label_key in results:
-                results[label_key] = results[label_key][valid_inds]
-            # mask fields, e.g. gt_masks and gt_masks_ignore
-            mask_key = bbox2mask.get(key)
-            if mask_key in results:
-                results[mask_key] = results[mask_key][valid_inds]
-
     def __call__(self, results):
         """Call function to rotate images, bounding boxes, masks and semantic
         segmentation maps.
@@ -521,15 +342,6 @@ class Rotate(object):
             center = ((w - 1) * 0.5, (h - 1) * 0.5)
         angle = random_negative(self.angle, self.random_negative_prob)
         self._rotate_img(results, angle, center, self.scale)
-        rotate_matrix = cv2.getRotationMatrix2D(center, -angle, self.scale)
-        self._rotate_bboxes(results, rotate_matrix)
-        self._rotate_masks(results, angle, center, self.scale, fill_val=0)
-        self._rotate_seg(results,
-                         angle,
-                         center,
-                         self.scale,
-                         fill_val=self.seg_ignore_label)
-        self._filter_invalid(results)
         return results
 
     def __repr__(self):
@@ -626,65 +438,7 @@ class Translate(object):
             results[key] = mmcv.imtranslate(
                 img, offset, direction, self.img_fill_val).astype(img.dtype)
 
-    def _translate_bboxes(self, results, offset):
-        """Shift bboxes horizontally or vertically, according to offset."""
-        h, w, c = results['img_shape']
-        for key in results.get('bbox_fields', []):
-            min_x, min_y, max_x, max_y = np.split(results[key],
-                                                  results[key].shape[-1],
-                                                  axis=-1)
-            if self.direction == 'horizontal':
-                min_x = np.maximum(0, min_x + offset)
-                max_x = np.minimum(w, max_x + offset)
-            elif self.direction == 'vertical':
-                min_y = np.maximum(0, min_y + offset)
-                max_y = np.minimum(h, max_y + offset)
 
-            # the boxs translated outside of image will be filtered along with
-            # the corresponding masks, by invoking ``_filter_invalid``.
-            results[key] = np.concatenate([min_x, min_y, max_x, max_y],
-                                          axis=-1)
-
-    def _translate_masks(self,
-                         results,
-                         offset,
-                         direction='horizontal',
-                         fill_val=0):
-        """Translate masks horizontally or vertically."""
-        h, w, c = results['img_shape']
-        for key in results.get('mask_fields', []):
-            masks = results[key]
-            results[key] = masks.translate((h, w), offset, direction, fill_val)
-
-    def _translate_seg(self,
-                       results,
-                       offset,
-                       direction='horizontal',
-                       fill_val=255):
-        """Translate segmentation maps horizontally or vertically."""
-        for key in results.get('seg_fields', []):
-            seg = results[key].copy()
-            results[key] = mmcv.imtranslate(seg, offset, direction,
-                                            fill_val).astype(seg.dtype)
-
-    def _filter_invalid(self, results, min_size=0):
-        """Filter bboxes and masks too small or translated out of image."""
-        bbox2label, bbox2mask, _ = bbox2fields()
-        for key in results.get('bbox_fields', []):
-            bbox_w = results[key][:, 2] - results[key][:, 0]
-            bbox_h = results[key][:, 3] - results[key][:, 1]
-            valid_inds = (bbox_w > min_size) & (bbox_h > min_size)
-            valid_inds = np.nonzero(valid_inds)[0]
-            results[key] = results[key][valid_inds]
-            # label fields. e.g. gt_labels and gt_labels_ignore
-            label_key = bbox2label.get(key)
-            if label_key in results:
-                results[label_key] = results[label_key][valid_inds]
-            # mask fields, e.g. gt_masks and gt_masks_ignore
-            mask_key = bbox2mask.get(key)
-            if mask_key in results:
-                results[mask_key] = results[mask_key][valid_inds]
-        return results
 
     def __call__(self, results):
         """Call function to translate images, bounding boxes, masks and
@@ -700,16 +454,6 @@ class Translate(object):
             return results
         offset = random_negative(self.offset, self.random_negative_prob)
         self._translate_img(results, offset, self.direction)
-        self._translate_bboxes(results, offset)
-        # fill_val defaultly 0 for BitmapMasks and None for PolygonMasks.
-        self._translate_masks(results, offset, self.direction)
-        # fill_val set to ``seg_ignore_label`` for the ignored value
-        # of segmentation map.
-        self._translate_seg(results,
-                            offset,
-                            self.direction,
-                            fill_val=self.seg_ignore_label)
-        self._filter_invalid(results, min_size=self.min_size)
         return results
 
 

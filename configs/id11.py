@@ -29,17 +29,18 @@ train_pipeline = [
 data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
             train=dict(pipeline=train_pipeline))
-model = dict(modal_used=['image'],
-             pretrained=dict(_delete_=True),
-             branch_config=dict(
-                 video=dict(norm_cfg=norm_cfg),
-                 audio=dict(norm_cfg=norm_cfg),
-             ),
-             head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
-                              video=dict(norm_cfg=norm_cfg),
-                              text=dict(norm_cfg=norm_cfg),
-                              audio=dict(norm_cfg=norm_cfg),
-                              fusion=dict(norm_cfg=norm_cfg)))
+model = dict(
+    modal_used=['image'],
+    # pretrained=dict(_delete_=True),
+    branch_config=dict(
+        video=dict(norm_cfg=norm_cfg),
+        audio=dict(norm_cfg=norm_cfg),
+    ),
+    head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
+                     video=dict(norm_cfg=norm_cfg),
+                     text=dict(norm_cfg=norm_cfg),
+                     audio=dict(norm_cfg=norm_cfg),
+                     fusion=dict(norm_cfg=norm_cfg)))
 
 optimizer = dict(lr=0.1,
                  paramwise_cfg=dict(

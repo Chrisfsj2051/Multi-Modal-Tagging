@@ -11,7 +11,6 @@ from mmt.models.builder import FRAME
 @FRAME.register_module()
 class NeXtVLAD(nn.Module):
     """NetVLAD layer implementation."""
-
     def __init__(self,
                  feature_size,
                  max_frames,
@@ -34,10 +33,10 @@ class NeXtVLAD(nn.Module):
             torch.randn(1, self.expansion * self.feature_size // self.groups,
                         cluster_size))
 
-        self.bn1 = build_norm_layer(norm_cfg, groups * cluster_size)
-        self.bn2 = build_norm_layer(norm_cfg,
-                                    self.cluster_size * self.expansion *
-                                    self.feature_size // self.groups)
+        self.bn1 = build_norm_layer(norm_cfg, groups * cluster_size)[1]
+        self.bn2 = build_norm_layer(
+            norm_cfg, self.cluster_size * self.expansion * self.feature_size //
+            self.groups)[1]
         self.init_parameters()
 
     def init_parameters(self):

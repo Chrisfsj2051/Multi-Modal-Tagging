@@ -3,7 +3,7 @@ _base_ = [
     '_base_/models/fusion_4branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-# load_from = 'pretrained/use_bs2.pth'
+load_from = 'pretrained/use_bs2.pth'
 
 train_total_iters = 10000
 

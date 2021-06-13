@@ -109,19 +109,22 @@ class BertTokenize(object):
             remain_len = self.max_length - len(text['video_ocr'])
             text['video_ocr'] += text['video_asr'][-remain_len:]
         ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
-        asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])
-        results['ocr_text'], results['asr_text'] = ocr_token, asr_token
-        results['meta_info']['ocr_mask'] = ocr_mask
-        results['meta_info']['asr_mask'] = asr_mask
-        results['meta_info']['ocr_seq_len'] = ocr_seq_len
-        results['meta_info']['asr_seq_len'] = asr_seq_len
+        results['text'] = ocr_token
+        results['meta_info']['text_mask'] = ocr_mask
+        results['meta_info']['text_seq_len'] = ocr_seq_len
+        # asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])
+        # results['ocr_text'], results['asr_text'] = ocr_token, asr_token
+        # results['meta_info']['ocr_mask'] = ocr_mask
+        # results['meta_info']['asr_mask'] = asr_mask
+        # results['meta_info']['ocr_seq_len'] = ocr_seq_len
+        # results['meta_info']['asr_seq_len'] = asr_seq_len
         return results
 
 
 @PIPELINES.register_module()
 class Tokenize(object):
     def __init__(self, vocab_root, max_length):
-        # raise NotImplemented('Please use BertTokenize')
+        raise NotImplementedError('Please use BertTokenize')
         self.tokenizer = FullTokenizer(vocab_root)
         self.max_length = max_length
 

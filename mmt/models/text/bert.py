@@ -7,13 +7,9 @@ from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertModel
 
 @TEXT.register_module()
 class Bert(nn.Module):
-    def __init__(self,
-                 ckpt_path='pretrained/bert/',
-                 fixed=False,
-                 only_ocr=False):
+    def __init__(self, ckpt_path='pretrained/bert/', fixed=False):
         super(Bert, self).__init__()
         self.bert = BertModel.from_pretrained(ckpt_path)
-        self.only_ocr = only_ocr
         if fixed:
             self.bert.eval()
             for param in self.bert.parameters():
@@ -29,23 +25,28 @@ class Bert(nn.Module):
 
     def forward(self, x, meta_info):
         assert x.ndim == 2
-        ocr, asr = x.split(x.shape[1] // 2, dim=1)
-        infos = [[] for _ in range(4)]
-        keys = ['ocr_seq_len', 'asr_seq_len', 'ocr_mask', 'asr_mask']
-        for item in meta_info:
-            for i, key in enumerate(keys):
-                infos[i].append(item[key])
-        for i in range(4):
-            infos[i] = ocr.new_tensor(infos[i])
-        _, ocr_feat = self.bert(ocr,
-                                attention_mask=infos[2],
-                                output_all_encoded_layers=False)
-        if not self.only_ocr:
-            _, asr_feat = self.bert(asr,
-                                    attention_mask=infos[3],
-                                    output_all_encoded_layers=False)
-            return (asr_feat + ocr_feat) / 2
-        return ocr_feat
+        x_mask = x.new_tensor([item['text_mask'] for item in meta_info])
+        _, feat = self.bert(x,
+                            attention_mask=x_mask,
+                            output_all_encoded_layers=False)
+        return feat
+        # ocr, asr = x.split(x.shape[1] // 2, dim=1)
+        # infos = [[] for _ in range(4)]
+        # keys = ['ocr_seq_len', 'asr_seq_len', 'ocr_mask', 'asr_mask']
+        # for item in meta_info:
+        #     for i, key in enumerate(keys):
+        #         infos[i].append(item[key])
+        # for i in range(4):
+        #     infos[i] = ocr.new_tensor(infos[i])
+        # _, ocr_feat = self.bert(ocr,
+        #                         attention_mask=infos[2],
+        #                         output_all_encoded_layers=False)
+        # if not self.only_ocr:
+        #     _, asr_feat = self.bert(asr,
+        #                             attention_mask=infos[3],
+        #                             output_all_encoded_layers=False)
+        #     return (asr_feat + ocr_feat) / 2
+        # return ocr_feat
 
 
 if __name__ == '__main__':

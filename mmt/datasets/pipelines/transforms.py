@@ -76,7 +76,7 @@ class BertTokenize(object):
         self.max_length = max_length
 
     def tokenize(self, text):
-        PAD, CLS = '[PAD]', '[CLS]'
+        PAD, CLS = '[PAD]', '[CLS]'  # noqa
         token = self.tokenizer.tokenize(text)
         assert sum([x == '[UNK]' for x in token]) / len(token) < 0.5, \
             'Please check if the vocab file is correctly loaded'
@@ -98,6 +98,16 @@ class BertTokenize(object):
         text = results.pop('text')
         if 'meta_info' not in results.keys():
             results['meta_info'] = {}
+        assert self.max_length % 4 == 0
+        block_len = self.max_length // 4
+        if len(text['video_ocr']) > block_len * 3:
+            text['video_ocr'] = text['video_ocr'][:block_len * 3]
+            text['video_ocr'] = text['video_ocr'][:-1] + '#'
+            text['video_ocr'] += text['video_asr'][-block_len:]
+        else:
+            text['video_ocr'] += '#'
+            remain_len = self.max_length - len(text['video_ocr'])
+            text['video_ocr'] += text['video_asr'][-remain_len:]
         ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
         asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])
         results['ocr_text'], results['asr_text'] = ocr_token, asr_token

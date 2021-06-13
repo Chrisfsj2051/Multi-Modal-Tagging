@@ -20,10 +20,11 @@ data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
             train=dict(pipeline=train_pipeline))
 
-model = dict(modal_used=['text'],
-             branch_config=dict(text=dict(_delete_=True, type='Bert')),
-             head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
-                              video=dict(norm_cfg=norm_cfg),
-                              text=dict(norm_cfg=norm_cfg, in_dim=768),
-                              audio=dict(norm_cfg=norm_cfg),
-                              fusion=dict(norm_cfg=norm_cfg)))
+model = dict(
+    modal_used=['text'],
+    branch_config=dict(text=dict(_delete_=True, type='Bert', only_ocr=True)),
+    head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
+                     video=dict(norm_cfg=norm_cfg),
+                     text=dict(norm_cfg=norm_cfg, in_dim=768),
+                     audio=dict(norm_cfg=norm_cfg),
+                     fusion=dict(norm_cfg=norm_cfg)))

@@ -2,10 +2,15 @@ import os
 import random
 
 configs = os.listdir('configs/')
-
-for cfg in configs:
-    if 'id11' not in cfg:
+cnt = 0
+for i, cfg in enumerate(configs):
+    if 'bert' not in cfg:
         continue
     PORT = random.randint(10000, 30000)
-    # print(f'PORT={PORT} nohup bash tools/dist_train.sh {"configs/"+cfg} 2 &\nsleep 1\n') # noqa
-    print(f'PORT={PORT} bash tools/dist_train.sh {"configs/"+cfg} 2')
+    if cnt % 2 == 0:
+        cmd = f'PORT={PORT} nohup bash tools/dist_train.sh {"configs/"+cfg} 2 &'  # noqa
+    else:
+        cmd = f'PORT={PORT} bash tools/dist_train.sh {"configs/" + cfg} 2'
+    cnt += 1
+    print(cmd)
+    print('sleep 3')

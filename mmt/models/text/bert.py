@@ -2,15 +2,26 @@ import torch.nn as nn
 
 from mmt.datasets.pipelines.transforms import BertTokenize
 from mmt.models.builder import TEXT
-from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import (BertConfig,
-                                                                   BertModel)
+from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertModel
 
 
 @TEXT.register_module()
 class Bert(nn.Module):
-    def __init__(self, ckpt_path='pretrained/bert/'):
+    def __init__(self, ckpt_path='pretrained/bert/', fixed=False):
         super(Bert, self).__init__()
         self.bert = BertModel.from_pretrained(ckpt_path)
+        if fixed:
+            self.bert.eval()
+            for param in self.bert.parameters():
+                param.requires_grad = False
+        self.fixed = fixed
+
+    def train(self, mode=True):
+        """Convert the model into training mode while keep normalization layer
+        freezed."""
+        super(Bert, self).train(mode)
+        if self.fixed:
+            self.bert.eval()
 
     def forward(self, x, meta_info):
         assert x.ndim == 2

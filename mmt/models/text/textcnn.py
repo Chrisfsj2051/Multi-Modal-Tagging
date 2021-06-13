@@ -45,12 +45,13 @@ class TextCNN(nn.Module):
 @TEXT.register_module()
 class TwoStreamTextCNN(TextCNN):
     def forward(self, x, meta_info):
-        assert x.ndim == 2
-        ocr, asr = x.split(x.shape[1] // 2, dim=1)
-        ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
-        asr_feat = super(TwoStreamTextCNN, self).forward(asr)
-        out = (ocr_feat + asr_feat) / 2
-        return out
+        # assert x.ndim == 2
+        # ocr, asr = x.split(x.shape[1] // 2, dim=1)
+        # ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
+        # asr_feat = super(TwoStreamTextCNN, self).forward(asr)
+        # out = (ocr_feat + asr_feat) / 2
+        # return out
+        return super(TwoStreamTextCNN, self).forward(x)
 
 
 if __name__ == '__main__':

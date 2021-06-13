@@ -5,9 +5,4 @@ _base_ = [
 
 data = dict(samples_per_gpu=2, workers_per_gpu=4)
 
-model = dict(
-    modal_used=['image'],
-    head_config=dict(
-        image=dict(dropout_p=0.0)
-    )
-)
+model = dict(modal_used=['image'], head_config=dict(image=dict(dropout_p=0.0)))

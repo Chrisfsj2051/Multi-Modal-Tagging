@@ -3,7 +3,6 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-
 norm_cfg = dict(type='SyncBN')
 # norm_cfg = dict(type='BN1d')
 
@@ -17,21 +16,25 @@ train_pipeline = [
          contrast_range=(0.5, 1.5),
          saturation_range=(0.5, 1.5),
          hue_delta=18),
+    dict(type='CutOut',
+         n_holes=3,
+         cutout_ratio=[(0.05, 0.05), (0.1, 0.1), (0.07, 0.07)]),
+    dict(type='CutOut',
+         n_holes=1,
+         cutout_ratio=[(0.2, 0.2), (0.15, 0.15), (0.13, 0.13)]),
     dict(type='AutoAugment',
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
-         [[dict(type='Rotate', prob=0.5, level=i)]
-          for i in range(1, 11)]),
+         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='BertTokenize', bert_path='dataset/vocab_small.txt',
-         max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
+    dict(type='Collect',
+         keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
 ]
-
 
 data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
@@ -48,7 +51,6 @@ model = dict(
                      text=dict(norm_cfg=norm_cfg),
                      audio=dict(norm_cfg=norm_cfg),
                      fusion=dict(norm_cfg=norm_cfg)))
-
 
 optimizer = dict(lr=0.1,
                  paramwise_cfg=dict(

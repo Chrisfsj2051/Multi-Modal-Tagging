@@ -7,9 +7,13 @@ from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertModel
 
 @TEXT.register_module()
 class Bert(nn.Module):
-    def __init__(self, ckpt_path='pretrained/bert/', fixed=False):
+    def __init__(self,
+                 ckpt_path='pretrained/bert/',
+                 fixed=False,
+                 only_ocr=False):
         super(Bert, self).__init__()
         self.bert = BertModel.from_pretrained(ckpt_path)
+        self.only_ocr = only_ocr
         if fixed:
             self.bert.eval()
             for param in self.bert.parameters():
@@ -36,10 +40,12 @@ class Bert(nn.Module):
         _, ocr_feat = self.bert(ocr,
                                 attention_mask=infos[2],
                                 output_all_encoded_layers=False)
-        _, asr_feat = self.bert(asr,
-                                attention_mask=infos[3],
-                                output_all_encoded_layers=False)
-        return (asr_feat + ocr_feat) / 2
+        if not self.only_ocr:
+            _, asr_feat = self.bert(asr,
+                                    attention_mask=infos[3],
+                                    output_all_encoded_layers=False)
+            return (asr_feat + ocr_feat) / 2
+        return ocr_feat
 
 
 if __name__ == '__main__':

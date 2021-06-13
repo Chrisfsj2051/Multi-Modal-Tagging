@@ -7,7 +7,7 @@ model = dict(modal_used=['text'],
                  in_dim=768,
              )))
 
-optimizer = dict(lr=0.1,
+optimizer = dict(lr=0.01,
                  paramwise_cfg=dict(
                      custom_keys={
                          'image_branch': dict(lr_mult=0.01, decay_mult=1.0),

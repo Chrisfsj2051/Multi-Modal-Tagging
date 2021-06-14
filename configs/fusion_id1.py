@@ -21,13 +21,7 @@ optimizer = dict(_delete_=True,
                          'fusion': dict(weight_decay_mult=1.0)
                      }))
 
-model = dict(
-    mode=3,
-    # branch_config=dict(text=dict(_delete_=True, type='Bert')),
-    # head_config=dict(text=dict(type='SEHead', in_dim=768),
-    #                  fusion=dict(type='SEHead', in_dim=20224)),
-    # modal_dropout_p=dict(text=0.3, video=0.3, image=0.3, audio=0.3),
-)
+model = dict(mode=3)
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
@@ -39,9 +33,6 @@ lr_config = dict(policy='step',
                  step=[train_total_iters // 3, 2 * train_total_iters // 3])
 
 runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
-
-img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
-                    std=[58.395, 57.12, 57.375])
 
 data = dict(
     workers_per_gpu=8,

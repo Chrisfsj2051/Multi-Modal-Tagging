@@ -108,7 +108,7 @@ class BertTokenize(object):
             text['video_ocr'] += '#'
             remain_len = self.max_length - len(text['video_ocr'])
             text['video_ocr'] += text['video_asr'][-remain_len:]
-        results['text'] = deepcopy(text['video_ocr'])
+
         # ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
         # results['text'] = ocr_token
         # results['meta_info']['text_mask'] = ocr_mask

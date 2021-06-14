@@ -31,7 +31,7 @@ model = dict(modal_used=['text'],
              ),
              head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
                               video=dict(norm_cfg=norm_cfg),
-                              text=dict(dropout_p=0.8, norm_cfg=norm_cfg),
+                              text=dict(dropout_p=0.5, norm_cfg=norm_cfg),
                               audio=dict(norm_cfg=norm_cfg),
                               fusion=dict(norm_cfg=norm_cfg)))
 

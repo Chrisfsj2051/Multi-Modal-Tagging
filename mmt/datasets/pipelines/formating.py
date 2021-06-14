@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from copy import deepcopy
 
 import mmcv
 import numpy as np
@@ -173,7 +172,6 @@ class DefaultFormatBundle(object):
         # results['text'] = torch.cat(
         #     [to_tensor(results['ocr_text']),
         #      to_tensor(results['asr_text'])])
-        results['text'] = deepcopy(results['video_ocr'])
         results['text'] = DC(to_tensor(results['text']),
                              stack=True,
                              pad_dims=None)

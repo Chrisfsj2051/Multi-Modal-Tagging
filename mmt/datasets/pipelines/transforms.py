@@ -108,11 +108,11 @@ class BertTokenize(object):
             text['video_ocr'] += '#'
             remain_len = self.max_length - len(text['video_ocr'])
             text['video_ocr'] += text['video_asr'][-remain_len:]
+        ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
+        results['text'] = ocr_token
+        results['meta_info']['text_mask'] = ocr_mask
+        results['meta_info']['text_seq_len'] = ocr_seq_len
 
-        # ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
-        # results['text'] = ocr_token
-        # results['meta_info']['text_mask'] = ocr_mask
-        # results['meta_info']['text_seq_len'] = ocr_seq_len
         # asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])
         # results['ocr_text'], results['asr_text'] = ocr_token, asr_token
         # results['meta_info']['ocr_mask'] = ocr_mask

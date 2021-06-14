@@ -44,6 +44,6 @@ img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 
 data = dict(
-    workers_per_gpu=0,
-    samples_per_gpu=2,
+    workers_per_gpu=8,
+    samples_per_gpu=8,
 )

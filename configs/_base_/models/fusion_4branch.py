@@ -7,30 +7,29 @@ model = dict(
     use_batch_norm=False,
     mode=3,
     modal_used=modal_used,
-    branch_config=dict(
-        video=dict(type='NeXtVLAD',
-                   feature_size=1024,
-                   max_frames=300,
-                   cluster_size=128),
-        audio=dict(type='NeXtVLAD',
-                   feature_size=128,
-                   max_frames=300,
-                   cluster_size=64),
-        image=dict(type='ResNet',
-                   depth=50,
-                   num_stages=4,
-                   out_indices=(3,),
-                   frozen_stages=1,
-                   norm_cfg=dict(type='BN', requires_grad=True),
-                   norm_eval=True,
-                   style='pytorch'),
-        text=dict(type='TwoStreamTextCNN',
-                  vocab_size=9906,
-                  ebd_dim=300,
-                  channel_in=256,
-                  channel_out=1024,
-                  filter_size=(2, 3, 4),
-                  dropout_p=0.0)),
+    branch_config=dict(video=dict(type='NeXtVLAD',
+                                  feature_size=1024,
+                                  max_frames=300,
+                                  cluster_size=128),
+                       audio=dict(type='NeXtVLAD',
+                                  feature_size=128,
+                                  max_frames=300,
+                                  cluster_size=64),
+                       image=dict(type='ResNet',
+                                  depth=50,
+                                  num_stages=4,
+                                  out_indices=(3, ),
+                                  frozen_stages=1,
+                                  norm_cfg=dict(type='BN', requires_grad=True),
+                                  norm_eval=True,
+                                  style='pytorch'),
+                       text=dict(type='TwoStreamTextCNN',
+                                 vocab_size=21129,
+                                 ebd_dim=300,
+                                 channel_in=256,
+                                 channel_out=1024,
+                                 filter_size=(2, 3, 4),
+                                 dropout_p=0.0)),
     # ebd_config=dict(video=dict(type='FCHead', in_dim=16384, out_dim=1024),
     #                 image=dict(type='FCHead', in_dim=2048, out_dim=1024),
     #                 text=dict(type='FCHead', in_dim=1024, out_dim=1024),
@@ -46,8 +45,7 @@ model = dict(
                 type='ClsHead',
                 in_dim=1024,
                 out_dim=82,
-                loss=dict(type='MultiLabelBCEWithLogitsLoss')
-            ),
+                loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         image=dict(
             type='SEHead',
@@ -59,8 +57,7 @@ model = dict(
                 type='ClsHead',
                 in_dim=1024,
                 out_dim=82,
-                loss=dict(type='MultiLabelBCEWithLogitsLoss')
-            ),
+                loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         text=dict(
             type='SEHead',
@@ -72,8 +69,7 @@ model = dict(
                 type='ClsHead',
                 in_dim=1024,
                 out_dim=82,
-                loss=dict(type='MultiLabelBCEWithLogitsLoss')
-            ),
+                loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         audio=dict(
             type='SEHead',
@@ -85,8 +81,7 @@ model = dict(
                 type='ClsHead',
                 in_dim=1024,
                 out_dim=82,
-                loss=dict(type='MultiLabelBCEWithLogitsLoss')
-            ),
+                loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         fusion=dict(
             type='SEHead',
@@ -107,7 +102,4 @@ model = dict(
                 #           apply_onehot=False,
                 #           with_sigmoid=False),
                 # label_id_file='dataset/tagging/label_super_id.txt'
-            )
-        )
-    )
-)
+            ))))

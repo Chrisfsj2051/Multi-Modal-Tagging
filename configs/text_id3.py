@@ -3,7 +3,6 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-# norm_cfg = dict(type='SyncBN')
 norm_cfg = dict(type='BN1d')
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
@@ -29,20 +28,18 @@ model = dict(modal_used=['text'],
                  video=dict(norm_cfg=norm_cfg),
                  audio=dict(norm_cfg=norm_cfg),
              ),
-             head_config=dict(image=dict(dropout_p=0.7, norm_cfg=norm_cfg),
+             head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
                               video=dict(norm_cfg=norm_cfg),
-                              text=dict(dropout_p=0.5, norm_cfg=norm_cfg),
+                              text=dict(norm_cfg=norm_cfg),
                               audio=dict(norm_cfg=norm_cfg),
                               fusion=dict(norm_cfg=norm_cfg)))
 
-optimizer = dict(
-    lr=0.01,
-    paramwise_cfg=dict(
-        custom_keys={
-            'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
-            # 'text_branch': dict(lr_mult=0.001, decay_mult=1.0),
-            'text_branch': dict(lr_mult=0.01, decay_mult=1.0),
-            'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
-            'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
-            'fusion': dict(weight_decay_mult=1.0)
-        }))
+optimizer = dict(lr=0.01,
+                 paramwise_cfg=dict(
+                     custom_keys={
+                         'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'text_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'fusion': dict(weight_decay_mult=1.0)
+                     }))

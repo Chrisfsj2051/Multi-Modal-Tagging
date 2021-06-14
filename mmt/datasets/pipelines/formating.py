@@ -169,9 +169,11 @@ class DefaultFormatBundle(object):
         if 'meta_info' not in results.keys():
             results['meta_info'] = {}
         results['meta_info'] = DC(results['meta_info'], cpu_only=True)
-        # results['text'] = torch.cat(
-        #     [to_tensor(results['ocr_text']),
-        #      to_tensor(results['asr_text'])])
+        if 'text' not in results.keys():
+            results['text'] = torch.cat([
+                to_tensor(results['ocr_text']),
+                to_tensor(results['asr_text'])
+            ])
         results['text'] = DC(to_tensor(results['text']),
                              stack=True,
                              pad_dims=None)

@@ -19,10 +19,22 @@ train_pipeline = [
     dict(type='Collect',
          keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
 ]
-
+val_pipeline = [
+    dict(type='LoadAnnotations'),
+    dict(type='BertTokenize',
+         bert_path='pretrained/bert',
+         max_length=256,
+         hybrid=True),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='Resize', size=(224, 224)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
+]
 data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
-            train=dict(pipeline=train_pipeline))
+            train=dict(pipeline=train_pipeline),
+            val=dict(pipeline=val_pipeline))
 
 model = dict(modal_used=['text'],
              branch_config=dict(text=dict(_delete_=True, type='Bert')),

@@ -3,8 +3,8 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-norm_cfg = dict(type='SyncBN')
-# norm_cfg = dict(type='BN1d')
+# norm_cfg = dict(type='SyncBN')
+norm_cfg = dict(type='BN1d')
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
@@ -29,7 +29,7 @@ model = dict(modal_used=['text'],
                  video=dict(norm_cfg=norm_cfg),
                  audio=dict(norm_cfg=norm_cfg),
              ),
-             head_config=dict(image=dict(dropout_p=0.8, norm_cfg=norm_cfg),
+             head_config=dict(image=dict(dropout_p=0.7, norm_cfg=norm_cfg),
                               video=dict(norm_cfg=norm_cfg),
                               text=dict(dropout_p=0.5, norm_cfg=norm_cfg),
                               audio=dict(norm_cfg=norm_cfg),

@@ -3,8 +3,8 @@ _base_ = [
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
 
-norm_cfg = dict(type='SyncBN')
-# norm_cfg = dict(type='BN1d')
+# norm_cfg = dict(type='SyncBN')
+norm_cfg = dict(type='BN1d')
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])

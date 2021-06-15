@@ -1,82 +1,69 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from mmt.models.builder import HEAD, build_head
 
-def get_attn_pad_mask(seq_q, seq_k):
-    '''
-    seq_q: [batch_size, seq_len]
-    seq_k: [batch_size, seq_len]
-    seq_len could be src_len or it could be tgt_len
-    seq_len in seq_q and seq_len in seq_k maybe not equal
-    '''
-    batch_size, len_q = seq_q.size()
-    batch_size, len_k = seq_k.size()
-    # eq(zero) is PAD token
-    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)  # [batch_size, 1, len_k], False is masked
-    return pad_attn_mask.expand(batch_size, len_q, len_k)  # [batch_size, len_q, len_k]
+
 
 class ScaledDotProductAttention(nn.Module):
-    def __init__(self, d_k):
+    def __init__(self):
         super(ScaledDotProductAttention, self).__init__()
-        self.d_k = d_k
 
-    def forward(self, Q, K, V, attn_mask):
+    def forward(self, Q, K, V, scale=None):
         '''
-        Q: [batch_size, n_heads, len_q, d_k]
-        K: [batch_size, n_heads, len_k, d_k]
-        V: [batch_size, n_heads, len_v(=len_k), d_v]
-        attn_mask: [batch_size, n_heads, seq_len, seq_len]
+        Args:
+            Q: [batch_size, len_Q, dim_Q]
+            K: [batch_size, len_K, dim_K]
+            V: [batch_size, len_V, dim_V]
+            scale: 缩放因子 论文为根号dim_K
+        Return:
+            self-attention后的张量，以及attention张量
         '''
-        # scores : [batch_size, n_heads, len_q, len_k]
-        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(self.d_k)
-        # Fills elements of self tensor with value where mask is True.
-        scores.masked_fill_(attn_mask, -1e9)
-        attn = nn.Softmax(dim=-1)(scores)
-        # [batch_size, n_heads, len_q, d_v]
-        context = torch.matmul(attn, V)
-        return context, attn
+        attention = torch.matmul(Q, K.permute(0, 2, 1))
+        if scale:
+            attention = attention * scale
+        # if mask:  # TODO change this
+        #     attention = attention.masked_fill_(mask == 0, -1e9)
+        attention = F.softmax(attention, dim=-1)
+        context = torch.matmul(attention, V)
+        return context
+
+
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_k, d_v, n_heads, in_dim_k, in_dim_v):
+    def __init__(self, dim_in, num_head):
         super(MultiHeadAttention, self).__init__()
-        self.W_Q = nn.Linear(in_dim_k, d_k * n_heads, bias=False)
-        self.W_K = nn.Linear(in_dim_v, d_k * n_heads, bias=False)
-        self.W_V = nn.Linear(in_dim_v, d_v * n_heads, bias=False)
-        self.fc = nn.Linear(n_heads * d_v, in_dim_k, bias=False)
-        self.n_heads = n_heads
-        self.d_k = d_k
-        self.d_v = d_v
-        self.ln = nn.LayerNorm(in_dim_k)
-        self.dot_attn = ScaledDotProductAttention(in_dim_k)
+        self.num_head = num_head
+        assert dim_in % num_head == 0
+        dim_head = dim_in // num_head
+        self.dim_head = dim_head
+        self.W_Q = nn.Linear(dim_in, dim_head * num_head, bias=False)
+        self.W_K = nn.Linear(dim_in, dim_head * num_head, bias=False)
+        self.W_V = nn.Linear(dim_in, dim_head * num_head, bias=False)
+        self.fc = nn.Linear(dim_head * num_head, dim_in, bias=False)
+        self.layer_norm = nn.LayerNorm(dim_in)
+        self.attention = ScaledDotProductAttention()
 
-    def forward(self, input_Q, input_K, input_V, attn_mask):
-        '''
-        input_Q: [batch_size, len_q, d_model]
-        input_K: [batch_size, len_k, d_model]
-        input_V: [batch_size, len_v(=len_k), d_model]
-        attn_mask: [batch_size, seq_len, seq_len]
-        '''
-        residual, batch_size = input_Q, input_Q.size(0)
-        # (B, S, D) -proj-> (B, S, D_new) -split-> (B, S, H, W) -trans-> (B, H, S, W)
-        Q = self.W_Q(input_Q).view(
-            batch_size, -1, self.n_heads,
-            self.d_k).transpose(1, 2)  # Q: [batch_size, n_heads, len_q, d_k]
-        K = self.W_K(input_K).view(
-            batch_size, -1, self.n_heads,
-            self.d_k).transpose(1, 2)  # K: [batch_size, n_heads, len_k, d_k]
-        V = self.W_V(input_V).view(
-            batch_size, -1, self.n_heads, self.d_v).transpose(
-                1, 2)  # V: [batch_size, n_heads, len_v(=len_k), d_v]
-        # attn_mask : [batch_size, n_heads, seq_len, seq_len]
-        attn_mask = attn_mask.unsqueeze(1).repeat(1, self.n_heads, 1,1)
-        # context: [batch_size, n_heads, len_q, d_v], attn: [batch_size, n_heads, len_q, len_k]
-        context, attn = self.dot_attn(Q, K, V, attn_mask)
-        context = context.transpose(1, 2).reshape(
-            batch_size, -1, self.n_heads *
-            self.d_v)  # context: [batch_size, len_q, n_heads * d_v]
-        output = self.fc(context)  # [batch_size, len_q, d_model]
-        return self.ln(output + residual), attn
+
+    def forward(self, x):
+        assert x.ndim == 3
+        batch_size = x.size(0)
+        Q = self.W_Q(x)
+        K = self.W_K(x)
+        V = self.W_V(x)
+        Q = Q.view(batch_size * self.num_head, -1, self.dim_head)
+        K = K.view(batch_size * self.num_head, -1, self.dim_head)
+        V = V.view(batch_size * self.num_head, -1, self.dim_head)
+        scale = K.size(-1) ** -0.5  # 缩放因子
+        context = self.attention(Q, K, V, scale)
+        context = context.view(batch_size, -1, self.dim_head * self.num_head)
+        out = self.fc(context)
+        # out = self.dropout(out)
+        out = out + x
+        out = self.layer_norm(out)
+        return out
 
 
 class PoswiseFeedForwardNet(nn.Module):
@@ -88,72 +75,58 @@ class PoswiseFeedForwardNet(nn.Module):
         self.ln = nn.LayerNorm(in_dim)
 
     def forward(self, inputs):
-        '''
-        inputs: [batch_size, seq_len, d_model]
-        '''
         residual = inputs
         output = self.fc(inputs)
-        return self.ln(output + residual)  # [batch_size, seq_len, d_model]
+        return self.ln(output + residual)
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, d_k, d_v, n_heads, in_dim_x, in_dim_y, ff_feat_dim):
+    def __init__(self, dim_in, num_head, dim_hidden):
         super(EncoderLayer, self).__init__()
-        self.enc_self_attn = MultiHeadAttention(d_k, d_v, n_heads, in_dim_x, in_dim_y)
-        self.pos_ffn = PoswiseFeedForwardNet(in_dim_x, ff_feat_dim)
+        self.attention = MultiHeadAttention(dim_in, num_head)
+        self.pos_ffn = PoswiseFeedForwardNet(dim_in, dim_hidden)
 
-    def forward(self, x, y, attn_mask):
-        '''
-        enc_inputs: [batch_size, src_len, d_model]
-        enc_self_attn_mask: [batch_size, src_len, src_len]
-        '''
-        # enc_outputs: [batch_size, src_len, d_model], attn: [batch_size, n_heads, src_len, src_len]
-        # enc_inputs to same Q,K,V
-        enc_outputs, attn = self.enc_self_attn(x, y, y, attn_mask)
-        # enc_outputs: [batch_size, src_len, d_model]
-        enc_outputs = self.pos_ffn(enc_outputs)
-        return enc_outputs, attn
+    def forward(self, x):
+        out = self.attention(x)
+        out = self.pos_ffn(out)
+        return out
 
 
-class BiAttnFusion(nn.Module):
-    def __init__(self, d_k, d_v, n_heads, in_dim_x, in_dim_y, n_layers, ff_feat_dim):
-        super(BiAttnFusion, self).__init__()
-        self.attn_x = nn.ModuleList([
-            EncoderLayer(d_k, d_v, n_heads, in_dim_x, in_dim_y, ff_feat_dim)
-            for _ in range(n_layers)
-        ])
-        self.attn_y = nn.ModuleList([
-            EncoderLayer(d_k, d_v, n_heads, in_dim_y, in_dim_x, ff_feat_dim)
-            for _ in range(n_layers)
+class TransformerEncoder(nn.Module):
+    def __init__(self, dim_in, num_head, dim_hidden, num_layers):
+        super(TransformerEncoder, self).__init__()
+        self.encoder = nn.ModuleList([
+            EncoderLayer(dim_in, num_head, dim_hidden)
+            for _ in range(num_layers)
         ])
 
-    def forward(self, x, y):
-        '''
-        enc_inputs: [batch_size, src_len]
-        '''
-        assert x.shape[1] == y.shape[1]
-        # seq_len = max(x.shape[1], y.shape[1])
-        # assert x.shape[1] <= seq_len
-        # x = torch.cat([x, torch.zeros_like(x)[:, :seq_len-x.shape[1]]], 1)
-        attn_pad_x = get_attn_pad_mask(x[:, :, 0], y[:, :, 0])
-        attn_pad_y = get_attn_pad_mask(y[:, :, 0], x[:, :, 0])
-        for attn_x, attn_y in zip(self.attn_x, self.attn_y):
-            # enc_outputs: [batch_size, src_len, d_model], enc_self_attn: [batch_size, n_heads, src_len, src_len]
-            x_ = attn_x(x, y, attn_pad_x)[0]
-            y_ = attn_y(y, x, attn_pad_y)[0]
-            x, y = x_, y_
+    def forward(self, x):
+        for encoder in self.encoder:
+            x = encoder(x)
+            print(x.shape)
+        return x
 
-        return x, y
+@HEAD.register_module()
+class SelfAttnFusionHead(nn.Module):
+    def __init__(self,  dim_in, num_head, dim_hidden, num_layers, cls_head_config):
+        super(SelfAttnFusionHead, self).__init__()
+        self.cls_head = build_head(cls_head_config)
+        self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden, num_layers)
+
+    def forward(self, x):
+        return self.encoder(x)
+
+    def forward_train(self, x, gt_labels):
+        activation = self(x)
+        return self.cls_head.forward_train(activation, gt_labels)
+
+    def simple_test(self, x):
+        activation = self(x)
+        return self.cls_head.simple_test(activation)
 
 
 if __name__ == '__main__':
-    model = BiAttnFusion(d_k=64,
-                         d_v=64,
-                         n_layers=6,
-                         in_dim_x=1024,
-                         in_dim_y=512,
-                         n_heads=8,
-                         ff_feat_dim=2048)
+    model = TransformerEncoder(256, 5, 1024, 3)
     inputs_x = torch.randn((4, 256, 1024))
     inputs_y = torch.randn((4, 300, 512))
-    model(inputs_x, inputs_y)
+    model(inputs_x)

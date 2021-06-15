@@ -15,7 +15,7 @@ TODO:
 
 
 @HEAD.register_module()
-class SEHead(nn.Module):
+class SingleSEHead(nn.Module):
     def __init__(self,
                  in_dim,
                  out_dim,
@@ -23,7 +23,7 @@ class SEHead(nn.Module):
                  cls_head_config,
                  norm_cfg=dict(type='BN1d'),
                  dropout_p=0.0):
-        super(SEHead, self).__init__()
+        super(SingleSEHead, self).__init__()
         self.cls_head = build_head(cls_head_config)
         self.out_dim = out_dim
         self.in_dim = in_dim
@@ -64,3 +64,14 @@ class SEHead(nn.Module):
     def simple_test(self, x):
         activation = self(x)
         return self.cls_head.simple_test(activation)
+
+@HEAD.register_module()
+class FusionSEHead(SingleSEHead):
+
+    def forward_train(self, modal_inputs, feats_dict, gt_labels):
+        x = torch.cat(list(feats_dict.values()), 1)
+        return super(FusionSEHead, self).forward_train(x, gt_labels)
+
+    def simple_test(self, modal_inputs, feats_dict):
+        x = torch.cat(list(feats_dict.values()), 1)
+        return super(FusionSEHead, self).simple_test(x)

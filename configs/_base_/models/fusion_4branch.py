@@ -36,7 +36,7 @@ model = dict(
     #                 audio=dict(type='FCHead', in_dim=1024, out_dim=1024)),
     head_config=dict(
         video=dict(
-            type='SEHead',
+            type='SingleSEHead',
             in_dim=16384,
             gating_reduction=8,
             out_dim=1024,
@@ -48,7 +48,7 @@ model = dict(
                 loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         image=dict(
-            type='SEHead',
+            type='SingleSEHead',
             in_dim=2048,
             gating_reduction=8,
             out_dim=1024,
@@ -60,7 +60,7 @@ model = dict(
                 loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         text=dict(
-            type='SEHead',
+            type='SingleSEHead',
             in_dim=1024,
             gating_reduction=8,
             out_dim=1024,
@@ -72,7 +72,7 @@ model = dict(
                 loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         audio=dict(
-            type='SEHead',
+            type='SingleSEHead',
             in_dim=1024,
             dropout_p=0.5,
             gating_reduction=8,
@@ -84,7 +84,7 @@ model = dict(
                 loss=dict(type='MultiLabelBCEWithLogitsLoss')),
         ),
         fusion=dict(
-            type='SEHead',
+            type='FusionSEHead',
             in_dim=20480,
             gating_reduction=8,
             dropout_p=0.8,

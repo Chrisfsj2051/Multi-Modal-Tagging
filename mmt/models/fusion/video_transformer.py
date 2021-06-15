@@ -12,7 +12,7 @@ from mmt.utils import get_root_logger
 
 
 @FUSION.register_module()
-class MultiBranchesFusionModel(BaseFusionModel):
+class SingleBranchesFusionModel(BaseFusionModel):
     """
     Args:
         mode (int):
@@ -20,19 +20,17 @@ class MultiBranchesFusionModel(BaseFusionModel):
             mode2: Train fusion head;
             mode3: Train All.
     """
-    def __init__(self, mode, modal_used, branch_config, head_config,
-                 use_batch_norm, pretrained, modal_dropout_p):
-        super(MultiBranchesFusionModel, self).__init__()
+    def __init__(self, modal_used, branch_config, head_config, use_batch_norm,
+                 pretrained):
+        super(SingleBranchesFusionModel, self).__init__()
+        assert len(modal_used) == 1
         build_branch_method = {
             'video': build_frame_branch,
             'image': build_image_branch,
             'text': build_text_branch,
             'audio': build_frame_branch
         }
-        self.mode = mode
         self.modal_list = modal_used
-        self.modal_dropout_p = modal_dropout_p
-        # self.add_module('attn', build_head(attn_config))
         for modal in self.modal_list:
             self.add_module(f'{modal}_branch',
                             build_branch_method[modal](branch_config[modal]))
@@ -41,8 +39,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
             if use_batch_norm:
                 self.add_module(f'{modal}_bn',
                                 nn.LayerNorm(head_config[modal]['in_dim']))
-        assert 'fusion' in head_config.keys()
-        self.add_module('fusion_head', build_head(head_config['fusion']))
         self.use_batch_norm = use_batch_norm
         if pretrained and 'video' in pretrained and 'video' in modal_used:
             self.load_pretrained(self.video_branch, pretrained['video'])
@@ -51,22 +47,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
         if pretrained and 'audio' in pretrained and 'text' in modal_used:
             self.load_pretrained(self.audio_branch, pretrained['audio'])
         if pretrained and 'image' in pretrained and 'image' in modal_used:
-            # trans_key = None
-            # if 'ResNet' in branch_config['image']['type']:
-            #     trans_key = resnet_trans_key
             self.load_pretrained(self.image_branch, pretrained['image'])
-
-        if mode == 1:
-            for param in self.fusion_head.parameters():
-                param.requires_grad = False
-            # for param in self.attn.parameters():
-            #     param.requires_grad = False
-        elif mode == 2:
-            for modal in self.modal_list:
-                for arch in ('branch', 'head'):
-                    for param in self.__getattr__(
-                            f'{modal}_{arch}').parameters():
-                        param.requires_grad = False
 
     def load_pretrained(self, model, pretrained):
         logger = get_root_logger()
@@ -87,12 +68,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
         load_state_dict(model, state_dict, strict=False, logger=logger)
 
     def forward_train(self, video, image, text, audio, meta_info, gt_labels):
-        if self.mode == 2:
-            for modal in self.modal_list:
-                for arch in ('branch', 'head'):
-                    self.__getattr__(f'{modal}_{arch}').eval()
 
-        feats_dict, losses = {}, {}
+        feats_list, losses = [], {}
         modal_inputs = {
             'video': video,
             'image': image,
@@ -107,42 +84,15 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            # ebd = self.__getattr__(f'{modal}_ebd')(feats)
-            feats_dict[modal] = feats
-            if self.mode != 2:
-                modal_loss = self.__getattr__(f'{modal}_head').forward_train(
-                    feats, gt_labels)
-                for key, val in modal_loss.items():
-                    losses[f'{modal}_{key}'] = val
-
-        if self.mode == 1:
-            return losses
-        if self.modal_dropout_p is not None:
-            feats_dict = self.apply_modal_dropout(feats_dict)
-        fusion_loss = self.fusion_head.forward_train(modal_inputs, feats_dict, gt_labels)
-        for key, val in fusion_loss.items():
-            losses[f'fusion_{key}'] = val
+            feats_list.append(feats)
+            modal_loss = self.__getattr__(f'{modal}_head').forward_train(
+                feats, gt_labels)
+            for key, val in modal_loss.items():
+                losses[f'{modal}_{key}'] = val
         return losses
 
-    def apply_modal_dropout(self, feats_dict):
-        key_list, item_list = [], []
-        for key, val in feats_dict.items():
-            key_list.append(key)
-            item_list.append(val)
-
-        bs = item_list[0].shape[0]
-        dropout_p = [[ 1 - self.modal_dropout_p[x] for _ in range(bs) ] for x in self.modal_list]
-        mask = np.random.binomial(1, dropout_p)
-        for i in range(mask.shape[1]):
-            if sum(mask[:, i]) == 0:
-                mask[random.randint(0, mask.shape[0] - 1), i] = 1
-        mask = torch.from_numpy(mask).cuda()
-        item_list = [x * y[..., None] for (x, y) in zip(item_list, mask)]
-        for i, k in enumerate(key_list):
-            feats_dict[k] = item_list[i]
-        return feats_dict
-
     def simple_test(self, video, image, text, audio, meta_info):
+        ebd_list = []
         modal_inputs = {
             'video': video,
             'image': image,
@@ -150,7 +100,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
             'audio': audio
         }
         test_results = [{}]
-        feats_dict = {}
         for modal in self.modal_list:
             inputs = modal_inputs[modal]
             if modal == 'text':
@@ -159,11 +108,7 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 feats = self.__getattr__(f'{modal}_branch')(inputs)
             if self.use_batch_norm:
                 feats = self.__getattr__(f'{modal}_bn')(feats)
-            # ebd = self.__getattr__(f'{modal}_ebd')(feats)
-            feats_dict[modal] = feats
+            ebd_list.append(feats)
             test_results[0][modal] = self.__getattr__(
                 f'{modal}_head').simple_test(feats)
-        if self.mode == 1:
-            return test_results
-        test_results[0]['fusion'] = self.fusion_head.simple_test(feats_dict)
         return test_results

@@ -2,9 +2,10 @@ _base_ = [
     '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
     '_base_/models/single_branch.py', '_base_/datasets/base_dataset.py'
 ]
+load_from = 'pretrained/text3_audio1_video1_image34.pth'
 
-norm_cfg = dict(type='SyncBN')
-# norm_cfg = dict(type='BN1d')
+# norm_cfg = dict(type='SyncBN')
+norm_cfg = dict(type='BN1d')
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
@@ -31,11 +32,11 @@ val_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=16,
+    samples_per_gpu=4,
     workers_per_gpu=8,
     train=dict(
         type='PretrainMatchDataset',
-        ann_file='dataset/tagging/GroundTruth/datafile/text.txt',
+        ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
         label_id_file='dataset/tagging/label_super_id.txt',
         pipeline=train_pipeline),
     val=dict(type='PretrainMatchDataset',
@@ -64,7 +65,7 @@ model = dict(
             type='SEHead',
             in_dim=17408,
             gating_reduction=8,
-            dropout_p=0.2,
+            dropout_p=0.0,
             out_dim=1024,
             cls_head_config=dict(
                 type='ClsHead',
@@ -77,11 +78,13 @@ model = dict(
 )
 
 optimizer = dict(
+    _delete_=True,
+    type='Adam',
     lr=0.01,
     paramwise_cfg=dict(
         custom_keys={
             'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
-            'text_branch': dict(lr_mult=0.01, decay_mult=1.0),
+            'text_branch': dict(lr_mult=1, decay_mult=1.0),
             'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
             'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
             'fusion': dict(weight_decay_mult=1.0)

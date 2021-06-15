@@ -119,7 +119,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
             return losses
         if self.modal_dropout_p is not None:
             feats_dict = self.apply_modal_dropout(feats_dict)
-        fusion_loss = self.fusion_head.forward_train(modal_inputs, feats_dict, gt_labels)
+        fusion_loss = self.fusion_head.forward_train(modal_inputs, feats_dict,
+                                                     gt_labels)
         for key, val in fusion_loss.items():
             losses[f'fusion_{key}'] = val
         return losses
@@ -131,7 +132,8 @@ class MultiBranchesFusionModel(BaseFusionModel):
             item_list.append(val)
 
         bs = item_list[0].shape[0]
-        dropout_p = [[ 1 - self.modal_dropout_p[x] for _ in range(bs) ] for x in self.modal_list]
+        dropout_p = [[1 - self.modal_dropout_p[x] for _ in range(bs)]
+                     for x in self.modal_list]
         mask = np.random.binomial(1, dropout_p)
         for i in range(mask.shape[1]):
             if sum(mask[:, i]) == 0:
@@ -165,5 +167,6 @@ class MultiBranchesFusionModel(BaseFusionModel):
                 f'{modal}_head').simple_test(feats)
         if self.mode == 1:
             return test_results
-        test_results[0]['fusion'] = self.fusion_head.simple_test(feats_dict)
+        test_results[0]['fusion'] = self.fusion_head.simple_test(
+            modal_inputs, feats_dict)
         return test_results

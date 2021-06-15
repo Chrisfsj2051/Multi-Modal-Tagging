@@ -1,5 +1,6 @@
 import json
 import random
+from copy import deepcopy
 
 import numpy as np
 import torch
@@ -71,7 +72,7 @@ class TaggingDataset:
                            text_anns=self.test_anns[i])
             if not self.test_mode:
                 results['gt_labels'] = self.gt_label[i]
-            results = self.pipeline(results)
+            results = self.pipeline(deepcopy(results))
             if results is not None:
                 return results
             logger = get_root_logger()

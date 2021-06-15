@@ -25,3 +25,19 @@ class MultiLabelBCEWithLogitsLoss(nn.Module):
             gt_onehot = gt_labels
             assert gt_onehot.shape == preds.shape
         return self.loss_weight * self.loss(preds, gt_onehot)
+
+@LOSS.register_module()
+class BCEWithLogitsLoss(nn.Module):
+    def __init__(self, loss_weight=1):
+        super(BCEWithLogitsLoss, self).__init__()
+        self.loss = nn.BCEWithLogitsLoss()
+        self.loss_weight = loss_weight
+
+    def forward(self, preds, gt_labels):
+        """
+        Args:
+            preds (torch.Tensor): (82, )
+            gt_labels (torch.Tensor): (NUM_C, )
+        """
+        # print(preds, gt_labels, self.loss(preds, gt_labels.float()))
+        return self.loss_weight * self.loss(preds, gt_labels.float())

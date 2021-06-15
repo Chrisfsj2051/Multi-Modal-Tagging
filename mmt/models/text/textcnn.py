@@ -47,8 +47,8 @@ class TwoStreamTextCNN(TextCNN):
     def forward(self, x, meta_info):
         assert x.ndim == 2
         ocr, asr = x.split(x.shape[1] // 2, dim=1)
-        ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
-        asr_feat = super(TwoStreamTextCNN, self).forward(asr)
+        ocr_feat = super(TwoStreamTextCNN, self).forward(ocr, meta_info)
+        asr_feat = super(TwoStreamTextCNN, self).forward(asr, meta_info)
         out = (ocr_feat + asr_feat) / 2
         return out
         # return super(TwoStreamTextCNN, self).forward(x)

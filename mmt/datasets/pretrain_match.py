@@ -30,9 +30,9 @@ class PretrainMatchDataset(TaggingDataset):
 
     def __getitem__(self, i):
         while True:
-            if not self.test_mode and self.gt_onehot[i] == 0:
-                self.match_list[i] = (self.match_list[i][0],
-                                      get_another(self.match_list[i][0], 0, len(self.video_anns)-1))
+            # if not self.test_mode and self.gt_onehot[i] == 0:
+            #     self.match_list[i] = (self.match_list[i][0],
+            #                           get_another(self.match_list[i][0], 0, len(self.video_anns)-1))
             results = dict(
                 audio_anns=self.audio_anns[self.match_list[i][0]],
                 video_anns=self.video_anns[self.match_list[i][0]],

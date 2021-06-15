@@ -30,7 +30,7 @@ class TextCNN(nn.Module):
         x = F.max_pool1d(x, x.size(2)).squeeze(2)
         return x
 
-    def forward(self, x):
+    def forward(self, x, meta_info):
         assert x.max().item() < self.vocab_size
         out = self.embedding(x)
         out = out.unsqueeze(1)
@@ -45,13 +45,13 @@ class TextCNN(nn.Module):
 @TEXT.register_module()
 class TwoStreamTextCNN(TextCNN):
     def forward(self, x, meta_info):
-        # assert x.ndim == 2
-        # ocr, asr = x.split(x.shape[1] // 2, dim=1)
-        # ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
-        # asr_feat = super(TwoStreamTextCNN, self).forward(asr)
-        # out = (ocr_feat + asr_feat) / 2
-        # return out
-        return super(TwoStreamTextCNN, self).forward(x)
+        assert x.ndim == 2
+        ocr, asr = x.split(x.shape[1] // 2, dim=1)
+        ocr_feat = super(TwoStreamTextCNN, self).forward(ocr)
+        asr_feat = super(TwoStreamTextCNN, self).forward(asr)
+        out = (ocr_feat + asr_feat) / 2
+        return out
+        # return super(TwoStreamTextCNN, self).forward(x)
 
 
 if __name__ == '__main__':

@@ -68,4 +68,4 @@ train_pipeline = [
     dict(type='Collect',
          keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
 ]
-data = dict(samples_per_gpu=4, train=dict(pipeline=train_pipeline))
+data = dict(samples_per_gpu=4, workers_per_gpu=8, train=dict(pipeline=train_pipeline))

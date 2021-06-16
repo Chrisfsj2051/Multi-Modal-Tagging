@@ -10,6 +10,7 @@ def parse_args():
     parser.add_argument('--video', help='checkpoint file')
     parser.add_argument('--audio', help='checkpoint file')
     parser.add_argument('--out', help='checkpoint file')
+    parser.add_argument('--no_keep_head', default=False, action='store_true')
     return parser.parse_args()
 
 
@@ -32,7 +33,8 @@ def main():
     for typ, dic in zip(['text', 'image', 'video', 'audio'],
                         [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):
         for key, val in dic.items():
-            if key.startswith(typ):
+            if key.startswith(typ) and (not args.no_keep_head
+                                        or 'head' not in key):
                 ret[key] = val
     torch.save(ret, args.out)
     print(f'Saved as {args.out}')

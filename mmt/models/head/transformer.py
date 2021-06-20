@@ -1,9 +1,8 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmt.models.builder import HEAD, build_head
 
+from mmt.models.builder import HEAD, build_head
 
 
 class ScaledDotProductAttention(nn.Module):
@@ -30,8 +29,6 @@ class ScaledDotProductAttention(nn.Module):
         return context
 
 
-
-
 class MultiHeadAttention(nn.Module):
     def __init__(self, dim_in, num_head):
         super(MultiHeadAttention, self).__init__()
@@ -46,7 +43,6 @@ class MultiHeadAttention(nn.Module):
         self.layer_norm = nn.LayerNorm(dim_in)
         self.attention = ScaledDotProductAttention()
 
-
     def forward(self, x):
         assert x.ndim == 3
         batch_size = x.size(0)
@@ -56,7 +52,7 @@ class MultiHeadAttention(nn.Module):
         Q = Q.view(batch_size * self.num_head, -1, self.dim_head)
         K = K.view(batch_size * self.num_head, -1, self.dim_head)
         V = V.view(batch_size * self.num_head, -1, self.dim_head)
-        scale = K.size(-1) ** -0.5  # 缩放因子
+        scale = K.size(-1)**-0.5  # 缩放因子
         context = self.attention(Q, K, V, scale)
         context = context.view(batch_size, -1, self.dim_head * self.num_head)
         out = self.fc(context)
@@ -106,15 +102,19 @@ class TransformerEncoder(nn.Module):
             print(x.shape)
         return x
 
+
 @HEAD.register_module()
 class SelfAttnFusionHead(nn.Module):
-    def __init__(self,  dim_in, num_head, dim_hidden, num_layers, cls_head_config):
+    def __init__(self, dim_in, num_head, dim_hidden, num_layers,
+                 cls_head_config):
         super(SelfAttnFusionHead, self).__init__()
         self.cls_head = build_head(cls_head_config)
-        self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden, num_layers)
+        self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden,
+                                          num_layers)
 
-    def forward(self, x):
-        return self.encoder(x)
+    def forward(self, modal_inputs, feats_dict, gt_labels):
+        pass
+        # return self.encoder(x)
 
     def forward_train(self, x, gt_labels):
         activation = self(x)

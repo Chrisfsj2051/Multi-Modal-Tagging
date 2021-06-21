@@ -7,10 +7,10 @@ model = dict(
         dim_in=1024,
         num_head=4,
         dim_hidden=2048,
-        dim_out=1024,
+        dim_out=2048,
         seq_len=300,
         num_layers=3),
     head=dict(
-        in_dim=1024
+        in_dim=2048
     )
 )

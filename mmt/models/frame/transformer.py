@@ -96,14 +96,16 @@ class TransformerEncoder(nn.Module):
             for _ in range(num_layers)
         ])
         self.fc = nn.Linear(seq_len * dim_in, dim_out)
+        self.dropout = nn.Dropout(0.8)
 
     def forward(self, x, meta_info):
         for encoder in self.encoder:
             x = encoder(x)
         x = x.view(x.shape[0], -1)
+        x = self.dropout(x)
         return self.fc(x)
 
-#
+
 # @BACKBONE.register_module()
 # class SelfAttnSingleHead(nn.Module):
 #     def __init__(self, dim_in, num_head, dim_hidden, num_layers):

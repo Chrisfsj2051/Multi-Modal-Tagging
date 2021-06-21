@@ -3,7 +3,7 @@ import warnings
 import mmcv
 import numpy as np
 import torch
-from mmcv.ops import RoIPool
+# from mmcv.ops import RoIPool
 from mmcv.parallel import collate, scatter
 from mmcv.runner import load_checkpoint
 

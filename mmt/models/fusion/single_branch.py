@@ -4,10 +4,11 @@ from mmt.models.fusion import BaseFusionModel
 
 @ARCH.register_module()
 class SingleBranchModel(BaseFusionModel):
-    def __init__(self, backbone, head, pretrained=None):
+    def __init__(self, key, backbone, head, pretrained=None):
         super(SingleBranchModel, self).__init__()
         self.backbone = build_backbone(backbone)
         self.head = build_head(head)
+        self.key = key
         if pretrained is not None:
             self.backbone.init_weights(pretrained=pretrained)
 
@@ -25,4 +26,4 @@ class SingleBranchModel(BaseFusionModel):
         x, meta_info = args
         feats = self.backbone(x, meta_info)
         preds = self.head.simple_test(feats, meta_info)
-        return preds
+        return [{self.key: preds}]

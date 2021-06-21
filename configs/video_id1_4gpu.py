@@ -34,12 +34,13 @@ model = dict(modal_used=['video'],
                               audio=dict(norm_cfg=norm_cfg),
                               fusion=dict(norm_cfg=norm_cfg)))
 
-optimizer = dict(lr=0.01,
-                 paramwise_cfg=dict(
-                     custom_keys={
-                         'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
-                         'text_branch': dict(lr_mult=0.01, decay_mult=1.0),
-                         'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
-                         'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
-                         'fusion': dict(weight_decay_mult=1.0)
-                     }))
+optimizer = dict(
+    lr=0.01,
+    paramwise_cfg=dict(
+        custom_keys={
+            'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
+            'text_branch': dict(lr_mult=0.01, decay_mult=1.0),
+            'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
+            'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),
+            'fusion': dict(weight_decay_mult=1.0)
+        }))

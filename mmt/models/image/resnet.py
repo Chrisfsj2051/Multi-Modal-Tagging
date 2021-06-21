@@ -7,7 +7,7 @@ from mmcv.runner import load_checkpoint
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from ...utils import get_root_logger
-from ..builder import IMAGE
+from ..builder import BACKBONE
 
 
 class ResLayer(nn.Sequential):
@@ -380,7 +380,7 @@ class Bottleneck(nn.Module):
         return out
 
 
-@IMAGE.register_module()
+@BACKBONE.register_module()
 class ResNet(nn.Module):
     """ResNet backbone.
 
@@ -696,7 +696,7 @@ class ResNet(nn.Module):
         else:
             raise TypeError('pretrained must be a str or None')
 
-    def forward(self, x):
+    def forward(self, x, meta_info):
         """Forward function."""
         if self.deep_stem:
             x = self.stem(x)
@@ -726,7 +726,7 @@ class ResNet(nn.Module):
                     m.eval()
 
 
-@IMAGE.register_module()
+@BACKBONE.register_module()
 class ResNetV1d(ResNet):
     r"""ResNetV1d variant described in `Bag of Tricks
     <https://arxiv.org/pdf/1812.01187.pdf>`_.

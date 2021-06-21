@@ -2,7 +2,7 @@ _base_ = 'video_id1_4gpu.py'
 
 model = dict(head_config=dict(
     video=dict(_delete_=True,
-               type='SelfAttnFusionHead',
+               type='SelfAttnSingleHead',
                dim_in=1024,
                num_head=4,
                dim_hidden=2048,

@@ -4,12 +4,9 @@ from collections import OrderedDict
 import torch
 import torch.distributed as dist
 import torch.nn as nn
-from mmcv.runner import auto_fp16
-
-from mmt.models.builder import FUSION
+from mmcv.runner import auto_fp16  # noqa
 
 
-@FUSION.register_module()
 class BaseFusionModel(nn.Module, metaclass=ABCMeta):
     """Base class for detectors."""
     def __init__(self):

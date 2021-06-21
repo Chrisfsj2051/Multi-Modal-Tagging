@@ -5,14 +5,6 @@ from torch.nn import init
 
 from mmt.models.builder import HEAD, build_head
 
-"""
-TODO:
-1. SE-GATING
-2. LAYER NORM
-3. TWO STAGE TRAINING
-4. ...
-"""
-
 
 @HEAD.register_module()
 class SingleSEHead(nn.Module):
@@ -28,10 +20,7 @@ class SingleSEHead(nn.Module):
         self.out_dim = out_dim
         self.in_dim = in_dim
         self.hidden_weight = nn.Parameter(torch.randn(in_dim, out_dim))
-        # self.hidden_bn = nn.BatchNorm1d(out_dim)
         self.hidden_bn = build_norm_layer(norm_cfg, out_dim)[1]
-        # norm_cfg =
-        # self.hidden_bn = build_norm_layer(norm_cfg, planes * block.expansion)[1]nn.BatchNorm1d(out_dim)
         self.gatting_weight_1 = nn.Parameter(
             torch.randn(out_dim, out_dim // gating_reduction))
         self.gatting_bn_1 = nn.BatchNorm1d(out_dim // gating_reduction)
@@ -46,7 +35,9 @@ class SingleSEHead(nn.Module):
             init.kaiming_uniform_(layer, mode='fan_in')
 
     def forward(self, x):
-        assert x.shape[1] == self.in_dim, f'Input shape: {x.shape[1]}, Param shape: {self.in_dim}'
+        assert x.shape[
+            1] == self.in_dim, \
+            f'Input shape: {x.shape[1]}, Param shape: {self.in_dim}'
         x = self.input_dropout(x)
         activation = torch.matmul(x, self.hidden_weight)
         activation = self.hidden_bn(activation)
@@ -57,17 +48,17 @@ class SingleSEHead(nn.Module):
         activation = activation * gates
         return activation
 
-    def forward_train(self, x, gt_labels):
+    def forward_train(self, x, meta_info, gt_labels):
         activation = self(x)
         return self.cls_head.forward_train(activation, gt_labels)
 
-    def simple_test(self, x):
+    def simple_test(self, x, meta_info):
         activation = self(x)
         return self.cls_head.simple_test(activation)
 
+
 @HEAD.register_module()
 class FusionSEHead(SingleSEHead):
-
     def forward_train(self, modal_inputs, feats_dict, gt_labels):
         x = torch.cat(list(feats_dict.values()), 1)
         return super(FusionSEHead, self).forward_train(x, gt_labels)

@@ -104,17 +104,16 @@ class TransformerEncoder(nn.Module):
 
 
 @HEAD.register_module()
-class SelfAttnFusionHead(nn.Module):
+class SelfAttnSingleHead(nn.Module):
     def __init__(self, dim_in, num_head, dim_hidden, num_layers,
                  cls_head_config):
-        super(SelfAttnFusionHead, self).__init__()
+        super(SelfAttnSingleHead, self).__init__()
         self.cls_head = build_head(cls_head_config)
         self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden,
                                           num_layers)
 
-    def forward(self, modal_inputs, feats_dict, gt_labels):
-        pass
-        # return self.encoder(x)
+    def forward(self, x):
+        return self.encoder(x)
 
     def forward_train(self, x, gt_labels):
         activation = self(x)

@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mmt.models.builder import TEXT
+from mmt.models.builder import BACKBONE
 from mmt.utils.tokenization import FullTokenizer
 
 
-@TEXT.register_module()
+@BACKBONE.register_module()
 class TextCNN(nn.Module):
     def __init__(self,
                  vocab_size,
@@ -42,7 +42,7 @@ class TextCNN(nn.Module):
         return out
 
 
-@TEXT.register_module()
+@BACKBONE.register_module()
 class TwoStreamTextCNN(TextCNN):
     def forward(self, x, meta_info):
         assert x.ndim == 2

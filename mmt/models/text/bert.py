@@ -1,11 +1,11 @@
 import torch.nn as nn
 
 from mmt.datasets.pipelines.transforms import BertTokenize
-from mmt.models.builder import TEXT
+from mmt.models.builder import BACKBONE
 from mmt.utils.third_party.bert_pytorch.pytorch_pretrained import BertModel
 
 
-@TEXT.register_module()
+@BACKBONE.register_module()
 class Bert(nn.Module):
     def __init__(self, ckpt_path='pretrained/bert/', fixed=False):
         super(Bert, self).__init__()

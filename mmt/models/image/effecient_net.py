@@ -2,12 +2,12 @@ import mmcv
 import torch.nn as nn
 
 from mmt.datasets.pipelines.formating import to_tensor
-from mmt.models.builder import IMAGE
+from mmt.models.builder import BACKBONE
 from mmt.models.image.effecient_net_pytorch.efficientnet_pytorch import \
     EfficientNet as ThirdPartyEfficientNet
 
 
-@IMAGE.register_module()
+@BACKBONE.register_module()
 class EffecientNet(nn.Module):
     def __init__(self, arch):
         super(EffecientNet, self).__init__()

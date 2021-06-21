@@ -4,11 +4,11 @@ import torch.nn.functional as F
 from mmcv.cnn import build_norm_layer
 from torch.nn import init
 
-from mmt.models.builder import FRAME
+from mmt.models.builder import BACKBONE
 
 
 # based on https://github.com/lyakaap/NetVLAD-pytorch/blob/master/netvlad.py
-@FRAME.register_module()
+@BACKBONE.register_module()
 class NeXtVLAD(nn.Module):
     """NetVLAD layer implementation."""
     def __init__(self,

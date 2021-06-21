@@ -1,5 +1,5 @@
 _base_ = [
-    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_sgd.py',
+    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
     '_base_/models/fusion.py', '_base_/datasets/fusion.py'
 ]
 
@@ -17,6 +17,7 @@ optimizer = dict(
             'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
             'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
             'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'fusion_head': dict(lr_mult=0.00, decay_mult=1.0)
         }))
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

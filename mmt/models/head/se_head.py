@@ -23,7 +23,7 @@ class SingleSEHead(nn.Module):
         self.hidden_bn = build_norm_layer(norm_cfg, out_dim)[1]
         self.gatting_weight_1 = nn.Parameter(
             torch.randn(out_dim, out_dim // gating_reduction))
-        self.gatting_bn_1 = build_norm_layer(out_dim // gating_reduction)[1]
+        self.gatting_bn_1 = build_norm_layer(norm_cfg, out_dim // gating_reduction)[1]
         self.gatting_weight_2 = nn.Parameter(
             torch.randn(out_dim // gating_reduction, out_dim))
         if dropout_p == 0:

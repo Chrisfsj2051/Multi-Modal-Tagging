@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mmt.models.builder import HEAD, build_head
+from mmt.models.builder import BACKBONE, build_head
 
 
 class ScaledDotProductAttention(nn.Module):
@@ -87,41 +87,40 @@ class EncoderLayer(nn.Module):
         out = self.pos_ffn(out)
         return out
 
-
+@BACKBONE.register_module()
 class TransformerEncoder(nn.Module):
-    def __init__(self, dim_in, num_head, dim_hidden, num_layers):
+    def __init__(self, dim_in, num_head, dim_hidden, num_layers, dim_out, seq_len):
         super(TransformerEncoder, self).__init__()
         self.encoder = nn.ModuleList([
             EncoderLayer(dim_in, num_head, dim_hidden)
             for _ in range(num_layers)
         ])
+        self.fc = nn.Linear(seq_len * dim_in, dim_out)
 
-    def forward(self, x):
+    def forward(self, x, meta_info):
         for encoder in self.encoder:
             x = encoder(x)
-            print(x.shape)
-        return x
+        x = x.view(x.shape[0], -1)
+        return self.fc(x)
 
-
-@HEAD.register_module()
-class SelfAttnSingleHead(nn.Module):
-    def __init__(self, dim_in, num_head, dim_hidden, num_layers,
-                 cls_head_config):
-        super(SelfAttnSingleHead, self).__init__()
-        self.cls_head = build_head(cls_head_config)
-        self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden,
-                                          num_layers)
-
-    def forward(self, x):
-        return self.encoder(x)
-
-    def forward_train(self, x, gt_labels):
-        activation = self(x)
-        return self.cls_head.forward_train(activation, gt_labels)
-
-    def simple_test(self, x):
-        activation = self(x)
-        return self.cls_head.simple_test(activation)
+#
+# @BACKBONE.register_module()
+# class SelfAttnSingleHead(nn.Module):
+#     def __init__(self, dim_in, num_head, dim_hidden, num_layers):
+#         super(SelfAttnSingleHead, self).__init__()
+#         self.encoder = TransformerEncoder(dim_in, num_head, dim_hidden,
+#                                           num_layers)
+#
+#     def forward(self, x):
+#         return self.encoder(x)
+#
+#     def forward_train(self, x, gt_labels):
+#         activation = self(x)
+#         return self.cls_head.forward_train(activation, gt_labels)
+#
+#     def simple_test(self, x):
+#         activation = self(x)
+#         return self.cls_head.simple_test(activation)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 model = dict(
     type='SingleBranchModel',
-    key='video',
+    key='text',
     backbone=dict(
         type='TwoStreamTextCNN',
         vocab_size=21129,

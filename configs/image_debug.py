@@ -14,6 +14,6 @@ optimizer = dict(
 
 norm_cfg = dict(type='SyncBN')
 model = dict(
-    backbone=dict(norm_cfg=norm_cfg),
+    # backbone=dict(norm_cfg=norm_cfg),
     head=dict(norm_cfg=norm_cfg)
 )

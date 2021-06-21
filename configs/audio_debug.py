@@ -1,6 +1,6 @@
 _base_ = [
     '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
-    '_base_/models/video.py', '_base_/datasets/video.py'
+    '_base_/models/audio.py', '_base_/datasets/audio.py'
 ]
 
 norm_cfg = dict(type='BN1d')

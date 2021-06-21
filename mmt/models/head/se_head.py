@@ -59,10 +59,10 @@ class SingleSEHead(nn.Module):
 
 @HEAD.register_module()
 class FusionSEHead(SingleSEHead):
-    def forward_train(self, modal_inputs, feats_dict, gt_labels):
+    def forward_train(self, feats_dict, meta_info, gt_labels):
         x = torch.cat(list(feats_dict.values()), 1)
-        return super(FusionSEHead, self).forward_train(x, gt_labels)
+        return super(FusionSEHead, self).forward_train(x, meta_info, gt_labels)
 
-    def simple_test(self, modal_inputs, feats_dict):
+    def simple_test(self, feats_dict, meta_info):
         x = torch.cat(list(feats_dict.values()), 1)
-        return super(FusionSEHead, self).simple_test(x)
+        return super(FusionSEHead, self).simple_test(x, meta_info)

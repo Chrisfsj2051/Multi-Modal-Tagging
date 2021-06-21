@@ -33,9 +33,10 @@ def main():
     for typ, dic in zip(['text', 'image', 'video', 'audio'],
                         [text_ckpt, image_ckpt, video_ckpt, audio_ckpt]):
         for key, val in dic.items():
-            if key.startswith(typ) and (not args.no_keep_head
-                                        or 'head' not in key):
-                ret[key] = val
+            ret[typ + '_branch.'+key] = val
+        #     if key.startswith(typ) and (not args.no_keep_head
+        #                                 or 'head' not in key):
+        #         ret[key] = val
     torch.save(ret, args.out)
     print(f'Saved as {args.out}')
 

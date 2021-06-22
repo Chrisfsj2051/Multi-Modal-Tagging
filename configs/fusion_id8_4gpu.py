@@ -17,7 +17,6 @@ optimizer = dict(
             'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
             'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
             'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'fusion_head': dict(lr_mult=0.00, decay_mult=1.0)
         }))
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

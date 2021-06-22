@@ -24,7 +24,7 @@ def main():
 
     for key, val in new_ckpt.items():
         branch_key = args.modal + '_branch.' + key
-        assert key in old_ckpt.keys()
+        assert branch_key in old_ckpt.keys()
         old_ckpt[branch_key] = val
     torch.save(old_ckpt, args.out)
     print(f'Saved as {args.out}')

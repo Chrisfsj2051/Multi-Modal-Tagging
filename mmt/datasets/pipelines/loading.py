@@ -1,6 +1,9 @@
 import json
+import os
+import random
 from copy import deepcopy
 
+import librosa
 import mmcv
 import numpy as np
 
@@ -57,3 +60,17 @@ class LoadAnnotations(object):
         except Exception as e:
             print(e, f' while loading {results["image_anns"]}')
             return None
+
+
+@PIPELINES.register_module()
+class LoadAnnotationsWithWAV(LoadAnnotations):
+    def load_audio_anns(self, results):
+        if 'audio' in self.replace_dict.keys():
+            assert self.replace_dict['audio'][0] in results['audio_anns']
+            results['audio_anns'] = results['audio_anns'].replace(
+                self.replace_dict['audio'][0], self.replace_dict['audio'][1])
+        audio_path = results.pop('audio_anns').replace('.npy', '')
+        file_list = os.listdir(audio_path)
+        file_list = file_list[:(len(file_list) + 1) // 2]
+        audio_path = os.path.join(audio_path, random.choice(file_list))
+        results['audio'], _ = librosa.core.load(audio_path, sr=3400, mono=True)

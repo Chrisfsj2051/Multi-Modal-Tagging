@@ -56,7 +56,7 @@ val_pipeline = [
 test_pipeline = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
              'extracted_video_feats/L16_LN/test_5k_2nd'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),

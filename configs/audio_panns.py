@@ -1,4 +1,5 @@
 _base_ = 'audio_id3_4gpu.py'
+optimizer_config = dict(_delete_=True, grad_clip=None)
 
 model = dict(
     type='SingleBranchModel',

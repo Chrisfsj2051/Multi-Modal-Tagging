@@ -14,6 +14,7 @@ class LoadAnnotations(object):
 
     def replace_anns(self, results):
         if 'video' in self.replace_dict.keys():
+            assert self.replace_dict['video'][0] in results['video_anns']
             results['video_anns'] = results['video_anns'].replace(
                 self.replace_dict['video'][0], self.replace_dict['video'][1])
         return results

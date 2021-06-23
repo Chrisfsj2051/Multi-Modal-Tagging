@@ -1,6 +1,17 @@
 _base_ = 'audio_id3_4gpu.py'
-optimizer_config = dict(_delete_=True, grad_clip=None)
-
+# optimizer_config = dict(_delete_=True, grad_clip=None)
+optimizer = dict(type='Adam',
+                 amsgrad=True,
+                 lr=0.01,
+                 weight_decay=0.0001,
+                 paramwise_cfg=dict(
+                     custom_keys={
+                         'image_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'text_branch': dict(lr_mult=0.001, decay_mult=1.0),
+                         'video_branch': dict(lr_mult=0.01, decay_mult=1.0),
+                         'audio_branch': dict(lr_mult=0.1, decay_mult=1.0),
+                         'fusion': dict(weight_decay_mult=1.0)
+                     }))
 model = dict(
     type='SingleBranchModel',
     key='audio',

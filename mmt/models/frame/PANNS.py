@@ -137,7 +137,7 @@ class PANNS(nn.Module):
         # init_layer(self.fc1)
         # init_layer(self.fc_audioset)
 
-    def init_weight(self, pretrained):
+    def init_weights(self, pretrained):
         logger = get_root_logger()
         load_checkpoint(self, pretrained, strict=False, logger=logger)
 

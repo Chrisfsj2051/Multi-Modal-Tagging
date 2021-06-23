@@ -50,5 +50,5 @@ model = dict(type='SingleBranchModel',
              key='video',
              backbone=dict(type='NeXtVLAD',
                            feature_size=1024,
-                           max_frames=100,
+                           max_frames=150,
                            cluster_size=128))

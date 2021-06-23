@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from mmcv.runner import load_checkpoint
 from torchlibrosa.augmentation import SpecAugmentation
 from torchlibrosa.stft import LogmelFilterBank, Spectrogram
 
 from mmt.models.builder import BACKBONE
+from mmt.utils import get_root_logger
 from mmt.utils.third_party.audioset_tagging_cnn.pytorch.pytorch_utils import \
     do_mixup
 
@@ -131,12 +133,13 @@ class PANNS(nn.Module):
         # self.fc1 = nn.Linear(2048, 2048, bias=True)
         # self.fc_audioset = nn.Linear(2048, classes_num, bias=True)
 
-        self.init_weight()
-
-    def init_weight(self):
         init_bn(self.bn0)
         # init_layer(self.fc1)
         # init_layer(self.fc_audioset)
+
+    def init_weight(self, pretrained):
+        logger = get_root_logger()
+        load_checkpoint(self, pretrained, strict=False, logger=logger)
 
     def forward(self, input, meta_info, mixup_lambda=None):
         """

@@ -4,6 +4,7 @@ optimizer_config = dict(_delete_=True, grad_clip=None)
 model = dict(
     type='SingleBranchModel',
     key='audio',
+    pretrained='pretrained/Cnn14_mAP=0.431.pth',
     backbone=dict(_delete_=True,
                   type='PANNS',
                   sample_rate=3400,

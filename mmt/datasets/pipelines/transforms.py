@@ -29,6 +29,10 @@ class Pad(object):
             dict: Updated result dict.
         """
         # ((d1_padL, d1_padR), (d2_padL, d2_padR))
+        if results['video'].shape[0] > self.video_pad_size[0]:
+            results['video'] = results['video'][:self.video_pad_size[0]]
+        if results['audio'].shape[0] > self.audio_pad_size[0]:
+            results['audio'] = results['audio'][:self.audio_pad_size[0]]
         video_pad_shape = [[
             0, x - y
         ] for x, y in zip(self.video_pad_size, results['video'].shape)]

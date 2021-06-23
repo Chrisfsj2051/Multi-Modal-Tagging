@@ -26,6 +26,7 @@ def extract_frame(args):
               'fps=fps=1 %s/vid%%03d.jpg' % (max_frame, video_filename,
                                              output_path)
     status, output = subprocess.getstatusoutput(command)
+    assert status == 0
     rgb_path_list = os.listdir(output_path)
     return len(rgb_path_list)
 

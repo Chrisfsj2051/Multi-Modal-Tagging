@@ -1,7 +1,9 @@
+from random import randint
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.runner import load_checkpoint
+from mmcv.runner import _load_checkpoint, load_checkpoint
 from torchlibrosa.augmentation import SpecAugmentation
 from torchlibrosa.stft import LogmelFilterBank, Spectrogram
 
@@ -139,6 +141,9 @@ class PANNS(nn.Module):
 
     def init_weights(self, pretrained):
         logger = get_root_logger()
+        checkpoint = _load_checkpoint(pretrained)['model']
+        pretrained = f'/tmp/{randint(0, 100000)}.pth'
+        torch.save(checkpoint, pretrained)
         load_checkpoint(self, pretrained, strict=False, logger=logger)
 
     def forward(self, input, meta_info, mixup_lambda=None):

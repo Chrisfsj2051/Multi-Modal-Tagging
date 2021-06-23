@@ -47,10 +47,8 @@ class LoadAnnotations(object):
         assert results['image'] is not None
 
     def __call__(self, results):
-        results = self.replace_anns(results)
+        results['id_name'] = results['audio_anns'].split('/')[-1].split('.')[0]
         try:
-            results['id_name'] = results['audio_anns'].split('/')[-1].split(
-                '.')[0]
             self.load_video_anns(results)
             self.load_audio_anns(results)
             self.load_text_anns(results)

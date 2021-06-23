@@ -37,7 +37,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(
-        type='LoadAnnotations',
+        type='LoadAnnotationsWithWAV',
         replace_dict=dict(
             audio=('tagging/tagging_dataset_train_5k/audio_npy/Vggish/tagging',
                    'extracted_audio_frame/train_5k'))),

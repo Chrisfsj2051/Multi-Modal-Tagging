@@ -3,7 +3,7 @@ _base_ = [
     '_base_/models/fusion.py', '_base_/datasets/fusion.py'
 ]
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
-
+find_unused_parameters=True
 custom_hooks = [
     dict(type='FreezeParamHook',
          param_pattern=['video', 'audio', 'image', 'text'],

@@ -5,16 +5,16 @@ import torch
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--ckpt')
     parser.add_argument('--branch_id', help='checkpoint file', choices=['a', 'b'])
     parser.add_argument('--out', help='checkpoint file')
-    parser.add_argument('--no_keep_head', default=False, action='store_true')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
-    ckpt = torch.load(args.text)
+    ckpt = torch.load(args.ckpt)
     if 'state_dict' in ckpt.keys():
         ckpt = ckpt['state_dict']
 

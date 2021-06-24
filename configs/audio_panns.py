@@ -3,7 +3,7 @@ optimizer = dict(
     _delete_=True,
     type='SGD',
     momentum=0.9,
-    lr=0.1,
+    lr=0.02,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
@@ -13,6 +13,11 @@ optimizer = dict(
             'audio_branch': dict(lr_mult=1, decay_mult=1.0),
             'fusion': dict(weight_decay_mult=1.0)
         }))
+lr_config = dict(policy='step',
+                 warmup='linear',
+                 warmup_iters=500,
+                 warmup_ratio=0.001,
+                 step=[8000, 9000])
 # optimizer_config = dict(_delete_=True, grad_clip=None)
 # optimizer = dict(type='Adam',
 #                  amsgrad=True,
@@ -42,7 +47,7 @@ model = dict(
     head=dict(
         type='SingleSEHead',
         in_dim=2048,
-        #             dropout_p=0.8
+        dropout_p=0.1
     ))
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],

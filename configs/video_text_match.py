@@ -14,7 +14,7 @@ optimizer = dict(
     lr=0.00002,
     weight_decay=0.0001,
     paramwise_cfg=dict(
-        custom_keys={'image_branch': dict(lr_mult=1, decay_mult=1.0),
+        custom_keys={'image_branch': dict(lr_mult=10, decay_mult=1.0),
                      'text_branch': dict(lr_mult=1, decay_mult=1.0),
                      'video_branch': dict(lr_mult=1, decay_mult=1.0),
                      'audio_branch': dict(lr_mult=0.01, decay_mult=1.0),

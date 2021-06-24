@@ -51,6 +51,7 @@ def main():
     video_list = os.listdir(args.video_path)
     # video_list = [os.path.join(args.video_path, x) for x in video_list]
     # video_lens = []
+
     pool = Pool(16)
     audio_lens = list(
         tqdm(pool.imap(extract_frame,

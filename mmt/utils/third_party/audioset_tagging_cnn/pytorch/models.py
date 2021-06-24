@@ -172,6 +172,7 @@ class Cnn14(nn.Module):
                                                  pad_mode=pad_mode,
                                                  freeze_parameters=True)
 
+        print('in')
         # Logmel feature extractor
         self.logmel_extractor = LogmelFilterBank(sr=sample_rate,
                                                  n_fft=window_size,
@@ -212,8 +213,8 @@ class Cnn14(nn.Module):
         """
         Input: (batch_size, data_length)"""
 
-        x = self.spectrogram_extractor(
-            input)  # (batch_size, 1, time_steps, freq_bins)
+        # (batch_size, 1, time_steps, freq_bins)
+        x = self.spectrogram_extractor(input)
         x = self.logmel_extractor(x)  # (batch_size, 1, time_steps, mel_bins)
 
         x = x.transpose(1, 3)

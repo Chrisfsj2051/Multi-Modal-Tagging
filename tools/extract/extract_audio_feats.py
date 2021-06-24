@@ -29,17 +29,17 @@ def extract_audio_feats(args):
     filename, audio_path, save_path, model = args
     file_root = os.path.join(audio_path, filename)
     feats_list = []
-    for file_path in os.listdir(file_root):
-        file_path = os.path.join(file_root, file_path)
-        (waveform, _) = librosa.core.load(file_path, sr=3400, mono=True)
-        waveform = waveform[None, :]  # (1, audio_length)
-        waveform = move_data_to_device(waveform, torch.device('cuda'))
-        with torch.no_grad():
-            feats = model(waveform, None)
-            feats_list.append(feats.tolist())
-    mmcv.mkdir_or_exist(save_path)
-    feats = np.array(feats_list).reshape(len(feats_list), -1)
-    np.save(os.path.join(save_path, filename + '.npy'), feats)
+    # for file_path in os.listdir(file_root):
+    #     file_path = os.path.join(file_root, file_path)
+    #     (waveform, _) = librosa.core.load(file_path, sr=3000000, mono=True)
+    #     waveform = waveform[None, :]  # (1, audio_length)
+    #     waveform = move_data_to_device(waveform, torch.device('cuda'))
+    #     with torch.no_grad():
+    #         feats = model(waveform, None)
+    #         feats_list.append(feats.tolist())
+    # mmcv.mkdir_or_exist(save_path)
+    # feats = np.array(feats_list).reshape(len(feats_list), -1)
+    # np.save(os.path.join(save_path, filename + '.npy'), feats)
 
 
 def main():
@@ -63,9 +63,14 @@ def main():
     model.load_state_dict(checkpoint['model'])
     model.eval()
     model.cuda()
+    id_list = os.listdir(args.audio_path)
+
+    # For windows:
+    # for ids in tqdm(id_list):
+    #     extract_audio_feats([ids, args.audio_path, args.save_path, model])
+
     multiprocessing.set_start_method('spawn')
     pool = Pool(8)
-    id_list = os.listdir(args.audio_path)
     list(
         tqdm(pool.imap(extract_audio_feats,
                        [(id_name, args.audio_path, args.save_path, model)

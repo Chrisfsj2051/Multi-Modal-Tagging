@@ -22,11 +22,11 @@ def main():
     for key, val in ckpt.items():
         if f'backbone_{args.branch_id}' in key:
             new_key = key.replace(f'backbone_{args.branch_id}', 'backbone')
-            print(new_key)
-            # ret[new_key] = val
+            # print(new_key)
+            ret[new_key] = val
 
-    # torch.save(ret, args.out)
-    # print(f'Saved as {args.out}')
+    torch.save(ret, args.out)
+    print(f'Saved as {args.out}')
 
 
 if __name__ == '__main__':

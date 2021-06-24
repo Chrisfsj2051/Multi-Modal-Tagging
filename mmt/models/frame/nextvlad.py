@@ -43,7 +43,7 @@ class NeXtVLAD(nn.Module):
         for layer in (self.w1, self.w2, self.w3, self.w4):
             init.kaiming_uniform_(layer, mode='fan_in')
 
-    def forward(self, input, meeta_info):
+    def forward(self, input, meta_info):
         input = torch.matmul(input, self.w1)
         attention = torch.matmul(input, self.w2).sigmoid()
         attention = attention.reshape([-1, self.max_frames * self.groups, 1])

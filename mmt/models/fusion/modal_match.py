@@ -1,5 +1,5 @@
-from mmt.models import BaseFusionModel
-from mmt.models.builder import ARCH, build_model, build_head, build_backbone
+from mmt.models.fusion import BaseFusionModel
+from mmt.models.builder import ARCH, build_head, build_backbone
 
 
 @ARCH.register_module()
@@ -13,24 +13,11 @@ class ModalMatchModel(BaseFusionModel):
         self.modal_keys = modal_keys
 
     def forward_train(self, meta_info, gt_labels, **kwargs):
-        modal_a_feats = self.branch_a(kwargs[self.modal_keys[0]])
-        modal_b_feats = self.branch_b(kwargs[self.modal_keys[1]])
+        modal_a_feats = self.backbone_a(kwargs[self.modal_keys[0]], meta_info)
+        modal_b_feats = self.backbone_b(kwargs[self.modal_keys[1]], meta_info)
         return self.head.forward_train([modal_a_feats, modal_b_feats], meta_info, gt_labels)
 
-    def simple_test(self, video, image, text, audio, meta_info):
-        all_preds = {}
-        video_feats, video_preds = self.video_branch.simple_test(
-            video=video, meta_info=meta_info, return_feats=True)
-        image_feats, image_preds = self.image_branch.simple_test(
-            image=image, meta_info=meta_info, return_feats=True)
-        audio_feats, audio_preds = self.audio_branch.simple_test(
-            audio=audio, meta_info=meta_info, return_feats=True)
-        text_feats, text_preds = self.text_branch.simple_test(
-            text=text, meta_info=meta_info, return_feats=True)
-        feats_dict = dict(image=image_feats, audio=audio_feats, text=text_feats, video=video_feats)
-        all_preds['fusion'] = self.fusion_head.simple_test(feats_dict, meta_info)
-        all_preds.update(video_preds[0])
-        all_preds.update(image_preds[0])
-        all_preds.update(audio_preds[0])
-        all_preds.update(text_preds[0])
-        return [all_preds]
+    def simple_test(self, meta_info, **kwargs):
+        modal_a_feats = self.backbone_a(kwargs[self.modal_keys[0]], meta_info)
+        modal_b_feats = self.backbone_b(kwargs[self.modal_keys[1]], meta_info)
+        return self.head.simple_test([modal_a_feats, modal_b_feats], meta_info)

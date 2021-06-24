@@ -37,7 +37,7 @@ class PretrainMatchDataset(TaggingDataset):
                 audio_anns=self.audio_anns[self.match_list[i][0]],
                 video_anns=self.video_anns[self.match_list[i][0]],
                 image_anns=self.image_anns[self.match_list[i][0]],
-                text_anns=self.test_anns[self.match_list[i][1]])
+                text_anns=self.text_anns[self.match_list[i][1]])
             if not self.test_mode:
                 results['gt_labels'] = [self.gt_onehot[i]]
             results = self.pipeline(deepcopy(results))
@@ -50,13 +50,13 @@ class PretrainMatchDataset(TaggingDataset):
     def evaluate(self, preds, metric=None, logger=None):
         results = {}
         gt_onehot = np.array(self.gt_onehot)
-        for modal in preds[0].keys():
-            modal_preds = [x[modal][0] for x in preds]
-            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
-            t = (modal_preds >= 0.5).squeeze().astype(np.int)
-            results[f'{modal}_accuracy'] = sum([x == y for x, y in zip(gt_onehot, t)]) / len(gt_onehot)
+        modal_preds = np.array([x.sigmoid().tolist() for x in preds])
+        t = (modal_preds >= 0.5).squeeze().astype(np.int)
+        results[f'accuracy'] = sum([x == y for x, y in zip(gt_onehot, t)]) / len(gt_onehot)
+        results['preds_mean'] = round(modal_preds.mean(), 4)
 
         return results
 
     def __len__(self):
+        # return 20
         return len(self.match_list)

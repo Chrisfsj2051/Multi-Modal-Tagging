@@ -38,6 +38,34 @@ class ClsHead(FCHead):
     def simple_test(self, x):
         return self.linear(x)
 
+@HEAD.register_module()
+class ModalMatchHead(nn.Module):
+    def __init__(self, fc_dim1, fc_dim2, hidden_dim, loss, dropout_p=None):
+        super(ModalMatchHead, self).__init__()
+        self.ln_1 = nn.LayerNorm(hidden_dim)
+        self.fc_1 = nn.Linear(fc_dim1, hidden_dim)
+        self.ln_2 = nn.LayerNorm(hidden_dim)
+        self.fc_2 = nn.Linear(fc_dim2, hidden_dim)
+        self.out = nn.Linear(hidden_dim, 1)
+        self.loss = build_loss(loss)
+
+    def forward(self, x, meta_info):
+        x1 = self.fc_1(x[0])
+        x2 = self.fc_2(x[1])
+        x1 = self.ln_1(x1)
+        x2 = self.ln_2(x2)
+        pred = self.out((x1 - x2).abs())
+        return pred
+
+    def forward_train(self, x, meta_info, gt_labels):
+        pred = self(x, meta_info)
+        loss_list = [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        return dict(cls_loss=loss_list)
+
+    def simple_test(self, x, meta_info):
+        pred = self(x, meta_info)
+        return pred
+
 
 @HEAD.register_module()
 class HMCHead(nn.Module):

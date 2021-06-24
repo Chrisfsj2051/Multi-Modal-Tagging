@@ -44,11 +44,11 @@ test_pipeline = [
 data = dict(
     samples_per_gpu=4,
     workers_per_gpu=8,
-    train=dict(type='TaggingDataset',
+    train=dict(type='PretrainMatchDataset',
                ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
                label_id_file='dataset/tagging/label_super_id.txt',
                pipeline=train_pipeline),
-    val=dict(type='TaggingDataset',
+    val=dict(type='PretrainMatchDataset',
              ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
              label_id_file='dataset/tagging/label_super_id.txt',
              pipeline=val_pipeline),

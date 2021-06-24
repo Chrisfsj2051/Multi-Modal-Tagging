@@ -39,5 +39,5 @@ class BCEWithLogitsLoss(nn.Module):
             preds (torch.Tensor): (82, )
             gt_labels (torch.Tensor): (NUM_C, )
         """
-        # print(preds, gt_labels, self.loss(preds, gt_labels.float()))
+
         return self.loss_weight * self.loss(preds, gt_labels.float())

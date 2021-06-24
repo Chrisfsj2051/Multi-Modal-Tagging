@@ -18,7 +18,7 @@ class TaggingDataset:
         (self.index_to_tag, self.tag_to_index, self.index_to_super_index,
          self.tag_to_super_index) = self.load_label_dict(label_id_file)
         self.test_mode = test_mode
-        (self.video_anns, self.audio_anns, self.image_anns, self.test_anns,
+        (self.video_anns, self.audio_anns, self.image_anns, self.text_anns,
          self.gt_label, self.gt_onehot) = self.load_annotations(ann_file)
         self.flag = np.zeros((len(self.video_anns))).astype(np.int)
         self.pipeline = Compose(pipeline)
@@ -69,7 +69,7 @@ class TaggingDataset:
             results = dict(audio_anns=self.audio_anns[i],
                            video_anns=self.video_anns[i],
                            image_anns=self.image_anns[i],
-                           text_anns=self.test_anns[i])
+                           text_anns=self.text_anns[i])
             if not self.test_mode:
                 results['gt_labels'] = self.gt_label[i]
             results = self.pipeline(deepcopy(results))

@@ -149,6 +149,7 @@ class PANNS(nn.Module):
     def forward(self, input, meta_info, mixup_lambda=None):
         """
         Input: (batch_size, data_length)"""
+        dropout_p=1e-7
         # (batch_size, 1, time_steps, freq_bins)
         x = self.spectrogram_extractor(input)
         x = self.logmel_extractor(x)  # (batch_size, 1, time_steps, mel_bins)
@@ -165,17 +166,17 @@ class PANNS(nn.Module):
             x = do_mixup(x, mixup_lambda)
 
         x = self.conv_block1(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.dropout(x, p=dropout_p, training=self.training)
         x = self.conv_block2(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.dropout(x, p=dropout_p, training=self.training)
         x = self.conv_block3(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.dropout(x, p=dropout_p, training=self.training)
         x = self.conv_block4(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.dropout(x, p=dropout_p, training=self.training)
         x = self.conv_block5(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.dropout(x, p=dropout_p, training=self.training)
         x = self.conv_block6(x, pool_size=(1, 1), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)  # [1, 2048, 21, 2]
+        x = F.dropout(x, p=dropout_p, training=self.training)  # [1, 2048, 21, 2]
         x = torch.mean(x, dim=3)
 
         (x1, _) = torch.max(x, dim=2)

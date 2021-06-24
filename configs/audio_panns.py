@@ -91,7 +91,7 @@ test_pipeline = [
     dict(type='Collect', keys=['audio', 'meta_info'])
 ]
 
-data = dict(samples_per_gpu=2,
+data = dict(samples_per_gpu=8,
             workers_per_gpu=8,
             train=dict(pipeline=train_pipeline),
             val=dict(pipeline=val_pipeline),

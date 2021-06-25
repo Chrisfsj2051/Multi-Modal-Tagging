@@ -32,8 +32,8 @@ class ClsHead(FCHead):
         if self.use_dropout:
             x = self.dropout(x)
         pred = self.linear(x)
-        loss_list = [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
-        return dict(cls_loss=loss_list)
+        loss = self.loss(pred, gt_labels)
+        return dict(cls_loss=loss)
 
     def simple_test(self, x):
         return self.linear(x)
@@ -59,7 +59,7 @@ class ModalMatchHead(nn.Module):
 
     def forward_train(self, x, meta_info, gt_labels):
         pred = self(x, meta_info)
-        loss_list = [self.loss(pred[i], gt_labels[i]) for i in range(len(x))]
+        loss_list = self.loss(pred, gt_labels)
         return dict(cls_loss=loss_list)
 
     def simple_test(self, x, meta_info):

@@ -1,0 +1,158 @@
+_base_ = [
+    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
+    '_base_/datasets/fusion.py'
+]
+
+
+model = dict(
+    type='VideoTextWithExtraTaskModel',
+    branch_config=dict(
+        video=dict(
+            type='SingleBranchModel',
+            key='video',
+            backbone=dict(
+                type='NeXtVLAD',
+                feature_size=1024,
+                max_frames=300,
+                cluster_size=128
+            ),
+            head=dict(
+                type='SingleSEHead',
+                in_dim=16384,
+                gating_reduction=8,
+                out_dim=1024,
+                dropout_p=0.8,
+                cls_head_config=dict(
+                    type='ClsHead',
+                    in_dim=1024,
+                    out_dim=82,
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss')
+                )
+            )
+        ),
+        text=dict(
+            type='SingleBranchModel',
+            key='text',
+            backbone=dict(
+                type='TwoStreamTextCNN',
+                vocab_size=21129,
+                ebd_dim=300,
+                channel_in=256,
+                channel_out=1024,
+                filter_size=(2, 3, 4)
+            ),
+            head=dict(
+                type='SingleSEHead',
+                in_dim=1024,
+                gating_reduction=8,
+                out_dim=1024,
+                dropout_p=0.5,
+                cls_head_config=dict(
+                    type='ClsHead',
+                    in_dim=1024,
+                    out_dim=82,
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss'))
+            )
+        )
+    ),
+    modal_match_config=dict(
+        type='ModalMatchHead',
+        fc_dim1=16384,
+        fc_dim2=1024,
+        hidden_dim=2048,
+        loss=dict(type='BCEWithLogitsLoss')
+    ),
+    fusion_config=dict(
+        type='FusionSEHead',
+        in_dim=17408,
+        gating_reduction=8,
+        dropout_p=0.8,
+        out_dim=1024,
+        cls_head_config=dict(
+            type='ClsHead',
+            in_dim=1024,
+            out_dim=82,
+            loss=dict(type='MultiLabelBCEWithLogitsLoss')
+        )
+    )
+)
+
+img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375])
+
+train_pipeline = [
+    dict(type='LoadAnnotations',
+         replace_dict=dict(video=(
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='PhotoMetricDistortion',
+         brightness_delta=32,
+         contrast_range=(0.5, 1.5),
+         saturation_range=(0.5, 1.5),
+         hue_delta=18),
+    dict(type='CutOut',
+         n_holes=3,
+         cutout_ratio=[(0.05, 0.05), (0.1, 0.1), (0.07, 0.07)]),
+    dict(type='CutOut',
+         n_holes=1,
+         cutout_ratio=[(0.2, 0.2), (0.15, 0.15), (0.13, 0.13)]),
+    dict(type='AutoAugment',
+         policies=[[dict(type='Shear', prob=0.5, level=i)]
+                   for i in range(1, 11)] +
+         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
+    dict(type='FrameRandomErase',
+         key_fields=['video'],
+         aug_num_frame=9,
+         aug_max_len=3,
+         aug_num_block=3,
+         aug_max_size=30),
+    dict(type='Resize', size=(224, 224)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect',
+         keys=['video', 'text', 'meta_info', 'gt_labels'])
+]
+
+val_pipeline = [
+    dict(type='LoadAnnotations',
+         replace_dict=dict(video=(
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='Resize', size=(224, 224)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
+]
+
+test_pipeline = [
+    dict(type='LoadAnnotations',
+         replace_dict=dict(video=(
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k_2nd'))),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='Resize', size=(224, 224)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
+]
+
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=1,
+    train=dict(type='TaggingDataset',
+               ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+               label_id_file='dataset/tagging/label_super_id.txt',
+               pipeline=train_pipeline),
+    val=dict(type='TaggingDataset',
+             ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
+             label_id_file='dataset/tagging/label_super_id.txt',
+             pipeline=val_pipeline),
+    test=dict(type='TaggingDataset',
+              ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',
+              label_id_file='dataset/tagging/label_super_id.txt',
+              pipeline=test_pipeline))

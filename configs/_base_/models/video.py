@@ -17,5 +17,5 @@ model = dict(
             type='ClsHead',
             in_dim=1024,
             out_dim=82,
-            loss=dict(type='MultiLabelBCEWithLogitsLoss'))
+            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8))
     ))

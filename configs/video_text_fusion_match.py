@@ -134,12 +134,23 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=1,
-    train=dict(type='TaggingDataset',
-               ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
-               label_id_file='dataset/tagging/label_super_id.txt',
-               pipeline=train_pipeline),
+    samples_per_gpu=8,
+    workers_per_gpu=8,
+    train=dict(
+        type='TwoStreamDataset',
+        main_dataset_config=dict(
+            type='TaggingDataset',
+           ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+           label_id_file='dataset/tagging/label_super_id.txt',
+           pipeline=train_pipeline
+        ),
+        extra_dataset_config=dict(
+            type='ConcatDataset',
+            datasets=dict(
+                # type=''
+            )
+        )
+    ),
     val=dict(type='TaggingDataset',
              ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
              label_id_file='dataset/tagging/label_super_id.txt',

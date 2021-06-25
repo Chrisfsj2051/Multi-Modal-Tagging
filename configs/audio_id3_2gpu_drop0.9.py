@@ -20,3 +20,5 @@ optimizer = dict(
         }
     )
 )
+
+data=dict(samples_per_gpu=8)

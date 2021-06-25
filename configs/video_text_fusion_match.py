@@ -3,6 +3,7 @@ _base_ = [
     '_base_/datasets/fusion.py'
 ]
 
+load_from = 'pretrained/image37_text23_video4_audio3.pth'
 
 model = dict(
     type='VideoTextWithExtraTaskModel',

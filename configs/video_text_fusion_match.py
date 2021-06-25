@@ -4,7 +4,19 @@ _base_ = [
 ]
 
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
-
+optimizer = dict(
+    _delete_=True,
+    type='Adam',
+    amsgrad=True,
+    lr=0.01,
+    weight_decay=0.0001,
+    paramwise_cfg=dict(
+        custom_keys={
+            'image_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+        }))
 model = dict(
     type='VideoTextWithExtraTaskModel',
     branch_config=dict(

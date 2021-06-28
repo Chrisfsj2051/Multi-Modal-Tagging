@@ -75,13 +75,14 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
         super(FusionSEHeadWithModalAttn, self).__init__(*args, **kwargs)
         self.attn_module = nn.ModuleDict()
         for key, val in modal_in_dim.items():
-            self.attn_module[key] = nn.Linear(val, 1)
+            self.attn_module[key] = nn.Sequential(nn.Linear(val, 1), nn.Sigmoid())
 
     def forward_train(self, feats_dict, meta_info, gt_labels):
-        print('in')
-        x = torch.cat(list(feats_dict.values()), 1)
-        return super(FusionSEHead, self).forward_train(x, meta_info, gt_labels)
+        for key in feats_dict.keys():
+            feats_dict[key] = feats_dict[key] * self.attn_module[key](feats_dict[key])
+        return super(FusionSEHeadWithModalAttn, self).forward_train(feats_dict, meta_info, gt_labels)
 
     def simple_test(self, feats_dict, meta_info):
-        x = torch.cat(list(feats_dict.values()), 1)
-        return super(FusionSEHead, self).simple_test(x, meta_info)
+        for key in feats_dict.keys():
+            feats_dict[key] = feats_dict[key] * self.attn_module[key](feats_dict[key])
+        return super(FusionSEHeadWithModalAttn, self).simple_test(feats_dict, meta_info)

@@ -81,7 +81,27 @@ train_pipeline = [
          keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
 ]
 
-extra_train_pipeline = [
+extra_train_pipeline_1 = [
+    dict(type='LoadAnnotations',
+         replace_dict=dict(video=(
+             'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k'))),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='FrameRandomErase',
+         key_fields=['video'],
+         aug_num_frame=9,
+         aug_max_len=3,
+         aug_num_block=3,
+         aug_max_size=30),
+    dict(type='Resize', size=(224, 224)),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info', 'gt_labels'])
+]
+
+extra_train_pipeline_2 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
              'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
@@ -89,6 +109,12 @@ extra_train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='FrameRandomErase',
+         key_fields=['video'],
+         aug_num_frame=9,
+         aug_max_len=3,
+         aug_num_block=3,
+         aug_max_size=30),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -134,10 +160,21 @@ data = dict(
             pipeline=train_pipeline
         ),
         extra_dataset_config=dict(
-            type='ModalMatchDataset',
-            ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',  # change to test
-            label_id_file='dataset/tagging/label_super_id.txt',
-            pipeline=extra_train_pipeline
+            type='ConcatDataset',
+            datasets=[
+                dict(
+                    type='ModalMatchDataset',
+                    ann_file='dataset/tagging/GroundTruth/datafile/test.txt',  # change to test
+                    label_id_file='dataset/tagging/label_super_id.txt',
+                    pipeline=extra_train_pipeline
+                ),
+                dict(
+                    type='ModalMatchDataset',
+                    ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',  # change to test
+                    label_id_file='dataset/tagging/label_super_id.txt',
+                    pipeline=extra_train_pipeline
+                )
+            ]
         )
     ),
     val=dict(

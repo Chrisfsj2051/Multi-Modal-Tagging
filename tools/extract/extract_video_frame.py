@@ -26,6 +26,8 @@ def extract_frame(args):
               'fps=fps=1 %s/vid%%03d.jpg' % (max_frame, video_filename,
                                              output_path)
     status, output = subprocess.getstatusoutput(command)
+    if status!=0:
+        print(output, video_filename)
     assert status == 0
     rgb_path_list = os.listdir(output_path)
     return len(rgb_path_list)
@@ -36,6 +38,7 @@ def main():
     assert os.path.exists(args.video_path)
     mmcv.mkdir_or_exist(args.save_path)
     video_list = os.listdir(args.video_path)
+    video_list = [x for x in video_list if '.mp4' in x]
     # video_list = [os.path.join(args.video_path, x) for x in video_list]
     # video_lens = []
     pool = Pool(16)

@@ -66,3 +66,20 @@ class FusionSEHead(SingleSEHead):
     def simple_test(self, feats_dict, meta_info):
         x = torch.cat(list(feats_dict.values()), 1)
         return super(FusionSEHead, self).simple_test(x, meta_info)
+
+
+@HEAD.register_module()
+class FusionSEHeadWithModalAttn(FusionSEHead):
+
+    def __init__(self, *args, in_dim, **kwargs):
+        super(FusionSEHeadWithModalAttn, self).__init__(*args, **kwargs)
+        print('in')
+
+    def forward_train(self, feats_dict, meta_info, gt_labels):
+        print('in')
+        x = torch.cat(list(feats_dict.values()), 1)
+        return super(FusionSEHead, self).forward_train(x, meta_info, gt_labels)
+
+    def simple_test(self, feats_dict, meta_info):
+        x = torch.cat(list(feats_dict.values()), 1)
+        return super(FusionSEHead, self).simple_test(x, meta_info)

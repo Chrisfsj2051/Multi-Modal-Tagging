@@ -13,7 +13,7 @@ model = dict(
         fc_dim1=16384,
         fc_dim2=1024,
         hidden_dim=2048,
-        loss=dict(type='BCEWithLogitsLoss', loss_weight=3)
+        loss=dict(type='BCEWithLogitsLoss', loss_weight=)
     )
 )
 

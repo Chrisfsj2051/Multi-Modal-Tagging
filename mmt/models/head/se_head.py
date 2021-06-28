@@ -75,10 +75,12 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
         super(FusionSEHeadWithModalAttn, self).__init__(*args, **kwargs)
         self.attn_module = nn.ModuleDict()
         for key, val in modal_in_dim.items():
-            self.attn_module[key] = nn.Sequential(nn.Linear(val, 1), nn.Sigmoid())
+            self.attn_module[key] = nn.Sequential(nn.Linear(val, 1024), nn.BatchNorm1d(1024), nn.ReLU(),
+                                                  nn.Linear(1024, 1), nn.Sigmoid())
 
     def forward_train(self, feats_dict, meta_info, gt_labels):
         for key in feats_dict.keys():
+            # print(key, self.attn_module[key](feats_dict[key]))
             feats_dict[key] = feats_dict[key] * self.attn_module[key](feats_dict[key])
         return super(FusionSEHeadWithModalAttn, self).forward_train(feats_dict, meta_info, gt_labels)
 

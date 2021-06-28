@@ -58,6 +58,8 @@ class LoadAnnotations(object):
             self.load_image_anns(results)
             return results
         except Exception as e:
+            print(e)
+            exit(0)
             print(e, f' while loading {results["image_anns"]}')
             return None
 

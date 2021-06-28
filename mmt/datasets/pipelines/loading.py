@@ -17,7 +17,8 @@ class LoadAnnotations(object):
 
     def load_video_anns(self, results):
         if 'video' in self.replace_dict.keys():
-            assert self.replace_dict['video'][0] in results['video_anns']
+            assert self.replace_dict['video'][0] in results['video_anns'], \
+                f'{results["video_anns"]} doesn"t contain {self.replace_dict["video"][0]}'
             results['video_anns'] = results['video_anns'].replace(
                 self.replace_dict['video'][0], self.replace_dict['video'][1])
         results['video'] = np.load(results.pop('video_anns')).astype(
@@ -58,8 +59,6 @@ class LoadAnnotations(object):
             self.load_image_anns(results)
             return results
         except Exception as e:
-            print(e)
-            exit(0)
             print(e, f' while loading {results["image_anns"]}')
             return None
 

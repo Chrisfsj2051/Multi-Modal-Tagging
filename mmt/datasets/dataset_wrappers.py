@@ -6,10 +6,10 @@ import numpy as np
 from mmcv.utils import print_log
 from torch.utils.data.dataset import ConcatDataset as _ConcatDataset
 
-from .builder import DATASETS
+# from mmt.datasets.builder import DATASETS
 
 
-@DATASETS.register_module()
+# @DATASETS.register_module()
 class ConcatDataset(_ConcatDataset):
     """A wrapper of concatenated dataset.
     Same as :obj:`torch.utils.data.dataset.ConcatDataset`, but
@@ -21,9 +21,9 @@ class ConcatDataset(_ConcatDataset):
             Defaults to True.
     """
 
-    def __init__(self, datasets, separate_eval=True):
+    def __init__(self, datasets, separate_eval=True, test_mode=True):
         super(ConcatDataset, self).__init__(datasets)
-        self.CLASSES = datasets[0].CLASSES
+        # self.CLASSES = datasets[0].CLASSES
         self.separate_eval = separate_eval
         if not separate_eval:
             if len(set([type(ds) for ds in datasets])) != 1:
@@ -73,7 +73,7 @@ class ConcatDataset(_ConcatDataset):
         # Check whether all the datasets support evaluation
         for dataset in self.datasets:
             assert hasattr(dataset, 'evaluate'), \
-                    f'{type(dataset)} does not implement evaluate function'
+                f'{type(dataset)} does not implement evaluate function'
 
         if self.separate_eval:
             dataset_idx = -1
@@ -82,11 +82,10 @@ class ConcatDataset(_ConcatDataset):
                 start_idx = 0 if dataset_idx == -1 else \
                     self.cumulative_sizes[dataset_idx]
                 end_idx = self.cumulative_sizes[dataset_idx + 1]
-
                 results_per_dataset = results[start_idx:end_idx]
                 print_log(
-                    f'\nEvaluateing {dataset.ann_file} with '
-                    f'{len(results_per_dataset)} images now',
+                    f'\nEvaluateing {str(type(dataset))} with '
+                    f'{len(results_per_dataset)} samples now',
                     logger=logger)
 
                 eval_results_per_dataset = dataset.evaluate(
@@ -113,7 +112,7 @@ class ConcatDataset(_ConcatDataset):
             return eval_results
 
 
-@DATASETS.register_module()
+# @DATASETS.register_module()
 class RepeatDataset:
     """A wrapper of repeated dataset.
     The length of repeated dataset will be `times` larger than the original
@@ -153,7 +152,7 @@ class RepeatDataset:
 
 
 # Modified from https://github.com/facebookresearch/detectron2/blob/41d475b75a230221e21d9cac5d69655e3415e3a4/detectron2/data/samplers/distributed_sampler.py#L57 # noqa
-@DATASETS.register_module()
+# @DATASETS.register_module()
 class ClassBalancedDataset:
     """A wrapper of repeated dataset with repeat factor.
     Suitable for training on class imbalanced datasets like LVIS. Following

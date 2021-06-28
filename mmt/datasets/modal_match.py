@@ -17,10 +17,10 @@ def get_another(x, low, high):
 
 
 @DATASETS.register_module()
-class PretrainMatchDataset(TaggingDataset):
+class ModalMatchDataset(TaggingDataset):
 
     def __init__(self, **kwargs):
-        super(PretrainMatchDataset, self).__init__(**kwargs)
+        super(ModalMatchDataset, self).__init__(**kwargs)
         self.match_list = ([(i, i) for i in range(len(self.video_anns))] +
                            [(i, get_another(i, 0, len(self.video_anns) - 1))
                             for i in range(len(self.video_anns))])
@@ -37,7 +37,9 @@ class PretrainMatchDataset(TaggingDataset):
                 audio_anns=self.audio_anns[self.match_list[i][0]],
                 video_anns=self.video_anns[self.match_list[i][0]],
                 image_anns=self.image_anns[self.match_list[i][0]],
-                text_anns=self.text_anns[self.match_list[i][1]])
+                text_anns=self.text_anns[self.match_list[i][1]],
+                meta_info={'modal_match': True}
+            )
             if not self.test_mode:
                 results['gt_labels'] = [self.gt_onehot[i]]
             results = self.pipeline(deepcopy(results))

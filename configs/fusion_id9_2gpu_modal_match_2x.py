@@ -5,6 +5,16 @@ _base_ = [
 # evaluation = dict(interval=10)
 # change samples and workers
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
+train_total_iters = 10000
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[train_total_iters // 3, 2 * train_total_iters // 3]
+)
+
+runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
 
 model = dict(
     type='MultiBranchFusionModelWithModalMatch',
@@ -13,7 +23,7 @@ model = dict(
         fc_dim1=16384,
         fc_dim2=1024,
         hidden_dim=2048,
-        loss=dict(type='BCEWithLogitsLoss', loss_weight=)
+        loss=dict(type='BCEWithLogitsLoss', loss_weight=4)
     )
 )
 

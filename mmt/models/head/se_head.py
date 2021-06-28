@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from mmcv.cnn import build_norm_layer
 from torch.nn import init
-
+import torch.nn as nn
 from mmt.models.builder import HEAD, build_head
 
 
@@ -71,9 +71,11 @@ class FusionSEHead(SingleSEHead):
 @HEAD.register_module()
 class FusionSEHeadWithModalAttn(FusionSEHead):
 
-    def __init__(self, *args, in_dim, **kwargs):
+    def __init__(self, *args, modal_in_dim, **kwargs):
         super(FusionSEHeadWithModalAttn, self).__init__(*args, **kwargs)
-        print('in')
+        self.attn_module = nn.ModuleDict()
+        for key, val in modal_in_dim.items():
+            self.attn_module[key] = nn.Linear(val, 1)
 
     def forward_train(self, feats_dict, meta_info, gt_labels):
         print('in')

@@ -1,6 +1,6 @@
 checkpoint_config = dict(interval=1000)
 evaluation = dict(interval=1000)
-seed = 1
+seed = 0
 log_config = dict(
     interval=50,
     hooks=[

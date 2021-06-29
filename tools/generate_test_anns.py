@@ -1,7 +1,7 @@
 import os
 
 if __name__ == '__main__':
-    data_base = 'dataset/tagging/tagging_dataset_test_5k/'
+    data_base = 'dataset/tagging/tagging_dataset_test_5k_2nd/'
     modal_type = ('video_npy/Youtube8M/tagging/', 'audio_npy/Vggish/tagging/',
                   'image_jpg/tagging/', 'text_txt/tagging/')
     modal_suffix = ('.npy', '.npy', '.jpg', '.txt')
@@ -15,5 +15,5 @@ if __name__ == '__main__':
         lines.append('\n')
         lines.append('\n')
     # print(lines)
-    with open('dataset/tagging/GroundTruth/datafile/test.txt', 'w') as f:
+    with open('dataset/tagging/GroundTruth/datafile/test_2nd.txt', 'w') as f:
         f.writelines(lines)

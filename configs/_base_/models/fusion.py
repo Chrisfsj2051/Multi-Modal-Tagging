@@ -13,7 +13,7 @@ model = dict(
             type='ClsHead',
             in_dim=1024,
             out_dim=82,
-            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4)
+            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )
     ),
     branch_config=dict(
@@ -36,7 +36,7 @@ model = dict(
                     type='ClsHead',
                     in_dim=1024,
                     out_dim=82,
-                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4)
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
                 )
             )
         ),
@@ -62,7 +62,7 @@ model = dict(
                     type='ClsHead',
                     in_dim=1024,
                     out_dim=82,
-                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8))
             )
         ),
         audio=dict(
@@ -84,7 +84,7 @@ model = dict(
                     type='ClsHead',
                     in_dim=1024,
                     out_dim=82,
-                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8))
             )
         ),
         text=dict(
@@ -108,7 +108,7 @@ model = dict(
                     type='ClsHead',
                     in_dim=1024,
                     out_dim=82,
-                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
+                    loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8))
             )
         )
     )

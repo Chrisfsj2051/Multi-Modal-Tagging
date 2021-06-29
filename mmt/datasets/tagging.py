@@ -136,3 +136,15 @@ class TaggingDataset:
 
     def __len__(self):
         return len(self.video_anns)
+
+
+if __name__ == '__main__':
+    ds = TaggingDataset(
+        ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+        label_id_file='dataset/tagging/label_super_id.txt',
+        pipeline=[])
+    onehot_list = np.array(ds.gt_onehot)
+    onehot = np.sum(onehot_list, 0) / len(onehot_list)
+    alpha = (1 - onehot) ** 0.75
+    for x in alpha:
+        print(x, end=',')

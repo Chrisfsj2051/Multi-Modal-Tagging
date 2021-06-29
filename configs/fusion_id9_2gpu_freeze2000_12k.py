@@ -8,7 +8,7 @@ custom_hooks = [
     dict(type='FreezeParamHook',
          param_pattern=['video', 'audio', 'image', 'text'],
          eval_pattern=['video', 'audio', 'image', 'text'],
-         freeze_iters=1000)
+         freeze_iters=2000)
 ]
 
 optimizer = dict(
@@ -25,6 +25,16 @@ optimizer = dict(
             'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
         }))
 
+train_total_iters = 12000
+
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[10000 // 3 + 2000, 2 * 10000 // 3 + 2000]
+)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
 data = dict(samples_per_gpu=8, workers_per_gpu=8)
+runner = dict(type='IterBasedRunner', max_iters=train_total_iters)

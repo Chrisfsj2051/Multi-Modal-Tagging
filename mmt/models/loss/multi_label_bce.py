@@ -31,13 +31,14 @@ class MultiLabelBCEWithLogitsFocalLoss(MultiLabelBCEWithLogitsLoss):
     def __init__(self, *args, gamma, **kwargs):
         super(MultiLabelBCEWithLogitsFocalLoss, self).__init__(*args, **kwargs)
         self.gamma = gamma
+        self.loss = nn.BCEWithLogitsLoss(reduction='none')
 
     def forward(self, preds, gt_labels):
         ce_loss = super(MultiLabelBCEWithLogitsFocalLoss,
                         self).forward(preds, gt_labels) / self.loss_weight
         p = torch.exp(-ce_loss)
         loss = (1 - p) ** self.gamma * ce_loss
-        return self.loss_weight * loss
+        return self.loss_weight * loss.mean()
 
 
 @LOSS.register_module()

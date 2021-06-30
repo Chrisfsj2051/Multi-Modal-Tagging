@@ -1,6 +1,5 @@
 _base_ = 'video_id4_2gpu.py'
-
-
+load_from = 'work_dirs/video_id4_2gpu/iter_10000.pth'
 model = dict(
     type='SemiSingleBranchModel',
     gt_thr=0.4
@@ -9,7 +8,7 @@ model = dict(
 custom_hooks = [
     dict(
         type='SemiEMAHook',
-        burnin_iters=1000,
+        burnin_iters=0,
         ema_eval=False,
         momentum=0.001
     )

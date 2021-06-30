@@ -69,7 +69,8 @@ class SemiSingleBranchModel(SingleBranchModel):
             if item.numel() == 0:
                 print_log('Empty Pseudo Label, skip', logger=get_root_logger())
                 return None
-            # print(kwargs['strong']['meta_info'], item)
+            label_list = [self.index_to_tag[x.item()] for x in item]
+            print(kwargs['strong']['meta_info'][i]['id_name'], label_list)
 
         return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs['strong'])
 

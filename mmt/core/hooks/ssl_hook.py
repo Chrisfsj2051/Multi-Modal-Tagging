@@ -58,6 +58,7 @@ class SemiEMAHook(EMAHook):
     def before_train_iter(self, runner):
         """before train iter"""
         model = self.get_model(runner)
+        model.index_to_tag = runner.data_loader._dataloader.dataset.main_dataset.index_to_tag
         model.burnin = self.burnin_iters >= runner.iter
         if not model.burnin and not self.initialized:
             self.param_ema_buffer = {}

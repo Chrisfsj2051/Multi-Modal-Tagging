@@ -65,10 +65,12 @@ class SemiSingleBranchModel(SingleBranchModel):
         self.ema_hook._swap_ema_parameters()
         self.train()
         kwargs['strong']['gt_labels'] = pseudo_labels
-        for item in pseudo_labels:
+        for i, item in enumerate(pseudo_labels):
             if item.numel() == 0:
                 print_log('Empty Pseudo Label, skip', logger=get_root_logger())
                 return None
+            # print(kwargs['strong']['meta_info'], item)
+
         return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs['strong'])
 
     def forward_train(self, return_feats=False, **kwargs):

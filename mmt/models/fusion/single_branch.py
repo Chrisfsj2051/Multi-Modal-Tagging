@@ -56,7 +56,7 @@ class SemiSingleBranchModel(SingleBranchModel):
         pseudo_mask = list(pseudo_labels)[0].sigmoid()
         pseudo_labels = []
         for idx in range(pseudo_mask.shape[0]):
-            pseudo_labels.append((pseudo_mask[idx] >= self.gt_thr).nonzero().squeeze())
+            pseudo_labels.append((pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False).squeeze())
         self.train()
         kwargs['gt_labels'] = pseudo_labels
         return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs)

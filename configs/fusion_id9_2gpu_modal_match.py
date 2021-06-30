@@ -23,6 +23,7 @@ model = dict(
         fc_dim1=16384,
         fc_dim2=1024,
         hidden_dim=2048,
+        dropout_p=0.5,
         loss=dict(type='BCEWithLogitsLoss', loss_weight=4)
     )
 )
@@ -94,7 +95,7 @@ extra_train_pipeline_1 = [
          aug_num_frame=9,
          aug_max_len=3,
          aug_num_block=3,
-         aug_max_size=30),
+         aug_max_size=10),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -114,7 +115,7 @@ extra_train_pipeline_2 = [
          aug_num_frame=9,
          aug_max_len=3,
          aug_num_block=3,
-         aug_max_size=30),
+         aug_max_size=10),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -166,13 +167,13 @@ data = dict(
                     type='ModalMatchDataset',
                     ann_file='dataset/tagging/GroundTruth/datafile/test.txt',  # change to test
                     label_id_file='dataset/tagging/label_super_id.txt',
-                    pipeline=extra_train_pipeline
+                    pipeline=extra_train_pipeline_1
                 ),
                 dict(
                     type='ModalMatchDataset',
                     ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',  # change to test
                     label_id_file='dataset/tagging/label_super_id.txt',
-                    pipeline=extra_train_pipeline
+                    pipeline=extra_train_pipeline_2
                 )
             ]
         )

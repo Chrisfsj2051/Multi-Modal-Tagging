@@ -48,10 +48,13 @@ class ModalMatchHead(nn.Module):
         self.fc_2 = nn.Linear(fc_dim2, hidden_dim)
         self.out = nn.Linear(hidden_dim, 1)
         self.loss = build_loss(loss)
+        if dropout_p is None:
+            dropout_p = 1e-11
+        self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x, meta_info):
-        x1 = self.fc_1(x[0])
-        x2 = self.fc_2(x[1])
+        x1 = self.fc_1(self.dropout(x[0]))
+        x2 = self.fc_2(self.dropout(x[1]))
         x1 = self.ln_1(x1)
         x2 = self.ln_2(x2)
         pred = self.out((x1 - x2).abs())

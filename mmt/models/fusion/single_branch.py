@@ -44,15 +44,17 @@ class SingleBranchModel(BaseFusionModel):
 @ARCH.register_module()
 class SemiSingleBranchModel(SingleBranchModel):
 
-    def __init__(self, gt_thr, unlabeled_loss_weight=1.0, **kwargs):
+    def __init__(self, gt_thr, unlabeled_loss_weight=1.0, use_ema=True, **kwargs):
         super(SemiSingleBranchModel, self).__init__(**kwargs)
         self.burnin = True
         self.gt_thr = gt_thr
+        self.use_ema = use_ema
         self.unlabeled_loss_weight = unlabeled_loss_weight
 
     def unlabeled_forward_train(self, **kwargs):
         self.eval()
-        self.ema_hook._swap_ema_parameters()
+        if self.use_ema:
+            self.ema_hook._swap_ema_parameters()
         with torch.no_grad():
             pseudo_labels = self.simple_test(return_feats=False, **kwargs['weak'])[0].values()
         assert len(pseudo_labels) == 1
@@ -62,15 +64,16 @@ class SemiSingleBranchModel(SingleBranchModel):
             pseudo_label = (pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False)
             pseudo_label = pseudo_label.view(pseudo_label.shape[0])
             pseudo_labels.append(pseudo_label)
-        self.ema_hook._swap_ema_parameters()
+        if self.use_ema:
+            self.ema_hook._swap_ema_parameters()
         self.train()
         kwargs['strong']['gt_labels'] = pseudo_labels
         for i, item in enumerate(pseudo_labels):
             if item.numel() == 0:
                 print_log('Empty Pseudo Label, skip', logger=get_root_logger())
                 return None
-            label_list = [self.index_to_tag[x.item()] for x in item]
-            print(kwargs['strong']['meta_info'][i]['id_name'], label_list)
+            # label_list = [self.index_to_tag[x.item()] for x in item]
+            # print(kwargs['strong']['meta_info'][i]['id_name'], label_list)
 
         return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs['strong'])
 

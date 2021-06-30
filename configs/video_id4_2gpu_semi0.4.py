@@ -1,20 +1,22 @@
 _base_ = 'video_id4_2gpu.py'
 
-img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
-                    std=[58.395, 57.12, 57.375])
 
 model = dict(
     type='SemiSingleBranchModel',
-    gt_thr=0.7
+    gt_thr=0.4
 )
 
 custom_hooks = [
     dict(
         type='SemiEMAHook',
-        burnin_iters=200,
+        burnin_iters=1000,
         ema_eval=False
     )
 ]
+
+
+img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375])
 
 train_pipeline = [
     dict(type='LoadAnnotations',
@@ -53,14 +55,10 @@ train_pipeline = [
 
 
 weak_train_pipeline_1 = [
-    # dict(type='LoadAnnotations',
-    #      replace_dict=dict(video=(
-    #          'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
-    #          'extracted_video_feats/L16_LN/test_5k'))),
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/train_5k'))),
+             'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k'))),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
@@ -73,8 +71,8 @@ weak_train_pipeline_1 = [
 strong_train_pipeline_1 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/train_5k'))),
+             'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     # dict(type='PhotoMetricDistortion',
@@ -94,10 +92,10 @@ strong_train_pipeline_1 = [
     #      [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
-         aug_num_frame=9,
-         aug_max_len=3,
-         aug_num_block=3,
-         aug_max_size=30),
+         aug_num_frame=30,
+         aug_max_len=10,
+         aug_num_block=10,
+         aug_max_size=100),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -106,14 +104,10 @@ strong_train_pipeline_1 = [
 ]
 
 weak_train_pipeline_2 = [
-    # dict(type='LoadAnnotations',
-    #      replace_dict=dict(video=(
-    #          'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
-    #          'extracted_video_feats/L16_LN/test_5k_2nd'))),
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/train_5k'))),
+             'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k_2nd'))),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
@@ -126,8 +120,8 @@ weak_train_pipeline_2 = [
 strong_train_pipeline_2=[
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/train_5k'))),
+             'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/test_5k_2nd'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     # dict(type='PhotoMetricDistortion',
@@ -147,10 +141,10 @@ strong_train_pipeline_2=[
     #      [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
-         aug_num_frame=9,
-         aug_max_len=3,
-         aug_num_block=3,
-         aug_max_size=30),
+         aug_num_frame=30,
+         aug_max_len=10,
+         aug_num_block=10,
+         aug_max_size=100),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -159,8 +153,6 @@ strong_train_pipeline_2=[
 ]
 
 data = dict(
-    samples_per_gpu=2,  # remove this line
-    workers_per_gpu=1,
     train=dict(
         _delete_=True,
         type='TwoStreamDataset',
@@ -175,8 +167,7 @@ data = dict(
             datasets=[
                 dict(
                     type='TaggingDatasetWithAugs',
-                    # ann_file='dataset/tagging/GroundTruth/datafile/test.txt',  # change to test
-                    ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+                    ann_file='dataset/tagging/GroundTruth/datafile/test.txt',  # change to test
                     label_id_file='dataset/tagging/label_super_id.txt',
                     pipeline=weak_train_pipeline_1,
                     strong_pipeline = strong_train_pipeline_1,
@@ -184,8 +175,7 @@ data = dict(
                 ),
                 dict(
                     type='TaggingDatasetWithAugs',
-                    # ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',  # change to test
-                    ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
+                    ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',  # change to test
                     label_id_file='dataset/tagging/label_super_id.txt',
                     pipeline=weak_train_pipeline_2,
                     strong_pipeline = strong_train_pipeline_2,

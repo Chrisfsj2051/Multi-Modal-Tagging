@@ -1,7 +1,11 @@
+from copy import deepcopy
+
 import torch
+from mmcv import print_log
 
 from mmt.models.builder import ARCH, build_backbone, build_head
 from mmt.models.fusion import BaseFusionModel
+from mmt.utils import get_root_logger
 
 
 @ARCH.register_module()
@@ -46,20 +50,23 @@ class SemiSingleBranchModel(SingleBranchModel):
         self.gt_thr = gt_thr
 
     def unlabeled_forward_train(self, **kwargs):
-        # x, meta_info = extra_data.values()
         self.eval()
-        # EMA
+        self.ema_hook._swap_ema_parameters()
         with torch.no_grad():
-            pseudo_labels = self.simple_test(return_feats=False, **kwargs)[0].values()
+            pseudo_labels = self.simple_test(return_feats=False, **kwargs['weak'])[0].values()
         assert len(pseudo_labels) == 1
         pseudo_mask = list(pseudo_labels)[0].sigmoid()
         pseudo_labels = []
         for idx in range(pseudo_mask.shape[0]):
             pseudo_labels.append((pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False).squeeze())
-        print(len(pseudo_labels[-1]))
+        self.ema_hook._swap_ema_parameters()
         self.train()
-        kwargs['gt_labels'] = pseudo_labels
-        return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs)
+        kwargs['strong']['gt_labels'] = pseudo_labels
+        for item in pseudo_labels:
+            if item.numel() == 0:
+                print_log('Empty Pseudo Label, skip', logger=get_root_logger())
+                return None
+        return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs['strong'])
 
     def forward_train(self, return_feats=False, **kwargs):
         extra_data = kwargs.pop('extra')
@@ -70,10 +77,14 @@ class SemiSingleBranchModel(SingleBranchModel):
         #     feats, losses = losses
         if not self.burnin:
             unlabeled_loss = self.unlabeled_forward_train(**extra_data)
+            if unlabeled_loss is None:
+                for key in list(losses.keys()):
+                    losses[f'ssl_{key}'] = torch.zeros_like(losses[key])
             # if return_feats:
             #     feats, losses = losses
-            for key in unlabeled_loss.keys():
-                losses[f'ssl_{key}'] = unlabeled_loss[key]
+            else:
+                for key in unlabeled_loss.keys():
+                    losses[f'ssl_{key}'] = unlabeled_loss[key]
         if not return_feats:
             return losses
         else:

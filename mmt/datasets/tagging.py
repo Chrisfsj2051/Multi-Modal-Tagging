@@ -138,6 +138,29 @@ class TaggingDataset:
         return len(self.video_anns)
 
 
+@DATASETS.register_module()
+class TaggingDatasetWithAugs(TaggingDataset):
+    def __init__(self, strong_pipeline, **kwargs):
+        super(TaggingDatasetWithAugs, self).__init__(**kwargs)
+        self.strong_pipeline = Compose(strong_pipeline)
+
+    def __getitem__(self, i):
+        while True:
+            results = dict(audio_anns=self.audio_anns[i],
+                           video_anns=self.video_anns[i],
+                           image_anns=self.image_anns[i],
+                           text_anns=self.text_anns[i])
+            if not self.test_mode:
+                results['gt_labels'] = self.gt_label[i]
+            weak_results = self.pipeline(deepcopy(results))
+            strong_results = self.strong_pipeline(deepcopy(results))
+            if results is not None and strong_results is not None:
+                return {'weak': weak_results, 'strong': strong_results}
+            logger = get_root_logger()
+            logger.info('Load failed')
+            i = random.randint(0, len(self) - 1)
+
+
 if __name__ == '__main__':
     ds = TaggingDataset(
         ann_file='dataset/tagging/GroundTruth/datafile/train.txt',

@@ -44,10 +44,11 @@ class SingleBranchModel(BaseFusionModel):
 @ARCH.register_module()
 class SemiSingleBranchModel(SingleBranchModel):
 
-    def __init__(self, gt_thr, **kwargs):
+    def __init__(self, gt_thr, unlabeled_loss_weight=1.0, **kwargs):
         super(SemiSingleBranchModel, self).__init__(**kwargs)
         self.burnin = True
         self.gt_thr = gt_thr
+        self.unlabeled_loss_weight = unlabeled_loss_weight
 
     def unlabeled_forward_train(self, **kwargs):
         self.eval()
@@ -58,7 +59,9 @@ class SemiSingleBranchModel(SingleBranchModel):
         pseudo_mask = list(pseudo_labels)[0].sigmoid()
         pseudo_labels = []
         for idx in range(pseudo_mask.shape[0]):
-            pseudo_labels.append((pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False).squeeze())
+            pseudo_label = (pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False)
+            pseudo_label = pseudo_label.view(pseudo_label.shape[0])
+            pseudo_labels.append(pseudo_label)
         self.ema_hook._swap_ema_parameters()
         self.train()
         kwargs['strong']['gt_labels'] = pseudo_labels
@@ -84,7 +87,7 @@ class SemiSingleBranchModel(SingleBranchModel):
             #     feats, losses = losses
             else:
                 for key in unlabeled_loss.keys():
-                    losses[f'ssl_{key}'] = unlabeled_loss[key]
+                    losses[f'ssl_{key}'] = unlabeled_loss[key] * self.unlabeled_loss_weight
         if not return_feats:
             return losses
         else:

@@ -5,5 +5,5 @@ _base_ = 'fusion_id9_2gpu.py'
 
 model = dict(
     type='MultiBranchFusionModel',
-    modal_dropout_p=dict(text=0.0, video=0.0, image=1.0, audio=0.0)
+    modal_dropout_p=dict(text=0.0, video=0.2, image=0.0, audio=0.0)
 )

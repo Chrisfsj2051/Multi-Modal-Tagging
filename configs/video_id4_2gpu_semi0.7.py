@@ -9,7 +9,7 @@ model = dict(
 custom_hooks = [
     dict(
         type='SemiEMAHook',
-        burnin_iters=800,
+        burnin_iters=1000,
         ema_eval=False
     )
 ]

@@ -42,8 +42,7 @@ class SemiSingleBranchModel(SingleBranchModel):
 
     def __init__(self, gt_thr, **kwargs):
         super(SemiSingleBranchModel, self).__init__(**kwargs)
-        # self.burn_in = True
-        self.burn_in = False
+        self.burnin = True
         self.gt_thr = gt_thr
 
     def unlabeled_forward_train(self, **kwargs):
@@ -57,6 +56,7 @@ class SemiSingleBranchModel(SingleBranchModel):
         pseudo_labels = []
         for idx in range(pseudo_mask.shape[0]):
             pseudo_labels.append((pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False).squeeze())
+        print(len(pseudo_labels[-1]))
         self.train()
         kwargs['gt_labels'] = pseudo_labels
         return super(SemiSingleBranchModel, self).forward_train(return_feats=False, **kwargs)
@@ -68,7 +68,7 @@ class SemiSingleBranchModel(SingleBranchModel):
         assert not return_feats
         # if return_feats:
         #     feats, losses = losses
-        if not self.burn_in:
+        if not self.burnin:
             unlabeled_loss = self.unlabeled_forward_train(**extra_data)
             # if return_feats:
             #     feats, losses = losses

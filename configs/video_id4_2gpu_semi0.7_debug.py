@@ -11,7 +11,7 @@ model = dict(
 custom_hooks = [
     dict(
         type='SemiStatusHook',
-        burnin_iters=2000
+        burnin_iters=200
     )
 ]
 

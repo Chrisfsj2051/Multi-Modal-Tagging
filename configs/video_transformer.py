@@ -1,4 +1,6 @@
-_base_ = 'video_id3_4gpu.py'
+_base_ = 'video_id4_2gpu.py'
+
+data = dict(samples_per_gpu=2, workers_per_gpu=1)
 
 model = dict(
     backbone=dict(

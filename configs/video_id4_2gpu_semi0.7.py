@@ -59,8 +59,8 @@ extra_train_pipeline_2 = [
 ]
 
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=1,
+    # samples_per_gpu=2,
+    # workers_per_gpu=1,
     train=dict(
         _delete_=True,
         type='TwoStreamDataset',

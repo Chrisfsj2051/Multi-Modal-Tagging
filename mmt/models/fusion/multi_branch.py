@@ -28,8 +28,8 @@ class MultiBranchFusionModel(BaseFusionModel):
         text_feats, text_loss = self.text_branch.forward_train(
             text=text, meta_info=meta_info, gt_labels=gt_labels, return_feats=True)
         feats_dict = dict(image=image_feats, audio=audio_feats, text=text_feats, video=video_feats)
-        fusion_loss = self.fusion_head.forward_train(feats_dict, meta_info,
-                                                     gt_labels)
+        feats_dict = self.apply_modal_dropout(feats_dict)
+        fusion_loss = self.fusion_head.forward_train(feats_dict, meta_info, gt_labels)
         losses = {}
         for name, los in zip(
                 ['video', 'image', 'audio', 'text', 'fusion'],
@@ -47,7 +47,7 @@ class MultiBranchFusionModel(BaseFusionModel):
 
         bs = item_list[0].shape[0]
         dropout_p = [[1 - self.modal_dropout_p[x] for _ in range(bs)]
-                     for x in self.modal_list]
+                     for x in key_list]
         mask = np.random.binomial(1, dropout_p)
         for i in range(mask.shape[1]):
             if sum(mask[:, i]) == 0:

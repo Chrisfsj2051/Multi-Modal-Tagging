@@ -41,3 +41,4 @@ data = dict(
     workers_per_gpu=8,
     train=dict(pipeline=train_pipeline)
 )
+

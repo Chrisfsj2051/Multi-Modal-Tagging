@@ -4,6 +4,7 @@ from mmcv.cnn import build_norm_layer
 from torch.nn import init
 import torch.nn as nn
 from mmt.models.builder import HEAD, build_head
+import numpy as np
 
 
 @HEAD.register_module()
@@ -36,7 +37,7 @@ class SingleSEHead(nn.Module):
 
     def forward(self, x):
         assert x.shape[
-            1] == self.in_dim, \
+                   1] == self.in_dim, \
             f'Input shape: {x.shape[1]}, Param shape: {self.in_dim}'
         x = self.input_dropout(x)
         activation = torch.matmul(x, self.hidden_weight)
@@ -93,6 +94,28 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
 @HEAD.register_module()
 class SingleMixupSEHead(SingleSEHead):
     def forward_train(self, x, meta_info, gt_labels):
-        print('in')
+
+        new_x, new_gt_labels, new_gt_alpha = [], [], []
+        bs = len(gt_labels)
+        for idx in range(bs):
+            alpha = np.random.beta(1.5, 1.5)
+            if alpha < 0.5:
+                alpha = 1-alpha
+            nx_idx = (bs // 2 + idx) % bs
+            x1, x2 = x[idx], x[nx_idx]
+            tmp_gt_label = {i: 0.0 for i in range(max(
+                gt_labels[idx].tolist() + gt_labels[nx_idx].tolist()) + 1)}
+            for label in gt_labels[idx].tolist():
+                tmp_gt_label[label] += alpha
+            for label in gt_labels[nx_idx].tolist():
+                tmp_gt_label[label] += 1 - alpha
+            label = [k for (k, v) in tmp_gt_label.items() if v > 0]
+            label_alpha = [v for (k, v) in tmp_gt_label.items() if v > 0]
+            new_gt_labels.append(gt_labels[0].new_tensor(label))
+            new_gt_alpha.append(x1.new_tensor(label_alpha))
+            new_x.append((x1 * alpha + x2 * (1 - alpha))[None])
+
+        new_x = torch.cat(new_x, 0)
         activation = self(x)
         return self.cls_head.forward_train(activation, gt_labels)
+

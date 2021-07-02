@@ -3,16 +3,18 @@ _base_ = [
     '_base_/models/fusion.py', '_base_/datasets/fusion.py'
 ]
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
+train_total_iters = 20000
+
+lr_config = dict(policy='step',
+                 warmup='linear',
+                 warmup_iters=500,
+                 warmup_ratio=0.001,
+                 step=[train_total_iters // 3, 2 * train_total_iters // 3])
+runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
 
 custom_hooks = [
-    dict(
-        type='SemiEMAHook',
-        burnin_iters=1000,
-        ema_eval=False,
-        momentum=0.001
-    )
+    dict(type='SemiEMAHook', burnin_iters=1000, ema_eval=False, momentum=0.001)
 ]
-
 optimizer = dict(
     _delete_=True,
     type='Adam',
@@ -29,11 +31,9 @@ optimizer = dict(
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
-model = dict(
-    type='SemiMultiBranchFusionModel',
-    gt_thr=0.5,
-    unlabeled_loss_weight=0.5
-)
+model = dict(type='SemiMultiBranchFusionModel',
+             gt_thr=0.4,
+             unlabeled_loss_weight=1.0)
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
@@ -59,7 +59,7 @@ train_pipeline = [
     dict(type='AutoAugment',
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
-                  [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
+         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
          aug_num_frame=9,
@@ -83,8 +83,7 @@ weak_train_pipeline_1 = [
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect',
-         keys=['video', 'image', 'text', 'audio', 'meta_info'])
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
 ]
 
 strong_train_pipeline_1 = [
@@ -108,7 +107,7 @@ strong_train_pipeline_1 = [
     dict(type='AutoAugment',
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
-                  [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
+         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
          aug_num_frame=30,
@@ -118,8 +117,7 @@ strong_train_pipeline_1 = [
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect',
-         keys=['video', 'image', 'text', 'audio', 'meta_info'])
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
 ]
 
 weak_train_pipeline_2 = [
@@ -132,8 +130,7 @@ weak_train_pipeline_2 = [
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect',
-         keys=['video', 'image', 'text', 'audio', 'meta_info'])
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
 ]
 
 strong_train_pipeline_2 = [
@@ -157,7 +154,7 @@ strong_train_pipeline_2 = [
     dict(type='AutoAugment',
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
-                  [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
+         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
          aug_num_frame=30,
@@ -167,8 +164,7 @@ strong_train_pipeline_2 = [
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect',
-         keys=['video', 'image', 'text', 'audio', 'meta_info'])
+    dict(type='Collect', keys=['video', 'image', 'text', 'audio', 'meta_info'])
 ]
 
 data = dict(
@@ -181,28 +177,21 @@ data = dict(
             type='TaggingDataset',
             ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
             label_id_file='dataset/tagging/label_super_id.txt',
-            pipeline=train_pipeline
-        ),
+            pipeline=train_pipeline),
         extra_dataset_config=dict(
             type='ConcatDataset',
             datasets=[
-                dict(
-                    type='TaggingDatasetWithAugs',
-                    ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
-                    label_id_file='dataset/tagging/label_super_id.txt',
-                    pipeline=weak_train_pipeline_1,
-                    strong_pipeline=strong_train_pipeline_1,
-                    test_mode=True
-                ),
-                dict(
-                    type='TaggingDatasetWithAugs',
-                    ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',
-                    label_id_file='dataset/tagging/label_super_id.txt',
-                    pipeline=weak_train_pipeline_2,
-                    strong_pipeline=strong_train_pipeline_2,
-                    test_mode=True
-                )
-            ]
-        )
-    )
-)
+                dict(type='TaggingDatasetWithAugs',
+                     ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
+                     label_id_file='dataset/tagging/label_super_id.txt',
+                     pipeline=weak_train_pipeline_1,
+                     strong_pipeline=strong_train_pipeline_1,
+                     test_mode=True),
+                dict(type='TaggingDatasetWithAugs',
+                     ann_file=
+                     'dataset/tagging/GroundTruth/datafile/test_2nd.txt',
+                     label_id_file='dataset/tagging/label_super_id.txt',
+                     pipeline=weak_train_pipeline_2,
+                     strong_pipeline=strong_train_pipeline_2,
+                     test_mode=True)
+            ])))

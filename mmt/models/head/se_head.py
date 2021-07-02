@@ -95,11 +95,17 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
 @HEAD.register_module()
 class SingleMixupSEHead(SingleSEHead):
 
+    def __init__(self, alpha_ub, **kwargs):
+        super(SingleMixupSEHead, self).__init__(**kwargs)
+        self.alpha_ub = alpha_ub
+
     def forward_train(self, x, meta_info, gt_labels):
         new_x, new_gt_labels, new_gt_alpha = [], [], []
         bs = len(gt_labels)
         for idx in range(bs):
             alpha = np.random.beta(1.5, 1.5)
+            while alpha > self.alpha_ub:
+                alpha = np.random.beta(1.5, 1.5)
             if alpha < 0.5:
                 alpha = 1 - alpha
             nx_idx = (bs // 2 + idx) % bs

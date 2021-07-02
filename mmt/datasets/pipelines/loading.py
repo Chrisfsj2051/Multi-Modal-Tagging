@@ -21,16 +21,15 @@ class LoadAnnotations(object):
                 f'{results["video_anns"]} doesn"t contain {self.replace_dict["video"][0]}'
             results['video_anns'] = results['video_anns'].replace(
                 self.replace_dict['video'][0], self.replace_dict['video'][1])
-        results['video'] = np.load(results.pop('video_anns')).astype(
-            np.float32)
+        results['video'] = np.load(results.pop('video_anns')).astype(np.float32)
+        results['meta_info']['video_len'] = results['video'].shape[0]
 
     def load_audio_anns(self, results):
         if 'audio' in self.replace_dict.keys():
             assert self.replace_dict['audio'][0] in results['audio_anns']
             results['audio_anns'] = results['audio_anns'].replace(
                 self.replace_dict['audio'][0], self.replace_dict['audio'][1])
-        results['audio'] = np.load(results.pop('audio_anns')).astype(
-            np.float32)
+        results['audio'] = np.load(results.pop('audio_anns')).astype(np.float32)
 
     def load_text_anns(self, results):
         with open(results['text_anns'], 'r', encoding='utf-8') as f:

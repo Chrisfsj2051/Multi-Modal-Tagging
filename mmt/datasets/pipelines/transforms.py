@@ -3,6 +3,7 @@ import os
 import random
 from copy import deepcopy
 
+import math
 import mmcv
 import numpy as np
 
@@ -54,6 +55,23 @@ class Pad(object):
         repr_str += f'size_divisor={self.size_divisor}, '
         repr_str += f'pad_val={self.pad_val})'
         return repr_str
+
+
+@PIPELINES.register_module()
+class VideoResamplePad:
+    def __init__(self, seq_len):
+        self.seq_len = seq_len
+
+    def __call__(self, results):
+        video = results['video'][:results['meta_info']['video_len']]
+        assert self.seq_len <= results['video'].shape[0]
+        if self.seq_len < video.shape[0]:
+            len_seg = len(video) / self.seq_len
+            seg_point = np.arange(0, len(video), len_seg)
+            seg_point = math.floor(seg_point)
+            seg_point[-1] = len(video) - 1
+
+        print('in')
 
 
 @PIPELINES.register_module()
@@ -160,6 +178,7 @@ class Normalize(object):
         to_rgb (bool): Whether to convert the image from BGR to RGB,
             default is true.
     """
+
     def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
@@ -461,6 +480,7 @@ class CutOut:
         fill_in (tuple[float, float, float] | tuple[int, int, int]): The value
             of pixel to fill in the dropped regions. Default: (0, 0, 0).
     """
+
     def __init__(self,
                  n_holes,
                  cutout_shape=None,

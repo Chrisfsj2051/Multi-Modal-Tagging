@@ -14,7 +14,7 @@ class TransformerHead(nn.Module):
             transformer_hidden_dim = hidden_dim
         self.modal_fc = nn.ModuleDict()
         for key in in_dim.keys():
-            self.modal_fc[key] = nn.Linear(in_dim[key], hidden_dim)
+            self.modal_fc[key] = nn.Sequential(nn.Linear(in_dim[key], hidden_dim), nn.LayerNorm(hidden_dim))
         self.encoder = nn.ModuleList([
             EncoderLayer(hidden_dim, num_head, transformer_hidden_dim)
             for _ in range(num_layers)
@@ -23,6 +23,7 @@ class TransformerHead(nn.Module):
         if dropout_p == 0:
             dropout_p = 1e-11
         self.input_dropout = nn.Dropout(dropout_p)
+
 
     def forward(self, x):
         x = [self.modal_fc[key](self.input_dropout(val))[:, None, :] for key, val in x.items()]

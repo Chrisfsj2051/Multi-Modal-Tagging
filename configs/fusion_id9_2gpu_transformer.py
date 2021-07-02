@@ -4,7 +4,12 @@ _base_ = [
 ]
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
 data = dict(samples_per_gpu=8, workers_per_gpu=8)
-
+custom_hooks = [
+    dict(type='FreezeParamHook',
+         param_pattern=['video', 'audio', 'image', 'text'],
+         eval_pattern=['video', 'audio', 'image', 'text'],
+         freeze_iters=1000)
+]
 model = dict(
     fusion_config=dict(
         _delete_=True,
@@ -17,7 +22,7 @@ model = dict(
         ),
         num_layers=4,
         hidden_dim=512,
-        dropout_p=0.8,
+        dropout_p=0.1,
         num_head=4,
         cls_head_config=dict(
             type='ClsHead',
@@ -32,14 +37,14 @@ optimizer = dict(
     _delete_=True,
     type='Adam',
     amsgrad=True,
-    lr=0.01,
+    lr=0.001,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
-            'image_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'image_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
         }))
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

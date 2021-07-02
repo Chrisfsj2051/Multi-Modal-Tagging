@@ -1,10 +1,11 @@
 _base_ = 'video_id4_2gpu.py'
 
-# data = dict(samples_per_gpu=2, workers_per_gpu=1)
+data = dict(samples_per_gpu=2, workers_per_gpu=1)
 
 model = dict(
     head=dict(
         type='SingleMixupSEHead',
+        dropout_p=0.5,
         cls_head_config=dict(
             type='MixupClsHead',
             loss=dict(type='MixupMultiLabelBCEWithLogitsLoss')

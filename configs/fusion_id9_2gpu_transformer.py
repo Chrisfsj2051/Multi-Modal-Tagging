@@ -38,16 +38,19 @@ model = dict(
 
 optimizer = dict(
     _delete_=True,
-    type='Adam',
-    amsgrad=True,
-    lr=0.01,
+    type='AdamW',
+    lr=0.0001,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
-            'image_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'image_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
         }))
-
+lr_config = dict(policy='step',
+                 warmup='linear',
+                 warmup_iters=500,
+                 warmup_ratio=0.001,
+                 step=[7000])
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

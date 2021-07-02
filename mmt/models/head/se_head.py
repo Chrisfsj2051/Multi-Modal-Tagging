@@ -17,7 +17,8 @@ class SingleSEHead(nn.Module):
                  norm_cfg=dict(type='BN1d'),
                  dropout_p=0.0):
         super(SingleSEHead, self).__init__()
-        self.cls_head = build_head(cls_head_config)
+        if cls_head_config is not None:
+            self.cls_head = build_head(cls_head_config)
         self.out_dim = out_dim
         self.in_dim = in_dim
         self.hidden_weight = nn.Parameter(torch.randn(in_dim, out_dim))

@@ -1,9 +1,11 @@
 import torch.nn as nn
 
+from mmt.models.head.se_head import SingleSEHead
 from mmt.models.builder import HEAD, build_head
 from mmt.models.frame.transformer import EncoderLayer
 import torch.nn as nn
 import torch
+
 
 @HEAD.register_module()
 class TransformerHead(nn.Module):
@@ -14,7 +16,14 @@ class TransformerHead(nn.Module):
             transformer_hidden_dim = hidden_dim
         self.modal_fc = nn.ModuleDict()
         for key in in_dim.keys():
-            self.modal_fc[key] = nn.Sequential(nn.Linear(in_dim[key], hidden_dim), nn.LayerNorm(hidden_dim))
+            # self.modal_fc[key] = nn.Sequential(nn.Linear(in_dim[key], hidden_dim), nn.LayerNorm(hidden_dim))
+            self.modal_fc[key] = SingleSEHead(
+                in_dim=in_dim[key],
+                out_dim=hidden_dim,
+                gating_reduction=8,
+                cls_head_config=None,
+                norm_cfg=dict(type='BN1d'),
+                dropout_p=dropout_p)
         self.encoder = nn.ModuleList([
             EncoderLayer(hidden_dim, num_head, transformer_hidden_dim)
             for _ in range(num_layers)
@@ -24,9 +33,9 @@ class TransformerHead(nn.Module):
             dropout_p = 1e-11
         self.input_dropout = nn.Dropout(dropout_p)
 
-
     def forward(self, x):
-        x = [self.modal_fc[key](self.input_dropout(val))[:, None, :] for key, val in x.items()]
+        # x = [self.modal_fc[key](self.input_dropout(val))[:, None, :] for key, val in x.items()]
+        x = [self.modal_fc[key](val)[:, None, :] for key, val in x.items()]
         x = torch.cat(x, 1)
         for encoder in self.encoder:
             x = encoder(x)
@@ -40,7 +49,6 @@ class TransformerHead(nn.Module):
     def simple_test(self, x, meta_info):
         activation = self(x)
         return self.cls_head.simple_test(activation)
-
 
 # class SingleSEHead(nn.Module):
 #     def __init__(self,

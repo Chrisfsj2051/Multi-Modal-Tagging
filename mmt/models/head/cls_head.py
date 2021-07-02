@@ -38,21 +38,23 @@ class ClsHead(FCHead):
     def simple_test(self, x):
         return self.linear(x)
 
+
 @HEAD.register_module()
 class MixupClsHead(ClsHead):
     def __init__(self, in_dim, out_dim, loss, dropout_p=None):
         super(ClsHead, self).__init__(in_dim, out_dim, dropout_p)
         self.loss = build_loss(loss)
 
-    def forward_train(self, x, gt_labels):
+    def forward_train(self, x, gt_labels, gt_alpha):
         if self.use_dropout:
             x = self.dropout(x)
         pred = self.linear(x)
-        loss = self.loss(pred, gt_labels)
+        loss = self.loss(pred, gt_labels, gt_alpha)
         return dict(cls_loss=loss)
 
     def simple_test(self, x):
         return self.linear(x)
+
 
 @HEAD.register_module()
 class ModalMatchHead(nn.Module):

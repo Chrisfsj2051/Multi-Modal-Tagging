@@ -93,14 +93,14 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
 
 @HEAD.register_module()
 class SingleMixupSEHead(SingleSEHead):
-    def forward_train(self, x, meta_info, gt_labels):
 
+    def forward_train(self, x, meta_info, gt_labels):
         new_x, new_gt_labels, new_gt_alpha = [], [], []
         bs = len(gt_labels)
         for idx in range(bs):
             alpha = np.random.beta(1.5, 1.5)
             if alpha < 0.5:
-                alpha = 1-alpha
+                alpha = 1 - alpha
             nx_idx = (bs // 2 + idx) % bs
             x1, x2 = x[idx], x[nx_idx]
             tmp_gt_label = {i: 0.0 for i in range(max(
@@ -116,6 +116,5 @@ class SingleMixupSEHead(SingleSEHead):
             new_x.append((x1 * alpha + x2 * (1 - alpha))[None])
 
         new_x = torch.cat(new_x, 0)
-        activation = self(x)
-        return self.cls_head.forward_train(activation, gt_labels)
-
+        activation = self(new_x)
+        return self.cls_head.forward_train(activation, new_gt_labels, new_gt_alpha)

@@ -216,7 +216,11 @@ class FrameAugBox(metaclass=abc.ABCMeta):
 @PIPELINES.register_module()
 class FrameRandomErase(FrameAugBox):
     def apply_frame_aug(self, x):
-        for cnt in range(self.aug_num_frame):
+        if self.aug_num_frame < 1.0:
+            aug_num_frame = int(self.aug_num_frame * x.shape[0])
+        else:
+            aug_num_frame = self.aug_num_frame
+        for cnt in range(aug_num_frame):
             st = random.randint(0, x.shape[0] - 1)
             ed = random.randint(st + 1, min(x.shape[0], st + self.aug_max_len))
             x[st:ed] *= 0

@@ -3,7 +3,8 @@ _base_ = 'video_id4_2gpu.py'
 
 model = dict(
     type='SemiSingleBranchModel',
-    gt_thr=0.4
+    gt_thr=0.4,
+    unlabeled_loss_weight=0.5
 )
 
 custom_hooks = [

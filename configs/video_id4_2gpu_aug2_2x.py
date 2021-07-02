@@ -26,7 +26,7 @@ train_pipeline = [
          key_fields=['video'],
          aug_num_frame=0,
          aug_max_len=0,
-         aug_num_block=10,
+         aug_num_block=20,
          aug_max_size=30),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),

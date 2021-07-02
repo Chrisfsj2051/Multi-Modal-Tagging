@@ -4,12 +4,14 @@ _base_ = [
 ]
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
 data = dict(samples_per_gpu=8, workers_per_gpu=8)
-# custom_hooks = [
-#     dict(type='FreezeParamHook',
-#          param_pattern=['video', 'audio', 'image', 'text'],
-#          eval_pattern=['video', 'audio', 'image', 'text'],
-#          freeze_iters=1000)
-# ]
+custom_hooks = [
+    dict(type='FreezeParamHook',
+         param_pattern=['video', 'audio', 'image', 'text'],
+         eval_pattern=['video', 'audio', 'image', 'text'],
+         freeze_iters=1000)
+]
+find_unused_parameters=True
+
 model = dict(
     fusion_config=dict(
         _delete_=True,

@@ -24,7 +24,7 @@ model = dict(
         ),
         num_layers=4,
         hidden_dim=512,
-        dropout_p=0.1,
+        dropout_p=0.8,
         num_head=4,
         cls_head_config=dict(
             type='ClsHead',

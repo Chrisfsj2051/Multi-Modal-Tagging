@@ -13,7 +13,7 @@ model = dict(
     )
 )
 
-train_total_iters = 20000
+train_total_iters = 10000
 
 lr_config = dict(
     policy='step',

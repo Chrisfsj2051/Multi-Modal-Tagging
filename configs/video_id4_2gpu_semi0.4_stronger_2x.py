@@ -1,7 +1,7 @@
 _base_ = 'video_id4_2gpu_semi0.4.py'
 
 train_total_iters = 20000
-
+runner = dict(type='IterBasedRunner', max_iters=train_total_iters)
 lr_config = dict(
     policy='step',
     warmup='linear',

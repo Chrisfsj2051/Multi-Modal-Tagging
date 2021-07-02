@@ -88,3 +88,11 @@ class FusionSEHeadWithModalAttn(FusionSEHead):
         for key in feats_dict.keys():
             feats_dict[key] = feats_dict[key] * self.attn_module[key](feats_dict[key])
         return super(FusionSEHeadWithModalAttn, self).simple_test(feats_dict, meta_info)
+
+
+@HEAD.register_module()
+class SingleMixupSEHead(SingleSEHead):
+    def forward_train(self, x, meta_info, gt_labels):
+        print('in')
+        activation = self(x)
+        return self.cls_head.forward_train(activation, gt_labels)

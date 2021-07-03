@@ -16,14 +16,18 @@ class TransformerHead(nn.Module):
             transformer_hidden_dim = hidden_dim
         self.modal_fc = nn.ModuleDict()
         for key in in_dim.keys():
-            # self.modal_fc[key] = nn.Sequential(nn.Linear(in_dim[key], hidden_dim), nn.LayerNorm(hidden_dim))
-            self.modal_fc[key] = SingleSEHead(
-                in_dim=in_dim[key],
-                out_dim=hidden_dim,
-                gating_reduction=8,
-                cls_head_config=None,
-                norm_cfg=dict(type='BN1d'),
-                dropout_p=dropout_p)
+            self.modal_fc[key] = nn.Sequential(
+                nn.Linear(in_dim[key], hidden_dim),
+                nn.LayerNorm(hidden_dim),
+                nn.ReLU()
+            )
+            # self.modal_fc[key] = SingleSEHead(
+            #     in_dim=in_dim[key],
+            #     out_dim=hidden_dim,
+            #     gating_reduction=8,
+            #     cls_head_config=None,
+            #     norm_cfg=dict(type='BN1d'),
+            #     dropout_p=dropout_p)
         self.encoder = nn.ModuleList([
             EncoderLayer(hidden_dim, num_head, transformer_hidden_dim)
             for _ in range(num_layers)

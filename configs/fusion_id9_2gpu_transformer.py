@@ -14,6 +14,7 @@ data = dict(samples_per_gpu=8, workers_per_gpu=8)
 # find_unused_parameters=True
 
 model = dict(
+    modal_dropout_p=dict(text=0.1, video=0.1, image=0.1, audio=0.1),
     fusion_config=dict(
         _delete_=True,
         type='TransformerHead',
@@ -24,13 +25,13 @@ model = dict(
             text=1024
         ),
         num_layers=3,
-        hidden_dim=128,
+        hidden_dim=256,
         dropout_p=0.9,
         num_head=4,
         cls_head_config=dict(
-            type='ClsHead',
             dropout_p=0.8,
-            in_dim=4 * 128,
+            type='ClsHead',
+            in_dim=4 * 256,
             out_dim=82,
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )

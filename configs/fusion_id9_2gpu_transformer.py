@@ -5,12 +5,12 @@ _base_ = [
 load_from = 'pretrained/image37_text23_video4_audio3.pth'
 data = dict(samples_per_gpu=8, workers_per_gpu=8)
 # data = dict(samples_per_gpu=2, workers_per_gpu=1)
-custom_hooks = [
-    dict(type='FreezeParamHook',
-         param_pattern=['video', 'audio', 'image', 'text'],
-         eval_pattern=['video', 'audio', 'image', 'text'],
-         freeze_iters=1000)
-]
+# custom_hooks = [
+#     dict(type='FreezeParamHook',
+#          param_pattern=['video', 'audio', 'image', 'text'],
+#          eval_pattern=['video', 'audio', 'image', 'text'],
+#          freeze_iters=1000)
+# ]
 find_unused_parameters=True
 
 model = dict(
@@ -23,13 +23,13 @@ model = dict(
             image=2048,
             text=1024
         ),
-        num_layers=4,
-        hidden_dim=512,
-        dropout_p=0.8,
+        num_layers=3,
+        hidden_dim=256,
+        dropout_p=0.9,
         num_head=4,
         cls_head_config=dict(
             type='ClsHead',
-            in_dim=4 * 512,
+            in_dim=4 * 256,
             out_dim=82,
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )

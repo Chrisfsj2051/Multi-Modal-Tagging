@@ -40,7 +40,7 @@ val_pipeline = [
              'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    dict(type='VideoResamplePad', seq_len=50),
+    dict(type='VideoResamplePad', seq_len=30),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

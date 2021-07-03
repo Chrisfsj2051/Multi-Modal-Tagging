@@ -6,7 +6,7 @@ _base_ = [
 norm_cfg = dict(type='BN1d')
 
 model = dict(
-    backbone=dict(max_frames=299),
+    backbone=dict(max_frames=50),
     head=dict(norm_cfg=norm_cfg))
 
 optimizer = dict(
@@ -26,7 +26,7 @@ train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    dict(type='VideoResamplePad', seq_len=299),
+    dict(type='VideoResamplePad', seq_len=50),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -40,7 +40,7 @@ val_pipeline = [
              'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
-    dict(type='VideoResamplePad', seq_len=299),
+    dict(type='VideoResamplePad', seq_len=50),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

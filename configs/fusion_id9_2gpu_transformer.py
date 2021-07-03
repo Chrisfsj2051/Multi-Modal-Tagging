@@ -14,7 +14,7 @@ data = dict(samples_per_gpu=8, workers_per_gpu=8)
 # find_unused_parameters=True
 
 model = dict(
-    modal_dropout_p=dict(text=0.1, video=0.1, image=0.1, audio=0.1),
+    # modal_dropout_p=dict(text=0.1, video=0.1, image=0.1, audio=0.1),
     fusion_config=dict(
         _delete_=True,
         type='TransformerHead',
@@ -45,10 +45,10 @@ optimizer = dict(
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
-            'image_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
-            'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'image_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
         }))
 lr_config = dict(policy='step',
                  warmup='linear',

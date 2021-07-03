@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from mmcv.cnn import build_norm_layer
 from torch.nn import init
 
+from mmt.datasets.pipelines.transforms import VideoResamplePad
 from mmt.models.builder import BACKBONE
 
 
@@ -68,3 +69,43 @@ class NeXtVLAD(nn.Module):
         vlad = vlad.reshape([-1, self.cluster_size * feature_size])
         vlad = self.bn2(vlad)
         return vlad
+
+@BACKBONE.register_module()
+class MultiScaleNeXtVLAD(nn.Module):
+    def __init__(self,
+                 feature_size,
+                 max_frames_list,
+                 cluster_size,
+                 norm_cfg=dict(type='BN1d'),
+                 expansion=2,
+                 groups=16):
+        super(MultiScaleNeXtVLAD, self).__init__()
+        self.next_vlads = nn.ModuleList()
+        for max_frames in max_frames_list:
+            self.next_vlads.append(
+                NeXtVLAD(
+                    feature_size,
+                    max_frames,
+                    cluster_size,
+                    norm_cfg=norm_cfg,
+                    expansion=expansion,
+                    groups=groups
+                )
+            )
+        self.max_frames_list = max_frames_list
+
+    def forward(self, input, meta_info):
+        results = []
+        for i, max_frames in enumerate(self.max_frames_list):
+            video_list = []
+            for video, meta in zip(input, meta_info):
+                video = video.cpu().numpy()
+                video = VideoResamplePad.resample(
+                    video, meta_info[0]['video_len'],  max_frames)
+                video_list.append(input.new_tensor(video)[None])
+
+            video = torch.cat(video_list, 0)
+            results.append(self.next_vlads[i](video, meta_info))
+
+        return torch.cat
+        print('in')

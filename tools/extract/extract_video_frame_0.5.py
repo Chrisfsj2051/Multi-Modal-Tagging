@@ -23,7 +23,7 @@ def extract_frame(args):
     # assert not os.path.exists(output_path)
     mmcv.mkdir_or_exist(output_path)
     command = 'ffmpeg -v error -t %i -i %s -f image2 -vf ' \
-              'fps=fps=0.5 %s/vid%%03d.jpg' % (max_frame, video_filename,
+              'fps=fps=2 %s/vid%%03d.jpg' % (max_frame, video_filename,
                                              output_path)
     status, output = subprocess.getstatusoutput(command)
     if status!=0:

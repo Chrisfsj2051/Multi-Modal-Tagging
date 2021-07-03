@@ -10,7 +10,7 @@ model = dict(
     ),
     head=dict(
         type='SingleSEHead',
-        in_dim=16384,
+        in_dim=65536,
         gating_reduction=8,
         out_dim=1024,
         dropout_p=0.8,

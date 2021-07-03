@@ -107,5 +107,4 @@ class MultiScaleNeXtVLAD(nn.Module):
             video = torch.cat(video_list, 0)
             results.append(self.next_vlads[i](video, meta_info))
 
-        return torch.cat
-        print('in')
+        return torch.cat(results, 1)

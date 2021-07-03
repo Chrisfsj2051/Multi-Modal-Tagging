@@ -45,10 +45,10 @@ optimizer = dict(
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
-            'image_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
-            'text_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
-            'video_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
-            'audio_branch.backbone': dict(lr_mult=0.5, decay_mult=1.0),
+            'image_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
         }))
 lr_config = dict(policy='step',
                  warmup='linear',

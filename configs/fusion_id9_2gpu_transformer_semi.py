@@ -1,5 +1,5 @@
 _base_ = 'fusion_id9_2gpu_transformer.py'
-load_from = None
+
 model = dict(
     type='SemiMultiBranchFusionModel',
     gt_thr=0.5,
@@ -11,7 +11,7 @@ custom_hooks = [
         type='SemiEMAHook',
         burnin_iters=2000,
         ema_eval=False,
-        momentum=0.001
+        momentum=0.01
     )
 ]
 

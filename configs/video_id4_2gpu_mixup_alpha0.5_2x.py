@@ -4,7 +4,7 @@ _base_ = 'video_id4_2gpu.py'
 model = dict(
     head=dict(
         type='SingleMixupSEHead',
-        alpha_ub=1.0,
+        alpha=0.5,
         cls_head_config=dict(
             type='MixupClsHead',
             loss=dict(type='MixupMultiLabelBCEWithLogitsLoss')

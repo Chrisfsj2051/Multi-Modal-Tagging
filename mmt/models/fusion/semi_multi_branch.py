@@ -11,9 +11,10 @@ from mmt.utils import get_root_logger
 
 @ARCH.register_module()
 class SemiMultiBranchFusionModel(MultiBranchFusionModel):
-    def __init__(self, unlabeled_loss_weight, gt_thr, **kwargs):
+    def __init__(self, unlabeled_loss_weight, gt_thr, only_fusion=False, **kwargs):
         super(SemiMultiBranchFusionModel, self).__init__(**kwargs)
         self.unlabeled_loss_weight = unlabeled_loss_weight
+        self.only_fusion = only_fusion
         self.gt_thr = gt_thr
 
     def forward_train(self, **kwargs):
@@ -23,10 +24,13 @@ class SemiMultiBranchFusionModel(MultiBranchFusionModel):
             unlabeled_loss = self.unlabeled_forward_train(**extra_data)
             if unlabeled_loss is None:
                 for key in list(losses.keys()):
-                    losses[f'ssl_{key}'] = torch.zeros_like(losses[key])
+                    if not self.only_fusion or 'fusion' in key:
+                        losses[f'ssl_{key}'] = torch.zeros_like(losses[key])
             else:
                 for key in unlabeled_loss.keys():
-                    losses[f'ssl_{key}'] = unlabeled_loss[key] * self.unlabeled_loss_weight
+                    if not self.only_fusion or 'fusion' in key:
+                        losses[f'ssl_{key}'] = (unlabeled_loss[key] *
+                                                self.unlabeled_loss_weight)
         return losses
 
     def unlabeled_forward_train(self, **kwargs):

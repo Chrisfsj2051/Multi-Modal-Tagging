@@ -65,8 +65,9 @@ class VideoResamplePad:
     @staticmethod
     def resample(video, video_len, seq_len):
         assert video_len <= len(video)
-        if video_len == len(video):
-            return video
+        assert seq_len <= len(video)
+        if video_len <= seq_len:
+            return video[:seq_len]
         else:
             video = video[:video_len]
             len_seg = len(video) / seq_len

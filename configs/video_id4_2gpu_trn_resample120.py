@@ -9,7 +9,7 @@ model = dict(
     backbone=dict(
         _delete_=True,
         type='TRN',
-        num_segment=300,
+        num_segment=120,
         input_dim=1024,
         output_dim=2048
     ),
@@ -36,6 +36,7 @@ train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='VideoResamplePad', seq_len=120),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -49,6 +50,7 @@ val_pipeline = [
              'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='VideoResamplePad', seq_len=120),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

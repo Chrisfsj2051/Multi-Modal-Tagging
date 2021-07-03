@@ -1,5 +1,13 @@
 _base_ = 'audio_id3_2gpu.py'
 
+model = dict(
+    head=dict(
+        dropout_p=0.5,
+        cls_head_config=dict(
+            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
+    ))
+
+
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 

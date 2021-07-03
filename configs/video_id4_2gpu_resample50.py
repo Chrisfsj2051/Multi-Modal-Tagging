@@ -5,7 +5,9 @@ _base_ = [
 
 norm_cfg = dict(type='BN1d')
 
-model = dict(head=dict(norm_cfg=norm_cfg))
+model = dict(
+    backbone=dict(max_frames=50),
+    head=dict(norm_cfg=norm_cfg))
 
 optimizer = dict(
     lr=0.01,

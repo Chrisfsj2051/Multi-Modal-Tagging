@@ -67,11 +67,17 @@ class VideoResamplePad:
         assert self.seq_len <= results['video'].shape[0]
         if self.seq_len < video.shape[0]:
             len_seg = len(video) / self.seq_len
-            seg_point = np.arange(0, len(video), len_seg)
-            seg_point = math.floor(seg_point)
+            seg_point = np.arange(0, len(video) - 1e-6, len_seg)
+            seg_point = [math.floor(x) for x in seg_point]
             seg_point[-1] = len(video) - 1
+            seg_point = np.array(seg_point)
+            video = video[seg_point]
+        else:
+            video = results['video'][:self.seq_len]
 
-        print('in')
+        results['video'] = video
+        assert video.shape[0] == self.seq_len
+        return results
 
 
 @PIPELINES.register_module()

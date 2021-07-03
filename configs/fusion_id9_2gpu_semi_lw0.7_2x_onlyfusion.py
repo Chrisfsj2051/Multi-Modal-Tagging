@@ -15,7 +15,7 @@ model = dict(type='SemiMultiBranchFusionModel',
              only_fusion=True
              )
 
-train_total_iters = 30000
+train_total_iters = 20000
 lr_config = dict(policy='step',
                  warmup='linear',
                  warmup_iters=500,

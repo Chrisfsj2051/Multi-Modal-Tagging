@@ -25,7 +25,7 @@ model = dict(
             text=1024
         ),
         num_layers=3,
-        hidden_dim=256,
+        hidden_dim=64,
         dropout_p=0.9,
         num_head=8,
         cls_head_config=dict(

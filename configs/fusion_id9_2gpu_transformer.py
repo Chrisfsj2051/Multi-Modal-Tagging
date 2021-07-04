@@ -24,14 +24,14 @@ model = dict(
             image=2048,
             text=1024
         ),
-        num_layers=2,
-        hidden_dim=64,
+        num_layers=5,
+        hidden_dim=512,
         dropout_p=0.9,
         num_head=8,
         cls_head_config=dict(
             dropout_p=0.8,
             type='ClsHead',
-            in_dim=4 * 64,
+            in_dim=4 * 512,
             out_dim=82,
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )

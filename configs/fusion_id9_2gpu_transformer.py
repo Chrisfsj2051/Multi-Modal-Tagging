@@ -24,14 +24,14 @@ model = dict(
             image=2048,
             text=1024
         ),
-        num_layers=3,
-        hidden_dim=256,
+        num_layers=1,
+        hidden_dim=64,
         dropout_p=0.9,
-        num_head=4,
+        num_head=8,
         cls_head_config=dict(
             dropout_p=0.8,
             type='ClsHead',
-            in_dim=4 * 256,
+            in_dim=4 * 64,
             out_dim=82,
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )
@@ -45,10 +45,10 @@ optimizer = dict(
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
-            'image_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
-            'text_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
-            'video_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
-            'audio_branch.backbone': dict(lr_mult=0.1, decay_mult=1.0),
+            'image_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'text_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'video_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
+            'audio_branch.backbone': dict(lr_mult=0.01, decay_mult=1.0),
         }))
 lr_config = dict(policy='step',
                  warmup='linear',

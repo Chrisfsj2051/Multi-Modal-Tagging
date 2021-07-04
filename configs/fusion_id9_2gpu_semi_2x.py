@@ -9,7 +9,7 @@ custom_hooks = [
         type='SemiEMAHook',
         burnin_iters=1000,
         ema_eval=False,
-        momentum=0.01
+        momentum=0.0001
     )
 ]
 

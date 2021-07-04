@@ -1,15 +1,19 @@
 _base_ = 'fusion_id9_2gpu_transformer.py'
 
+load_from = None
+
 model = dict(
     type='SemiMultiBranchFusionModel',
     gt_thr=0.5,
+    ignore_thr=0.3,
     unlabeled_loss_weight=0.5
 )
 
 custom_hooks = [
     dict(
         type='SemiEMAHook',
-        burnin_iters=2000,
+        # burnin_iters=2000,
+        burnin_iters=10,
         ema_eval=False,
         momentum=0.01
     )
@@ -56,8 +60,8 @@ train_pipeline = [
 weak_train_pipeline_1 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/test_5k'))),
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
@@ -70,8 +74,8 @@ weak_train_pipeline_1 = [
 strong_train_pipeline_1 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_test_5k/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/test_5k'))),
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='PhotoMetricDistortion',
@@ -105,8 +109,8 @@ strong_train_pipeline_1 = [
 weak_train_pipeline_2 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/test_5k_2nd'))),
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
@@ -119,8 +123,8 @@ weak_train_pipeline_2 = [
 strong_train_pipeline_2 = [
     dict(type='LoadAnnotations',
          replace_dict=dict(video=(
-             'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
-             'extracted_video_feats/L16_LN/test_5k_2nd'))),
+             'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
+             'extracted_video_feats/L16_LN/train_5k'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='PhotoMetricDistortion',
@@ -168,7 +172,7 @@ data = dict(
             datasets=[
                 dict(
                     type='TaggingDatasetWithAugs',
-                    ann_file='dataset/tagging/GroundTruth/datafile/test.txt',
+                    ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
                     label_id_file='dataset/tagging/label_super_id.txt',
                     pipeline=weak_train_pipeline_1,
                     strong_pipeline=strong_train_pipeline_1,
@@ -176,7 +180,7 @@ data = dict(
                 ),
                 dict(
                     type='TaggingDatasetWithAugs',
-                    ann_file='dataset/tagging/GroundTruth/datafile/test_2nd.txt',
+                    ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
                     label_id_file='dataset/tagging/label_super_id.txt',
                     pipeline=weak_train_pipeline_2,
                     strong_pipeline=strong_train_pipeline_2,

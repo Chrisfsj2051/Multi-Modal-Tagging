@@ -12,9 +12,9 @@ class MultiLabelBCEWithLogitsLoss(nn.Module):
         super(MultiLabelBCEWithLogitsLoss, self).__init__()
         self.loss_weight = loss_weight
         # self.apply_onehot = apply_onehot
-        self.loss = nn.BCEWithLogitsLoss()
+        self.loss = nn.BCEWithLogitsLoss(reduction='none')
 
-    def forward(self, preds, gt_labels):
+    def forward(self, preds, gt_labels, ignore_labels=None):
         """
         Args:
             preds (totorch.Tensor): (N, 82)
@@ -26,7 +26,10 @@ class MultiLabelBCEWithLogitsLoss(nn.Module):
             gt_onehot[gt_label] = 1
             gt_onehot_list.append(gt_onehot)
         gt_onehot = torch.cat([x[None] for x in gt_onehot_list], 0)
-        return self.loss_weight * self.loss(preds, gt_onehot)
+        loss = self.loss(preds, gt_onehot)
+        if ignore_labels is None:
+            return self.loss_weight * loss.mean()
+        return self.loss_weight * 1
 
 
 @LOSS.register_module()

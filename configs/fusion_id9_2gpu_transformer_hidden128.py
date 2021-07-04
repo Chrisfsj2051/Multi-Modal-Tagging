@@ -25,13 +25,13 @@ model = dict(
             text=1024
         ),
         num_layers=1,
-        hidden_dim=256,
+        hidden_dim=128,
         dropout_p=0.9,
         num_head=8,
         cls_head_config=dict(
             dropout_p=0.8,
             type='ClsHead',
-            in_dim=4 * 256,
+            in_dim=4 * 128,
             out_dim=82,
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8)
         )

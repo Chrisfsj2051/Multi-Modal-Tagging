@@ -24,7 +24,7 @@ model = dict(
             image=2048,
             text=1024
         ),
-        num_layers=2,
+        num_layers=1,
         hidden_dim=256,
         dropout_p=0.9,
         num_head=8,

@@ -2,7 +2,7 @@ _base_ = [
     '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
     '_base_/models/fusion.py', '_base_/datasets/fusion.py'
 ]
-load_from = 'pretrained/image37_text23_video4_audio3.pth'
+load_from = 'pretrained/image39_text31_video45_audio12.pth'
 
 optimizer = dict(
     _delete_=True,

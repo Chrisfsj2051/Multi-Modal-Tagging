@@ -23,7 +23,7 @@ model = dict(
             backbone=dict(
                 type='NeXtVLAD',
                 feature_size=1024,
-                max_frames=300,
+                max_frames=120,
                 cluster_size=128
             ),
             head=dict(
@@ -44,14 +44,15 @@ model = dict(
             type='SingleBranchModel',
             pretrained='torchvision://resnet50',
             key='image',
-            backbone=dict(type='ResNet',
-                          depth=50,
-                          num_stages=4,
-                          out_indices=(3,),
-                          frozen_stages=1,
-                          norm_cfg=dict(type='BN', requires_grad=True),
-                          norm_eval=True,
-                          style='pytorch'),
+            backbone=dict(
+                type='ResNet',
+                depth=50,
+                num_stages=4,
+                out_indices=(3,),
+                frozen_stages=1,
+                norm_cfg=dict(type='BN', requires_grad=True),
+                norm_eval=True,
+                style='pytorch'),
             head=dict(
                 type='SingleSEHead',
                 in_dim=2048,
@@ -91,10 +92,10 @@ model = dict(
             type='SingleBranchModel',
             key='text',
             backbone=dict(
-                type='TwoStreamTextCNN',
+                type='TextCNN',
                 vocab_size=21129,
                 ebd_dim=300,
-                num_filters=256,
+                num_filters=512,
                 channel_out=1024,
                 filter_size=(2, 3, 4)
             ),

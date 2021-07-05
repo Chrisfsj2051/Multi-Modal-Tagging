@@ -1,4 +1,4 @@
-_base_ = 'fusion_id9_2gpu.py'
+_base_ = 'fusion_2gpu_final.py'
 
 model = dict(
     fusion_config=dict(

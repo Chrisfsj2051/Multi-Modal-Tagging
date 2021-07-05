@@ -2,7 +2,7 @@ _base_ = [
     '_base_/default_runtime.py', '_base_/schedules/schedule_1x_sgd.py',
     '_base_/models/image.py', '_base_/datasets/image.py'
 ]
-# loss weight
+
 optimizer = dict(
     lr=0.1,
     paramwise_cfg=dict(

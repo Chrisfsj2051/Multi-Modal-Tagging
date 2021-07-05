@@ -1,12 +1,24 @@
-_base_ = 'audio_id3_2gpu.py'
+_base_ = [
+    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
+    '_base_/models/audio.py', '_base_/datasets/audio.py'
+]
+
+optimizer = dict(
+    lr=0.01,
+    paramwise_cfg=dict(
+        custom_keys={
+            'backbone': dict(lr_mult=0.01, decay_mult=1.0),
+        }
+    )
+)
 
 model = dict(
     head=dict(
         dropout_p=0.5,
         cls_head_config=dict(
             loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
-    ))
-
+    )
+)
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
@@ -27,7 +39,6 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['audio', 'meta_info', 'gt_labels'])
 ]
-
 
 val_pipeline = [
     dict(type='LoadAnnotations'),

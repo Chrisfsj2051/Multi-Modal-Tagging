@@ -65,8 +65,8 @@ val_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=1,
+    samples_per_gpu=8,
+    workers_per_gpu=8,
     train=dict(type='TaggingDataset',
                ann_file='dataset/tagging/GroundTruth/datafile/train.txt',
                label_id_file='dataset/tagging/label_super_id.txt',

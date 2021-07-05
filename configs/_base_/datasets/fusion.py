@@ -23,7 +23,7 @@ train_pipeline = [
     dict(type='AutoAugment',
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
-         [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
+                  [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
     dict(type='FrameRandomErase',
          key_fields=['video'],
          aug_num_frame=9,
@@ -57,8 +57,8 @@ test_pipeline = [
              'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
              'extracted_video_feats/L16_LN/test_5k_2nd'))),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True),
-    dict(type='VideoResamplePad', seq_len=120),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
+    dict(type='VideoResamplePad', seq_len=120),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

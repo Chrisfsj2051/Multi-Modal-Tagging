@@ -28,7 +28,7 @@ train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
     dict(type='FrameRandomErase',
-         key_fields=['video'],
+         key_fields=['audio'],
          aug_num_frame=0.1,
          aug_max_len=1,
          aug_num_block=2,

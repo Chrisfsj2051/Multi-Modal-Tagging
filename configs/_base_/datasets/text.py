@@ -1,10 +1,11 @@
+
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 
 train_pipeline = [
     dict(type='LoadAnnotations'),
     dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True, random_permute=True),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
@@ -15,7 +16,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadAnnotations'),
-    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),

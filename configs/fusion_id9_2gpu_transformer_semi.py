@@ -4,8 +4,8 @@ load_from = None
 
 model = dict(
     type='SemiMultiBranchFusionModel',
-    gt_thr=0.5,
-    ignore_thr=0.3,
+    gt_thr=0.6,
+    ignore_thr=0.0,
     unlabeled_loss_weight=0.5
 )
 
@@ -156,8 +156,8 @@ strong_train_pipeline_2 = [
 ]
 
 data = dict(
-    samples_per_gpu=8,
-    workers_per_gpu=8,
+    samples_per_gpu=2,
+    workers_per_gpu=1,
     train=dict(
         _delete_=True,
         type='TwoStreamDataset',

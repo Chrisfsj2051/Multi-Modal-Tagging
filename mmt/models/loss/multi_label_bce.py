@@ -14,22 +14,28 @@ class MultiLabelBCEWithLogitsLoss(nn.Module):
         # self.apply_onehot = apply_onehot
         self.loss = nn.BCEWithLogitsLoss(reduction='none')
 
-    def forward(self, preds, gt_labels, ignore_labels=None):
+    def forward(self, preds, gt_labels, gt_labels_ignore=None):
         """
         Args:
             preds (totorch.Tensor): (N, 82)
             gt_labels (list[torch.Tensor]): (NUM_C, )
         """
-        gt_onehot_list = []
-        for gt_label in gt_labels:
-            gt_onehot = torch.zeros_like(preds[0])
-            gt_onehot[gt_label] = 1
-            gt_onehot_list.append(gt_onehot)
-        gt_onehot = torch.cat([x[None] for x in gt_onehot_list], 0)
+
+        def get_onehot(preds, labels):
+            onehot_list = []
+            for label in labels:
+                onehot = torch.zeros_like(preds[0])
+                onehot[label] = 1
+                onehot_list.append(onehot)
+            onehot = torch.cat([x[None] for x in onehot_list], 0)
+            return onehot
+
+        gt_onehot = get_onehot(preds, gt_labels)
         loss = self.loss(preds, gt_onehot)
-        if ignore_labels is None:
-            return self.loss_weight * loss.mean()
-        return self.loss_weight * 1
+        if gt_labels_ignore is not None:
+            ignore_onehot = get_onehot(preds, gt_labels_ignore).bool()
+            loss = loss[~ignore_onehot]
+        return self.loss_weight * loss.mean()
 
 
 @LOSS.register_module()

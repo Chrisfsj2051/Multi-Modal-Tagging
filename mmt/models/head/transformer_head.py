@@ -46,9 +46,9 @@ class TransformerHead(nn.Module):
         x = x.view(x.shape[0], -1)
         return x
 
-    def forward_train(self, x, meta_info, gt_labels):
+    def forward_train(self, x, meta_info, gt_labels, gt_labels_ignore):
         activation = self(x)
-        return self.cls_head.forward_train(activation, gt_labels)
+        return self.cls_head.forward_train(activation, gt_labels, gt_labels_ignore)
 
     def simple_test(self, x, meta_info):
         activation = self(x)

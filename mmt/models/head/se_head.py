@@ -50,9 +50,9 @@ class SingleSEHead(nn.Module):
         activation = activation * gates
         return activation
 
-    def forward_train(self, x, meta_info, gt_labels):
+    def forward_train(self, x, meta_info, gt_labels, gt_labels_ignore=None):
         activation = self(x)
-        return self.cls_head.forward_train(activation, gt_labels)
+        return self.cls_head.forward_train(activation, gt_labels, gt_labels_ignore)
 
     def simple_test(self, x, meta_info):
         activation = self(x)
@@ -61,9 +61,9 @@ class SingleSEHead(nn.Module):
 
 @HEAD.register_module()
 class FusionSEHead(SingleSEHead):
-    def forward_train(self, feats_dict, meta_info, gt_labels):
+    def forward_train(self, feats_dict, meta_info, gt_labels, gt_labels_ignore=None):
         x = torch.cat(list(feats_dict.values()), 1)
-        return super(FusionSEHead, self).forward_train(x, meta_info, gt_labels)
+        return super(FusionSEHead, self).forward_train(x, meta_info, gt_labels, gt_labels_ignore)
 
     def simple_test(self, feats_dict, meta_info):
         x = torch.cat(list(feats_dict.values()), 1)

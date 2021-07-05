@@ -44,12 +44,17 @@ class SemiMultiBranchFusionModel(MultiBranchFusionModel):
         for idx in range(pseudo_mask.shape[0]):
             assert self.gt_thr >= self.ignore_thr
             pseudo_label = (pseudo_mask[idx] >= self.gt_thr).nonzero(as_tuple=False)
-            pseudo_label = (pseudo_mask[idx] >= self.ignore_thr).nonzero(as_tuple=False)
+            ignore_label = (pseudo_mask[idx] >= self.ignore_thr).nonzero(as_tuple=False)
             pseudo_label = pseudo_label.view(pseudo_label.shape[0])
+            ignore_label = ignore_label.view(ignore_label.shape[0])
+            ignore_label = pseudo_label.new_tensor(list(
+                set(ignore_label.tolist()).difference(pseudo_label.tolist())))
             pseudo_labels.append(pseudo_label)
+            ignore_labels.append(ignore_label)
         self.ema_hook._swap_ema_parameters()
         self.train()
         kwargs['strong']['gt_labels'] = pseudo_labels
+        kwargs['strong']['gt_labels_ignore'] = ignore_labels
         for i, item in enumerate(pseudo_labels):
             if item.numel() == 0:
                 print_log('Empty Pseudo Label, skip', logger=get_root_logger())

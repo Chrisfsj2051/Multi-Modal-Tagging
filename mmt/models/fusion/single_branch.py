@@ -18,12 +18,12 @@ class SingleBranchModel(BaseFusionModel):
         if pretrained is not None:
             self.backbone.init_weights(pretrained=pretrained)
 
-    def forward_train(self, return_feats=False, **kwargs):
+    def forward_train(self, return_feats=False, gt_labels_ignore=None, **kwargs):
         assert len(kwargs) == 3  # x, meta, label
         args = list(kwargs.values())
         x, meta_info, gt_labels = args
         feats = self.backbone(x, meta_info)
-        losses = self.head.forward_train(feats, meta_info, gt_labels)
+        losses = self.head.forward_train(feats, meta_info, gt_labels, gt_labels_ignore)
         if not return_feats:
             return losses
         else:

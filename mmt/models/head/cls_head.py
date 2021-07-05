@@ -28,11 +28,11 @@ class ClsHead(FCHead):
         super(ClsHead, self).__init__(in_dim, out_dim, dropout_p)
         self.loss = build_loss(loss)
 
-    def forward_train(self, x, gt_labels):
+    def forward_train(self, x, gt_labels, gt_labels_ignore=None):
         if self.use_dropout:
             x = self.dropout(x)
         pred = self.linear(x)
-        loss = self.loss(pred, gt_labels)
+        loss = self.loss(pred, gt_labels, gt_labels_ignore)
         return dict(cls_loss=loss)
 
     def simple_test(self, x):

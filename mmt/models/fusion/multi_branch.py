@@ -18,18 +18,22 @@ class MultiBranchFusionModel(BaseFusionModel):
         self.fusion_head = build_head(fusion_config)
         self.modal_dropout_p = modal_dropout_p
 
-    def forward_train(self, video, image, text, audio, meta_info, gt_labels):
+    def forward_train(self, video, image, text, audio, meta_info, gt_labels, gt_labels_ignore=None):
         video_feats, video_loss = self.video_branch.forward_train(
-            video=video, meta_info=meta_info, gt_labels=gt_labels, return_feats=True)
+            video=video, meta_info=meta_info, gt_labels=gt_labels,
+            gt_labels_ignore=gt_labels_ignore, return_feats=True)
         image_feats, image_loss = self.image_branch.forward_train(
-            image=image, meta_info=meta_info, gt_labels=gt_labels, return_feats=True)
+            image=image, meta_info=meta_info, gt_labels=gt_labels,
+            gt_labels_ignore=gt_labels_ignore, return_feats=True)
         audio_feats, audio_loss = self.audio_branch.forward_train(
-            audio=audio, meta_info=meta_info, gt_labels=gt_labels, return_feats=True)
+            audio=audio, meta_info=meta_info, gt_labels=gt_labels,
+            gt_labels_ignore=gt_labels_ignore, return_feats=True)
         text_feats, text_loss = self.text_branch.forward_train(
-            text=text, meta_info=meta_info, gt_labels=gt_labels, return_feats=True)
+            text=text, meta_info=meta_info, gt_labels=gt_labels,
+            gt_labels_ignore=gt_labels_ignore, return_feats=True)
         feats_dict = dict(image=image_feats, audio=audio_feats, text=text_feats, video=video_feats)
         feats_dict = self.apply_modal_dropout(feats_dict)
-        fusion_loss = self.fusion_head.forward_train(feats_dict, meta_info, gt_labels)
+        fusion_loss = self.fusion_head.forward_train(feats_dict, meta_info, gt_labels, gt_labels_ignore)
         losses = {}
         for name, los in zip(
                 ['video', 'image', 'audio', 'text', 'fusion'],

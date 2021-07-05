@@ -5,7 +5,7 @@ model = dict(
         type='TwoStreamTextCNN',
         vocab_size=21129,
         ebd_dim=300,
-        channel_in=256,
+        num_filters=512,
         channel_out=1024,
         filter_size=(2, 3, 4)
     ),
@@ -19,5 +19,5 @@ model = dict(
             type='ClsHead',
             in_dim=1024,
             out_dim=82,
-            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=8))
+            loss=dict(type='MultiLabelBCEWithLogitsLoss', loss_weight=4))
     ))

@@ -101,12 +101,20 @@ class Resize(object):
 
 @PIPELINES.register_module()
 class BertTokenize(object):
-    def __init__(self, bert_path, max_length, concat_ocr_asr=False, random_permute=False):
+    def __init__(self,
+                 bert_path,
+                 max_length,
+                 concat_ocr_asr=False,
+                 random_permute=False,
+                 random_erase_ratio=0.0,
+                 random_swap_ratio=0.0):
         assert max_length <= 512, 'Re-train bert if max_length>512'
         self.concat_ocr_asr = concat_ocr_asr
         self.tokenizer = BertTokenizer.from_pretrained(bert_path)
         self.max_length = max_length
         self.random_permute = random_permute
+        self.random_erase_ratio = random_erase_ratio
+        self.random_swap_ratio = random_swap_ratio
         if random_permute:
             assert concat_ocr_asr
 
@@ -118,6 +126,17 @@ class BertTokenize(object):
         token = [CLS] + token
         seq_len = len(token)
         token_ids = self.tokenizer.convert_tokens_to_ids(token)
+        if self.random_erase_ratio > 0.0:
+            for i in range(int(seq_len * self.random_erase_ratio)):
+                token_ids[random.randint(0, seq_len - 1)] = 0
+        if self.random_swap_ratio > 0.0:
+            for i in range(int(seq_len * self.random_swap_ratio)):
+                p1 = random.randint(0, seq_len - 1)
+                p2 = random.randint(0, seq_len - 1)
+                chr = token_ids[p1]
+                token_ids[p1] = token_ids[p2]
+                token_ids[p2] = chr
+
         pad_size = self.max_length
         if len(token) < pad_size:
             mask = [1] * len(token_ids) + [0] * (pad_size - len(token))

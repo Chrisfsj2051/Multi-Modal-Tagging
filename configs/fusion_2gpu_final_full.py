@@ -1,5 +1,5 @@
 _base_ = 'fusion_2gpu_final.py'
-
+load_from = 'image40_text32_video46_audio13_full.pth'
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])
 

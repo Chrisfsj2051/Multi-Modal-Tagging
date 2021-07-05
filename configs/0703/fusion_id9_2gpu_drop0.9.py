@@ -1,4 +1,4 @@
-_base_ = 'fusion_2gpu_final.py'
+_base_ = '_fusion_id51_2gpu.py'
 
 # load_from = None
 # data = dict(samples_per_gpu=2, workers_per_gpu=1)

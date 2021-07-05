@@ -27,6 +27,14 @@ data = dict(
                  ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
                  label_id_file='dataset/tagging/label_super_id.txt',
                  pipeline=train_pipeline),
-        ],
+        ]
     )
 )
+
+train_total_iters = 11000
+lr_config = dict(policy='step',
+                 warmup='linear',
+                 warmup_iters=500,
+                 warmup_ratio=0.001,
+                 step=[train_total_iters // 3, 2 * train_total_iters // 3])
+runner = dict(type='IterBasedRunner', max_iters=train_total_iters)

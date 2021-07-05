@@ -19,5 +19,4 @@ optimizer = dict(
         }))
 
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
-
 data = dict(samples_per_gpu=8, workers_per_gpu=8)

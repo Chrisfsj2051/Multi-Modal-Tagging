@@ -11,7 +11,7 @@ class TextCNN(nn.Module):
     def __init__(self,
                  vocab_size,
                  ebd_dim,
-                 channel_in,
+                 num_filters,
                  channel_out,
                  filter_size,
                  dropout_p=None):
@@ -19,8 +19,8 @@ class TextCNN(nn.Module):
         self.vocab_size = vocab_size
         self.embedding = nn.Embedding(vocab_size, ebd_dim)
         self.convs = nn.ModuleList(
-            [nn.Conv2d(1, channel_in, (k, ebd_dim)) for k in filter_size])
-        self.fc = nn.Linear(channel_in * len(filter_size), channel_out)
+            [nn.Conv2d(1, num_filters, (k, ebd_dim)) for k in filter_size])
+        self.fc = nn.Linear(num_filters * len(filter_size), channel_out)
         self.use_dropout = dropout_p is not None
         if self.use_dropout:
             self.dropout = nn.Dropout(p=dropout_p)

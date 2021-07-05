@@ -31,12 +31,6 @@ train_pipeline = [
          policies=[[dict(type='Shear', prob=0.5, level=i)]
                    for i in range(1, 11)] +
          [[dict(type='Rotate', prob=0.5, level=i)] for i in range(1, 11)]),
-    dict(type='FrameRandomErase',
-         key_fields=['video'],
-         aug_num_frame=9,
-         aug_max_len=3,
-         aug_num_block=3,
-         aug_max_size=30),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

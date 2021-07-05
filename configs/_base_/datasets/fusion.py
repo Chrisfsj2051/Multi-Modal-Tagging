@@ -6,7 +6,7 @@ train_pipeline = [
          replace_dict=dict(video=(
              'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
              'extracted_video_feats/L16_LN/train_5k'))),
-    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True, random_permute=True),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='PhotoMetricDistortion',
          brightness_delta=32,
@@ -41,7 +41,7 @@ val_pipeline = [
          replace_dict=dict(video=(
              'tagging/tagging_dataset_train_5k/video_npy/Youtube8M/tagging',
              'extracted_video_feats/L16_LN/train_5k'))),
-    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
@@ -54,7 +54,7 @@ test_pipeline = [
          replace_dict=dict(video=(
              'tagging/tagging_dataset_test_5k_2nd/video_npy/Youtube8M/tagging',
              'extracted_video_feats/L16_LN/test_5k_2nd'))),
-    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=256),
+    dict(type='BertTokenize', bert_path='pretrained/bert', max_length=512, concat_ocr_asr=True),
     dict(type='Pad', video_pad_size=(300, 1024), audio_pad_size=(300, 128)),
     dict(type='Resize', size=(224, 224)),
     dict(type='Normalize', **img_norm_cfg),
@@ -63,7 +63,7 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=8,
     workers_per_gpu=8,
     train=dict(type='TaggingDataset',
                ann_file='dataset/tagging/GroundTruth/datafile/train.txt',

@@ -1,4 +1,4 @@
-_base_ = '_video_id45_2gpu.py'
+_base_ = '_video_id45_2gpu_2x.py'
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])

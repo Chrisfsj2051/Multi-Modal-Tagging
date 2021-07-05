@@ -2,12 +2,12 @@ _base_ = [
     '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
     '_base_/models/fusion.py', '_base_/datasets/fusion.py'
 ]
-load_from = 'pretrained/image37_text23_video4_audio3.pth'
+# load_from = 'pretrained/image37_text23_video4_audio3.pth'
 
 custom_hooks = [
     dict(
         type='SemiEMAHook',
-        burnin_iters=1000,
+        burnin_iters=10,
         ema_eval=False,
         momentum=0.0001
     )
@@ -32,6 +32,7 @@ optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 model = dict(
     type='SemiMultiBranchFusionModel',
     gt_thr=0.5,
+    ignore_thr=0.5,
     unlabeled_loss_weight=0.5
 )
 
@@ -172,8 +173,8 @@ strong_train_pipeline_2 = [
 ]
 
 data = dict(
-    samples_per_gpu=8,
-    workers_per_gpu=8,
+    samples_per_gpu=2,
+    workers_per_gpu=1,
     train=dict(
         _delete_=True,
         type='TwoStreamDataset',

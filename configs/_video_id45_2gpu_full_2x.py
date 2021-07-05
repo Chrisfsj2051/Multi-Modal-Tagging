@@ -30,6 +30,6 @@ data = dict(
                  ann_file='dataset/tagging/GroundTruth/datafile/val.txt',
                  label_id_file='dataset/tagging/label_super_id.txt',
                  pipeline=train_pipeline),
-        ],
+        ]
     )
 )

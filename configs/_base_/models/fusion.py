@@ -94,7 +94,7 @@ model = dict(
                 type='TwoStreamTextCNN',
                 vocab_size=21129,
                 ebd_dim=300,
-                channel_in=256,
+                num_filters=256,
                 channel_out=1024,
                 filter_size=(2, 3, 4)
             ),

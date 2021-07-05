@@ -9,6 +9,7 @@ model = dict(
     type='SingleBranchModel',
     key='text',
     backbone=dict(
+        _delete_=True,
         type='TextCNN',
         vocab_size=21129,
         ebd_dim=300,

@@ -101,11 +101,14 @@ class Resize(object):
 
 @PIPELINES.register_module()
 class BertTokenize(object):
-    def __init__(self, bert_path, max_length, hybrid=False):
+    def __init__(self, bert_path, max_length, concat_ocr_asr=False, random_permute=False):
         assert max_length <= 512, 'Re-train bert if max_length>512'
-        self.hybrid = hybrid
+        self.concat_ocr_asr = concat_ocr_asr
         self.tokenizer = BertTokenizer.from_pretrained(bert_path)
         self.max_length = max_length
+        self.random_permute = random_permute
+        if random_permute:
+            assert concat_ocr_asr
 
     def tokenize(self, text):
         PAD, CLS = '[PAD]', '[CLS]'  # noqa
@@ -130,21 +133,14 @@ class BertTokenize(object):
         text = results.pop('text')
         if 'meta_info' not in results.keys():
             results['meta_info'] = {}
-        if self.hybrid:
-            assert self.max_length % 4 == 0
-            block_len = self.max_length // 4
-            if len(text['video_ocr']) > block_len * 3:
-                text['video_ocr'] = text['video_ocr'][:block_len * 3]
-                text['video_ocr'] = text['video_ocr'][:-1] + '#'
-                text['video_ocr'] += text['video_asr'][-block_len:]
-            else:
-                text['video_ocr'] += '#'
-                remain_len = self.max_length - len(text['video_ocr'])
-                text['video_ocr'] += text['video_asr'][-remain_len:]
-            ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
-            results['text'] = ocr_token
-            results['meta_info']['text_mask'] = ocr_mask
-            results['meta_info']['text_seq_len'] = ocr_seq_len
+        if self.concat_ocr_asr:
+            text_list = [text['video_ocr'], text['video_asr']]
+            if self.random_permute:
+                random.shuffle(text_list)
+            text = text_list[0] + '|' + text_list[1]
+            text_token, text_mask, text_seq_len = self.tokenize(text)
+            results['ocr_text'] = text_token[:len(text_token) // 2]
+            results['asr_text'] = text_token[len(text_token) // 2:]
         else:
             ocr_token, ocr_mask, ocr_seq_len = self.tokenize(text['video_ocr'])
             asr_token, asr_mask, asr_seq_len = self.tokenize(text['video_asr'])

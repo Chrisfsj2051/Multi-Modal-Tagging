@@ -36,6 +36,8 @@ class LoadAnnotations(object):
             results['text'] = json.load(f)
         results['text']['video_ocr'] = results['text']['video_ocr'].replace(
             '|', ',')
+        results['text']['video_asr'] = results['text']['video_asr'].replace(
+            '|', ',')
         assert (len(results['text']['video_ocr'])
                 or len(results['text']['video_asr']))
         if len(results['text']['video_asr']) == 0:

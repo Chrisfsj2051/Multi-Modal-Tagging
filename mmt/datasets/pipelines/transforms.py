@@ -121,26 +121,29 @@ class BertTokenize(object):
     def tokenize(self, text):
         PAD, CLS = '[PAD]', '[CLS]'  # noqa
         token = self.tokenizer.tokenize(text)
+        text = list(text)
+        if self.random_erase_ratio > 0.0:
+            for i in range(int(len(text) * self.random_erase_ratio)):
+                idx = random.randint(0, len(text) - 1)
+                if text[idx] == '|':
+                    continue
+                text[idx] = PAD
+        if self.random_swap_ratio > 0.0:
+            for i in range(int(len(text) * self.random_swap_ratio)):
+                p1 = random.randint(0, len(text) - 1)
+                p2 = random.randint(0, len(text) - 1)
+                if text[p1] == '|' or text[p2] == '|':
+                    continue
+                chr = text[p1]
+                text[p1] = text[p2]
+                text[p2] = chr
+        text = "".join(list(text))
         assert sum([x == '[UNK]' for x in token]) / len(token) < 0.5, \
             'Please check if the vocab file is correctly loaded'
         token = [CLS] + token
         seq_len = len(token)
         token_ids = self.tokenizer.convert_tokens_to_ids(token)
-        if self.random_erase_ratio > 0.0:
-            for i in range(int(seq_len * self.random_erase_ratio)):
-                idx = random.randint(1, seq_len - 1)
-                if text[idx] == '|':
-                    continue
-                token_ids[idx] = 0
-        if self.random_swap_ratio > 0.0:
-            for i in range(int(seq_len * self.random_swap_ratio)):
-                p1 = random.randint(1, seq_len - 1)
-                p2 = random.randint(1, seq_len - 1)
-                if text[p1] == '|' or text[p2] == '|':
-                    continue
-                chr = token_ids[p1]
-                token_ids[p1] = token_ids[p2]
-                token_ids[p2] = chr
+
 
         pad_size = self.max_length
         if len(token) < pad_size:

@@ -1,19 +1,4 @@
-_base_ = [
-    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
-    '_base_/models/video.py', '_base_/datasets/video.py'
-]
-
-norm_cfg = dict(type='BN1d')
-
-model = dict(
-    backbone=dict(max_frames=120),
-    head=dict(norm_cfg=norm_cfg))
-
-optimizer = dict(
-    lr=0.01,
-    paramwise_cfg=dict(custom_keys={
-        'backbone': dict(lr_mult=0.01, decay_mult=1.0),
-    }))
+_base_ = '_video_id45_2gpu.py'
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
                     std=[58.395, 57.12, 57.375])

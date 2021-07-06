@@ -1,4 +1,4 @@
-_base_ = 'fusion_id52_2gpu_semi_1x_loss4.0.py'
+_base_ = 'fusion_id52_2gpu_semi_1x_loss1.0.py'
 
 model = dict(
     type='SemiMultiBranchFusionModel',

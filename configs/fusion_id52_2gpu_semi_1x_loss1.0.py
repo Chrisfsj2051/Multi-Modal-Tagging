@@ -12,7 +12,7 @@ model = dict(
     type='SemiMultiBranchFusionModel',
     gt_thr=0.9,
     ignore_thr=0.1,
-    unlabeled_loss_weight=4.0
+    unlabeled_loss_weight=1.0
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53],
@@ -81,9 +81,9 @@ strong_train_pipeline_1 = [
     dict(
         type='FrameRandomErase',
         key_fields=['video'],
-        aug_num_frame=0.3,
+        aug_num_frame=0.1,
         aug_max_len=1,
-        aug_num_block=15,
+        aug_num_block=10,
         aug_max_size=60),
     dict(type='PhotoMetricDistortion',
          brightness_delta=32,
@@ -133,8 +133,8 @@ strong_train_pipeline_2 = [
     dict(
         type='FrameRandomErase',
         key_fields=['video'],
-        aug_num_frame=0.3,
-        aug_max_len=15,
+        aug_num_frame=0.1,
+        aug_max_len=1,
         aug_num_block=10,
         aug_max_size=60),
     dict(type='PhotoMetricDistortion',

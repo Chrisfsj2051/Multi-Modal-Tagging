@@ -3,16 +3,16 @@ import os
 import warnings
 
 import mmcv
+import numpy as np
 import torch
 from mmcv import Config, DictAction
 from mmcv.cnn import fuse_conv_bn
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
+from sklearn.ensemble import GradientBoostingClassifier
 
 from mmt import build_dataloader, build_dataset
-from mmt.apis import multi_gpu_test, single_gpu_test
-from mmt.datasets.utils import replace_ImageToTensor
 from mmt.models.builder import build_model
 
 
@@ -53,11 +53,21 @@ def main():
     blending_cfg = Config.fromfile(args.config_blending)
     train_ds = build_dataset(blending_cfg.data.train)
     val_ds = build_dataset(blending_cfg.data.val)
-    model =
     train_loader = build_dataloader(train_ds, samples_per_gpu=1, workers_per_gpu=1, dist=False, shuffle=False)
     val_loader = build_dataloader(val_ds, samples_per_gpu=1, workers_per_gpu=1, dist=False, shuffle=False)
+    gbdt = GradientBoostingClassifier(learning_rate=0.02, subsample=0.5, max_depth=6, n_estimators=30)
+    feat_list_1, feat_list_2 = [], []
     for data in train_loader:
-        print('in')
+        with torch.no_grad():
+            pred_1 = model_1.forward(return_loss=False, **data)[0]['fusion']
+            pred_2 = model_2.forward(return_loss=False, **data)[0]['fusion']
+        feat_list_1.append(pred_1.cpu().numpy())
+        feat_list_2.append(pred_2.cpu().numpy())
+
+    feat_1 = np.concatenate(feat_list_1, 0)
+    feat_2 = np.concatenate(feat_list_2, 0)
+    feat = np.concatenate([feat_1, feat_2], 1)
+
     feat_1, feat_2 = [], []
     # for data in train_ds:
     #     print('')
@@ -66,4 +76,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 

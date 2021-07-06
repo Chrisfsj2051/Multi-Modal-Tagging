@@ -82,7 +82,8 @@ class TaggingDataset:
     def format_results(self, outputs, save_dir='submit/submit.json', **kwargs):
         outputs = [x['fusion'][0] for x in outputs]
         outputs = torch.cat([x[None] for x in outputs])
-        outputs = outputs.sigmoid()
+        if self.with_sigmoid:
+            outputs = outputs.sigmoid()
         topk_score, topk_label = outputs.topk(20, 1, True, True)
         ret_json = {}
         for i in range(len(self.video_anns)):
@@ -115,7 +116,10 @@ class TaggingDataset:
         for modal in preds[0].keys():
             print_str += '-' * 30 + '\n'
             modal_preds = [x[modal][0] for x in preds]
-            modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            if self.with_sigmoid:
+                modal_preds = np.array([x.sigmoid().tolist() for x in modal_preds])
+            else:
+                modal_preds = np.array([x.tolist() for x in modal_preds])
             num_classes = len(self.index_to_super_index)
             for sc in super_class:
                 mask = [

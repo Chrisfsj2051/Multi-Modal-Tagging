@@ -26,7 +26,7 @@ model = dict(
         ),
         num_layers=5,
         hidden_dim=512,
-        dropout_p=0.9,
+        dropout_p=0.8,
         num_head=8,
         cls_head_config=dict(
             type='ClsHead',
@@ -40,7 +40,7 @@ model = dict(
 optimizer = dict(
     _delete_=True,
     type='AdamW',
-    lr=0.01,
+    lr=0.001,
     weight_decay=0.0001,
     paramwise_cfg=dict(
         custom_keys={
@@ -54,4 +54,4 @@ lr_config = dict(policy='step',
                  warmup_iters=500,
                  warmup_ratio=0.001,
                  step=[7000])
-optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
+optimizer_config = dict(grad_clip=dict(max_norm=0.1, norm_type=2))

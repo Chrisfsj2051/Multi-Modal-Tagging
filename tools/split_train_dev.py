@@ -6,7 +6,7 @@ TRAIN_RATIO = 0.9
 if __name__ == '__main__':
     data_base = 'dataset/tagging/GroundTruth/datafile/'
     with open(data_base + 'train.txt', 'r', encoding='utf-8') as f:
-        contents = f.readlines() + ['\n']
+        contents = f.readlines()
     groups = [contents[x:x + 6] for x in range(0, len(contents), 6)]
     random.seed(1)
     random.shuffle(groups)

@@ -89,8 +89,8 @@ class MultiLabelBCEWithLogitsFocalLoss(MultiLabelBCEWithLogitsLoss):
                       0.9827837430518577, 0.9898160084331585, 0.992323495070547, 0.9926576669858066, 0.9964979543529732,
                       0.9959973273895678, 0.9958304330958483, 0.9973321463887984]
         for i in range(len(self.alpha)):
-            if self.alpha[i] < 0.2:
-                self.alpha[i] = 0.2
+            if self.alpha[i] < 0.25:
+                self.alpha[i] = 0.25
 
         self.alpha = np.array(self.alpha)
 
@@ -99,8 +99,7 @@ class MultiLabelBCEWithLogitsFocalLoss(MultiLabelBCEWithLogitsLoss):
                         self).forward(preds, gt_labels) / self.loss_weight
         p = torch.exp(-ce_loss)
         loss = (1 - p) ** self.gamma * ce_loss
-        if self.use_alpha:
-            loss = loss * loss.new_tensor(self.alpha[None])
+        loss = loss * loss.new_tensor(self.alpha[None])
         return self.loss_weight * loss.mean()
 
 

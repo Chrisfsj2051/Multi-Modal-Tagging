@@ -87,18 +87,20 @@ def main():
     for cls in tqdm(range(82)):
         binary_labels = [cls in lab for lab in gt_labels]
         binary_labels = np.array(binary_labels).astype(np.int32)
-        gbdt[cls].fit(feat, binary_labels)
+        if all(binary_labels==0) or all(binary_labels==1):
+            gbdt[cls] = None
+        else:
+            gbdt[cls].fit(feat, binary_labels)
 
     preds = []
-    feat_list_1, feat_list_2 = [], []
     for data in tqdm(val_loader):
         with torch.no_grad():
             pred_1 = model_1.forward(return_loss=False, **data)[0]['fusion']
-            pred_2 = model_2.forward(return_loss=False, **data)[0]['fusion']
+            pred_2 = model_2.forward(return_loss=False, **data)[0]['video']
         feat_1 = pred_1.cpu().numpy()
         feat_2 = pred_2.cpu().numpy()
         feat = np.concatenate([feat_1, feat_2], 1)
-        prob = [gbdt[i].predict_proba(feat)[0][1] for i in range(len(gbdt))]
+        prob = [gbdt[i].predict_proba(feat)[0][1] if gbdt[i] else feat_1[0][i] for i in range(len(gbdt))]
         preds.append(prob)
     preds_fmt = [{'blending': [torch.FloatTensor(x)]} for x in preds]
     eval_res = val_ds.evaluate(preds_fmt)

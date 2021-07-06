@@ -1,17 +1,4 @@
-_base_ = [
-    '_base_/default_runtime.py', '_base_/schedules/schedule_1x_adam.py',
-    '_base_/models/fusion.py', '_base_/datasets/fusion.py'
-]
-load_from = None
-data = dict(samples_per_gpu=8, workers_per_gpu=8)
-# data = dict(samples_per_gpu=2, workers_per_gpu=1)
-# custom_hooks = [
-#     dict(type='FreezeParamHook',
-#          param_pattern=['video', 'audio', 'image', 'text'],
-#          eval_pattern=['video', 'audio', 'image', 'text'],
-#          freeze_iters=1000)
-# ]
-# find_unused_parameters=True
+_base_ = '_fusion_id52_2gpu.py'
 
 model = dict(
     modal_dropout_p=dict(text=0.1, video=0.1, image=0.1, audio=0.1),

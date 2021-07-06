@@ -1,7 +1,7 @@
 import os
 import random
 
-TRAIN_RATIO=0.9
+TRAIN_RATIO = 0.9
 
 if __name__ == '__main__':
     data_base = 'dataset/tagging/GroundTruth/datafile/'
@@ -19,4 +19,3 @@ if __name__ == '__main__':
         with open(txt, 'w', encoding='utf-8') as f:
             for d in data:
                 f.writelines(d)
-            f.write('\n')

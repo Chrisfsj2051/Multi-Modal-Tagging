@@ -1,6 +1,7 @@
 import argparse
 import os
 import warnings
+from multiprocessing import Pool
 
 import mmcv
 import numpy as np
@@ -45,6 +46,17 @@ def build_from_config(config, ckpt, distributed):
     return model
 
 
+def fit_model(args):
+    cls, feat, binary_labels_list = args
+    binary_labels = binary_labels_list[cls]
+    if all(binary_labels == 0) or all(binary_labels == 1):
+        return None
+    else:
+        gbdt = GradientBoostingClassifier(learning_rate=0.02, subsample=0.5, max_depth=6, n_estimators=30)
+        gbdt.fit(feat, binary_labels)
+        return gbdt
+
+
 def main():
     args = parse_args()
     # init distributed env first, since logger depends on the dist info.
@@ -56,8 +68,6 @@ def main():
     val_ds = build_dataset(blending_cfg.data.val)
     train_loader = build_dataloader(train_ds, samples_per_gpu=1, workers_per_gpu=1, dist=False, shuffle=False)
     val_loader = build_dataloader(val_ds, samples_per_gpu=1, workers_per_gpu=1, dist=False, shuffle=False)
-    gbdt = [GradientBoostingClassifier(learning_rate=0.02, subsample=0.5, max_depth=6, n_estimators=30)
-            for _ in range(82)]
     feat_list_1, feat_list_2 = [], []
     for data in tqdm(train_loader):
         with torch.no_grad():
@@ -84,13 +94,21 @@ def main():
     # debug !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # debug !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    for cls in tqdm(range(82)):
+    pool = Pool(12)
+    binary_labels_list = []
+
+    for cls in range(82):
         binary_labels = [cls in lab for lab in gt_labels]
         binary_labels = np.array(binary_labels).astype(np.int32)
-        if all(binary_labels==0) or all(binary_labels==1):
-            gbdt[cls] = None
-        else:
-            gbdt[cls].fit(feat, binary_labels)
+        binary_labels_list.append(binary_labels)
+
+    gbdt = list(
+        tqdm(
+            pool.imap(fit_model, [[i, feat, binary_labels_list] for i in range(82)]),
+            total=82
+        ))
+    pool.close()
+    pool.join()
 
     preds = []
     for data in tqdm(val_loader):
@@ -107,10 +125,5 @@ def main():
     print(eval_res)
 
 
-
-
 if __name__ == '__main__':
     main()
-
-
-
